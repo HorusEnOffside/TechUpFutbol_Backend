@@ -40,6 +40,9 @@ El sistema distingue funcionalidades según el perfil del usuario; por ejemplo, 
 
 Estas decisiones garantizan una separación clara de responsabilidades, menor acoplamiento y mayor cohesión entre módulos, contribuyendo a la seguridad, escalabilidad y facilidad de uso del sistema. Además, se facilita la integración con sistemas externos y el cumplimiento de requisitos administrativos del evento.
 
+Entradas principales: solicitudes de inscripción, edición de perfil, creación de equipos, envío de invitaciones, subida de comprobantes de pago, configuración de torneo, registro de resultados y sanciones.
+Salidas principales: confirmaciones, notificaciones, reportes de estado, listas de partidos asignados, información de equipos y jugadores filtrados, acceso a auditorías y resúmenes administrativos.
+
 ---
 
 ## Definición de requerimientos
