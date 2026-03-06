@@ -47,14 +47,14 @@ Estas decisiones garantizan una separación clara de responsabilidades, menor ac
 ### Requerimientos funcionales
 ### Requerimientos no funcionales
 
-Por extensión y claridad, este análisis se presenta en un documento aparte: 
-https://drive.google.com/file/d/1AOBtzUp4Ludo7ZzYN-Zx059rskGi4_KU/view?usp=sharing
+#### Por extensión y claridad, este análisis se presenta en un documento aparte: 
+#### https://drive.google.com/file/d/1AOBtzUp4Ludo7ZzYN-Zx059rskGi4_KU/view?usp=sharing
 ---
 
 ## Análisis de requerimientos
 
-Por extensión y claridad, este análisis se presenta en un documento aparte:  
-https://drive.google.com/file/d/17BBAWJ_sIlNgE45yqnizIAVF_Hsg_3kc/view?usp=sharing
+#### Por extensión y claridad, este análisis se presenta en un documento aparte:  
+#### https://drive.google.com/file/d/17BBAWJ_sIlNgE45yqnizIAVF_Hsg_3kc/view?usp=sharing
 
 
 ---
