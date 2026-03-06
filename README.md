@@ -66,18 +66,25 @@ Salidas principales: confirmaciones, notificaciones, reportes de estado, listas 
 
 Enlace directo al prototipo de Figma:
 
+https://pruebacorreoescuelaingeduco.sharepoint.com/:u:/s/DOSW-2026-1/IQD-QiEeKjhOTYxGCeboISZ5AXz-GYQBqVUc-zho2mgXGxg?e=Dg0aeS
+
 
 Explicación:
+Propuesta inicial de la aplicacion donde resaltamos cantidad de pantallas y flujos.
 
 ---
 
 ## Manual de identidad
+https://pruebacorreoescuelaingeduco-my.sharepoint.com/:w:/g/personal/andres_cardozo-m_mail_escuelaing_edu_co/IQAVzek2k0baQ4d5eVeqO2pdAYt9ZoTT7_aCiT-z76HVTAM?rtime=zsOvmbJ73kg
 
-Explicación:
+Explicación: 
+Manual de identidad donde definimos nuestra marca y se encuentra el enlace a presentacion.
 
 ---
 
 ## Jira: Gestión de tareas y funcionalidades
+
+https://dosw-2026-01.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 
 
 ---
