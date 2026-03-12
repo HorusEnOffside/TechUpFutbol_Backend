@@ -67,7 +67,7 @@ Salidas principales: confirmaciones, notificaciones, reportes de estado, listas 
 
 Enlace directo al prototipo de Figma:
 
-https://pruebacorreoescuelaingeduco.sharepoint.com/:u:/s/DOSW-2026-1/IQD-QiEeKjhOTYxGCeboISZ5AXz-GYQBqVUc-zho2mgXGxg?e=Dg0aeS
+https://www.figma.com/design/tDLGUeXBQ7ROjQXduZtsp3/TechCup-Futbol?node-id=0-1&t=IKqSkDNZFQwFqz1A-1
 
 
 Explicación:
