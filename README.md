@@ -1,5 +1,5 @@
 # HORUS EN OFFSIDE
-<img width="500" height="500" alt="Logo" src="https://github.com/user-attachments/assets/6ad2a457-1212-4df0-9776-1f2dd576eee1" />
+![logoFInal.png](images/images/logoFInal.png)
 
 ## Integrantes
 
@@ -29,7 +29,8 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 ---
 
 ## Diagrama de contexto del sistema
-<img width="823" height="444" alt="DiagramaContexto_TechCup drawio" src="https://github.com/user-attachments/assets/99dc90f0-f8ce-4738-a719-9170301025cb" />
+![DiagramaContextoTechCupFINAL.png](images/images/DiagramaContextoTechCupFINAL.png)
+
 Explicación técnica del diagrama y las decisiones tomadas
 
 El diagrama de contexto de TECHCUP FÚTBOL representa las principales interacciones entre los distintos actores del torneo y el sistema central. Se identifican los siguientes actores: estudiantes, profesores, graduados, personal administrativo, familiares, capitanes, árbitros, organizador y administrador. Cada uno cuenta con accesos y permisos específicos según su rol.
