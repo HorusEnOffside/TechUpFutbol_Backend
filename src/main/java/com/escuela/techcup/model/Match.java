@@ -1,6 +1,5 @@
 package com.escuela.techcup.model;
 
-import java.sql.Ref;
 import java.time.LocalDateTime;
 
 public class Match {
