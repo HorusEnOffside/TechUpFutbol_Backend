@@ -58,7 +58,7 @@ Salidas principales: confirmaciones, notificaciones, reportes de estado, listas 
 ## Análisis de requerimientos
 
 #### Por extensión y claridad, este análisis se presenta en un documento aparte:  
-#### https://drive.google.com/file/d/17BBAWJ_sIlNgE45yqnizIAVF_Hsg_3kc/view?usp=sharing
+#### https://drive.google.com/file/d/1O21KZx6f8a-pN7CqbBEAr3Vqu2NvmFXN/view?usp=sharing
 
 
 ---
