@@ -42,7 +42,8 @@ public class PlayerController {
 		@RequestParam Gender gender,
 		@RequestParam PlayerType playerType,
 		@RequestParam int dorsalNumber,
-		@RequestParam Position position
+		@RequestParam Position position,
+		@RequestParam String password
 	) {
 		Player createdPlayer = playerService.createSportsProfile(
 			id,
@@ -52,7 +53,8 @@ public class PlayerController {
 			gender,
 			playerType,
 			dorsalNumber,
-			position
+			position,
+			password
 		);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdPlayer);
 	}
@@ -67,7 +69,8 @@ public class PlayerController {
 		@RequestParam PlayerType playerType,
 		@RequestParam int dorsalNumber,
 		@RequestParam Position position,
-		@RequestParam MultipartFile profilePicture
+		@RequestParam MultipartFile profilePicture,
+		@RequestParam String password
 	) throws IOException {
 		BufferedImage picture = ImageIO.read(profilePicture.getInputStream());
 		if (picture == null) {
@@ -83,7 +86,8 @@ public class PlayerController {
 			playerType,
 			dorsalNumber,
 			position,
-			picture
+			picture,
+			password
 		);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdPlayer);
 	}

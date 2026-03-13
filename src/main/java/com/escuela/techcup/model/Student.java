@@ -12,13 +12,13 @@ import lombok.Data;
 public class Student extends UserPlayer {
     private int semester;
 
-    public Student(String id, String name, String email, LocalDate dateOfBirth, Gender gender, int semester) {
-        super(id, name, email, dateOfBirth, gender, PlayerType.ESTUDIANTE);
+    public Student(String id, String name, String email, LocalDate dateOfBirth, Gender gender, int semester, String password) {
+        super(id, name, email, dateOfBirth, gender, PlayerType.ESTUDIANTE, password);
         this.semester = semester;
     }
 
-    public Student(String id, String name, String email, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, int semester) {
-        super(id, name, email, profilePicture, dateOfBirth, gender, PlayerType.ESTUDIANTE);
+    public Student(String id, String name, String email, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, int semester, String password) {
+        super(id, name, email, profilePicture, dateOfBirth, gender, PlayerType.ESTUDIANTE, password);
         this.semester = semester;
     }
 

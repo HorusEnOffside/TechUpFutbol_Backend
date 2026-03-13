@@ -20,7 +20,8 @@ public interface PlayerService {
 		PlayerType playerType,
 		int dorsalNumber,
         Position position,
-		BufferedImage profilePicture
+		BufferedImage profilePicture,
+        String password
 	);
 
     Player createSportsProfile(
@@ -31,7 +32,8 @@ public interface PlayerService {
 		Gender gender,
 		PlayerType playerType,
 		int dorsalNumber,
-        Position position
+        Position position,
+        String password
 	);
 
 

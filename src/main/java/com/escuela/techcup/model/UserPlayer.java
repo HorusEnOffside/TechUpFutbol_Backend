@@ -12,14 +12,14 @@ import lombok.Data;
 public class UserPlayer extends User {
     protected PlayerType playerType;
     
-    public UserPlayer(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType) {
-        super(id, name, email, dateOfBirth, gender);
+    public UserPlayer(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType, String password) {
+        super(id, name, email, dateOfBirth, gender, password);
         this.playerType = playerType;
         
     }
 
-    public UserPlayer(String id, String name, String email, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, PlayerType playerType) {
-        super(id, name, email, profilePicture, dateOfBirth, gender);
+    public UserPlayer(String id, String name, String email, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, PlayerType playerType, String password) {
+        super(id, name, email, profilePicture, dateOfBirth, gender, password);
         this.playerType = playerType;
     }
 

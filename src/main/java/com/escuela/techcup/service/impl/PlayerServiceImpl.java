@@ -18,19 +18,19 @@ public class PlayerServiceImpl implements PlayerService {
 
 
     @Override
-    public Player createSportsProfile(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType, int dorsalNumber, Position position) {
+    public Player createSportsProfile(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType, int dorsalNumber, Position position, String password) {
         PlayerValidator.validateInput(id, name, email, dorsalNumber);
 
-        UserPlayer userPlayer = new UserPlayer(id, name, email, dateOfBirth, gender, playerType);
-        
+        UserPlayer userPlayer = new UserPlayer(id, name, email, dateOfBirth, gender, playerType, password);
+
         return new Player(userPlayer, position, dorsalNumber);
     }
 
     @Override
-    public Player createSportsProfile(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType, int dorsalNumber, Position position, BufferedImage profilePicture) {
+    public Player createSportsProfile(String id, String name, String email, LocalDate dateOfBirth, Gender gender, PlayerType playerType, int dorsalNumber, Position position, BufferedImage profilePicture, String password) {
         PlayerValidator.validateInput(id, name, email, dorsalNumber);
 
-        UserPlayer userPlayer = new UserPlayer(id, name, email, profilePicture, dateOfBirth, gender, playerType);
+        UserPlayer userPlayer = new UserPlayer(id, name, email, profilePicture, dateOfBirth, gender, playerType, password);
 
         return new Player(userPlayer, position, dorsalNumber);
     }
