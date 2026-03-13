@@ -76,8 +76,7 @@ Propuesta inicial de la aplicacion donde resaltamos cantidad de pantallas y fluj
 ---
 
 ## Manual de identidad
-https://pruebacorreoescuelaingeduco-my.sharepoint.com/:w:/g/personal/andres_cardozo-m_mail_escuelaing_edu_co/IQAVzek2k0baQ4d5eVeqO2pdAYt9ZoTT7_aCiT-z76HVTAM?rtime=zsOvmbJ73kg
-
+https://pruebacorreoescuelaingeduco.sharepoint.com/:p:/s/DOSW-2026-1/IQA1oPTMzFDaSpldO_fjkOzEAQrW69M2W3Ogkj8GeMJL3mQ?e=SzFiPT
 Explicación: 
 Manual de identidad donde definimos nuestra marca y se encuentra el enlace a presentacion.
 
