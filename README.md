@@ -1,5 +1,5 @@
 # HORUS EN OFFSIDE
-![logoFInal.png](images/images/logoFInal.png)
+![logoFInal.png](docs/images/logoFInal.png)
 
 ## Integrantes
 
@@ -10,7 +10,7 @@
 - Sebastian Castillejo 
 
 ## TechCup Fútbol
-
+++
 ## Enunciado del problema
 
 Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela presenta retos significativos en la inscripción de equipos, registro de jugadores, manejo de pagos y seguimiento de resultados. No existe una plataforma integral que permita la gestión eficiente, segura y automatizada de todo el ciclo del torneo: desde la inscripción hasta la visualización de estadísticas y control disciplinario.
@@ -29,7 +29,7 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 ---
 
 ## Diagrama de contexto del sistema
-![DiagramaContextoTechCupFINAL.png](images/images/DiagramaContextoTechCupFINAL.png)
+![DiagramaContextoTechCupFINAL.png](docs/images/DiagramaContextoTechCupFINAL.png)
 
 Explicación técnica del diagrama y las decisiones tomadas
 
@@ -58,7 +58,7 @@ Salidas principales: confirmaciones, notificaciones, reportes de estado, listas 
 ## Análisis de requerimientos
 
 #### Por extensión y claridad, este análisis se presenta en un documento aparte:  
-#### https://drive.google.com/file/d/17BBAWJ_sIlNgE45yqnizIAVF_Hsg_3kc/view?usp=sharing
+#### https://1drv.ms/w/c/7d34c3acd28e130c/IQCAH7ImRPTqSYfQUhoapmEbAbOVB6q0QP5HCngxcs08icQ?e=9O5Xbh
 
 
 ---
@@ -67,7 +67,7 @@ Salidas principales: confirmaciones, notificaciones, reportes de estado, listas 
 
 Enlace directo al prototipo de Figma:
 
-https://pruebacorreoescuelaingeduco.sharepoint.com/:u:/s/DOSW-2026-1/IQD-QiEeKjhOTYxGCeboISZ5AXz-GYQBqVUc-zho2mgXGxg?e=Dg0aeS
+https://www.figma.com/design/tDLGUeXBQ7ROjQXduZtsp3/TechCup-Futbol?node-id=0-1&t=IKqSkDNZFQwFqz1A-1
 
 
 Explicación:
