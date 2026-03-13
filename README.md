@@ -1,5 +1,5 @@
 # HORUS EN OFFSIDE
-![logoFInal.png](images/images/logoFInal.png)
+![logoFInal.png](docs/images/logoFInal.png)
 
 ## Integrantes
 
@@ -10,7 +10,7 @@
 - Sebastian Castillejo 
 
 ## TechCup Fútbol
-
+++
 ## Enunciado del problema
 
 Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela presenta retos significativos en la inscripción de equipos, registro de jugadores, manejo de pagos y seguimiento de resultados. No existe una plataforma integral que permita la gestión eficiente, segura y automatizada de todo el ciclo del torneo: desde la inscripción hasta la visualización de estadísticas y control disciplinario.
@@ -29,7 +29,7 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 ---
 
 ## Diagrama de contexto del sistema
-![DiagramaContextoTechCupFINAL.png](images/images/DiagramaContextoTechCupFINAL.png)
+![DiagramaContextoTechCupFINAL.png](docs/images/DiagramaContextoTechCupFINAL.png)
 
 Explicación técnica del diagrama y las decisiones tomadas
 
