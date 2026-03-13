@@ -27,7 +27,7 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 6. [Jira: Gestión de tareas y funcionalidades](#jira)
 7. [Diagrama de componentes general](#diagrama-de-componentes-general)
 8. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
-
+9. [Diagrama de clases](#diagrama-de-clases)
 ---
 
 ## Diagrama de contexto del sistema
@@ -96,6 +96,9 @@ https://dosw-2026-01.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 
 ## Diagrama de componentes especificos
 ![Diagrama componentes especificos](docs/images/Diagramacomponentesespecificos.drawio.png)
+
+## Diagrama de clases
+![Diagrama de clases](docs/images/DiagramaClases.png)
 
 ## Sustento y justificación técnica
 
