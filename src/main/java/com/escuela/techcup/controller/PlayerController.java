@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.mapper.PlayerMapper;
-import com.escuela.techcup.core.exception.TechcupException;
+import com.escuela.techcup.core.exception.InvalidImageException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.service.PlayerService;
 
@@ -42,7 +42,7 @@ public class PlayerController {
 	public ResponseEntity<PlayerDTO> createSportsProfileWithPhoto(@Valid @RequestPart("player") PlayerDTO playerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
 		BufferedImage picture = ImageIO.read(profilePicture.getInputStream());
 		if (picture == null) {
-			throw new TechcupException.InvalidImageException("El archivo de imagen no es valido");
+			throw new InvalidImageException("El archivo de imagen no es valido");
 		}
 
 		Player createdPlayer = playerService.createSportsProfile(

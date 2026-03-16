@@ -14,12 +14,12 @@ import com.escuela.techcup.core.validator.PlayerValidator;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
-
+    //cuando se implemente persistencia verificar cosas del negocio, como que no se repitan emails, o que el dorsal number no se repita en el mismo equipo, etc.
 
     @Override
     public Player createSportsProfile(PlayerDTO playerDTO) {
-        String id = IdGeneratorUtil.generateId();
-        String password = PasswordHashUtil.hashPassword(playerDTO.getPassword());
+        String id = idGenerator();
+        String password = hashPassword(playerDTO.getPassword());
         
         PlayerValidator.validateInput(id, playerDTO.getName(), playerDTO.getEmail(), playerDTO.getDorsalNumber());
 
@@ -28,12 +28,20 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player createSportsProfile(PlayerDTO playerDTO, BufferedImage profilePicture) {
-        String id = IdGeneratorUtil.generateId();
-        String password = PasswordHashUtil.hashPassword(playerDTO.getPassword());
+        String id = idGenerator();
+        String password = hashPassword(playerDTO.getPassword());
 
         PlayerValidator.validateInput(id, playerDTO.getName(), playerDTO.getEmail(), playerDTO.getDorsalNumber());
 
         return PlayerMapper.toPlayer(playerDTO, id, profilePicture, password);
+    }
+
+
+    private String idGenerator() {
+        return IdGeneratorUtil.generateId();
+    }
+    private String hashPassword(String password) {
+        return PasswordHashUtil.hashPassword(password);
     }
 
 }

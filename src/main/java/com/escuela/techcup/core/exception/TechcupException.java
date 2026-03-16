@@ -1,25 +1,18 @@
 package com.escuela.techcup.core.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class TechcupException extends RuntimeException {
 
-    public TechcupException(String message) {
+    private final HttpStatus status;
+
+    public TechcupException(String message, HttpStatus status) {
         super(message);
+        this.status = status;
     }
 
-    public TechcupException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public static class InvalidInputException extends TechcupException {
-        public InvalidInputException(String message) {
-            super(message);
-        }
-    }
-
-    public static class InvalidImageException extends TechcupException {
-        public InvalidImageException(String message) {
-            super(message);
-        }
+    public HttpStatus getStatus() {
+        return status;
     }
 
 

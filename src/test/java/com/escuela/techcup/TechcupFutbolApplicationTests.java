@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
-import com.escuela.techcup.core.exception.TechcupException;
+import com.escuela.techcup.core.exception.InvalidInputException;
+import com.escuela.techcup.core.exception.ValidationException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
@@ -54,7 +55,7 @@ class TechcupFutbolApplicationTests {
 		PlayerDTO playerDTO = buildValidPlayerDTO();
 		playerDTO.setEmail("correo-invalido");
 
-		assertThrows(TechcupException.InvalidInputException.class, () -> playerService.createSportsProfile(playerDTO));
+		assertThrows(ValidationException.class, () -> playerService.createSportsProfile(playerDTO));
 	}
 
 	private PlayerDTO buildValidPlayerDTO() {

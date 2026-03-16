@@ -3,7 +3,7 @@ package com.escuela.techcup.controller.mapper;
 import java.awt.image.BufferedImage;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
-import com.escuela.techcup.core.exception.TechcupException;
+import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
 
@@ -15,7 +15,7 @@ public class PlayerMapper {
 
     public static Player toPlayer(PlayerDTO dto, String id, String password) {
         if (dto == null) {
-            throw new TechcupException.InvalidInputException("PlayerDTO no puede ser null");
+            throw new InvalidInputException("PlayerDTO no puede ser null");
         }
 
         UserPlayer userPlayer = new UserPlayer(
@@ -37,7 +37,7 @@ public class PlayerMapper {
 
     public static Player toPlayer(PlayerDTO dto, String id, BufferedImage profilePicture, String password) {
         if (dto == null) {
-            throw new TechcupException.InvalidInputException("PlayerDTO no puede ser null");
+            throw new InvalidInputException("PlayerDTO no puede ser null");
         }
 
         UserPlayer userPlayer = new UserPlayer(
@@ -56,7 +56,7 @@ public class PlayerMapper {
 
     public static PlayerDTO toDTO(Player player) {
         if (player == null) {
-            throw new TechcupException.InvalidInputException("Player no puede ser null");
+            throw new InvalidInputException("Player no puede ser null");
         }
 
         PlayerDTO dto = new PlayerDTO();

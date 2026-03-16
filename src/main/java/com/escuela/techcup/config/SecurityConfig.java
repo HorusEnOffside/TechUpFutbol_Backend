@@ -7,7 +7,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-
+    //http://localhost:8080/swagger-ui.html
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
