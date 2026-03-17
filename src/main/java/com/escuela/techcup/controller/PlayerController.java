@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
+import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.mapper.PlayerMapper;
 import com.escuela.techcup.core.exception.InvalidImageException;
 import com.escuela.techcup.core.model.Player;
@@ -32,21 +33,21 @@ public class PlayerController {
 	}
 
 	@PostMapping("/sports-profile")
-	public ResponseEntity<PlayerDTO> createSportsProfile(@Valid @RequestBody PlayerDTO playerDTO) {
-		Player createdPlayer = playerService.createSportsProfile(playerDTO);
+	public ResponseEntity<PlayerDTO> createSportsProfileStudent(@Valid @RequestBody StudentPlayerDTO studentPlayerDTO) {
+		Player createdPlayer = playerService.createSportsProfile(studentPlayerDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toDTO(createdPlayer));
 	}
 
 	
 	@PostMapping("/sports-profile/with-photo")
-	public ResponseEntity<PlayerDTO> createSportsProfileWithPhoto(@Valid @RequestPart("player") PlayerDTO playerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
+	public ResponseEntity<PlayerDTO> createSportsProfileStudentWithPhoto(@Valid @RequestPart("player") StudentPlayerDTO studentPlayerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
 		BufferedImage picture = ImageIO.read(profilePicture.getInputStream());
 		if (picture == null) {
 			throw new InvalidImageException("El archivo de imagen no es valido");
 		}
 
 		Player createdPlayer = playerService.createSportsProfile(
-			playerDTO,
+			studentPlayerDTO,
 			picture
 		);
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toDTO(createdPlayer));

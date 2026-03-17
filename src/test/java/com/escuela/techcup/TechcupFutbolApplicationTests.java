@@ -9,13 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.escuela.techcup.controller.dto.PlayerDTO;
-import com.escuela.techcup.core.exception.InvalidInputException;
+import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.core.exception.ValidationException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
-import com.escuela.techcup.core.model.enums.PlayerType;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.util.PasswordHashUtil;
@@ -31,7 +29,7 @@ class TechcupFutbolApplicationTests {
 
 	@Test
 	void testCreationPlayer() {
-		PlayerDTO playerDTO = buildValidPlayerDTO();
+		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
 
 		Player player = playerService.createSportsProfile(playerDTO);
 
@@ -39,11 +37,10 @@ class TechcupFutbolApplicationTests {
 		assertNotNull(player.getUserPlayer());
 		assertNotNull(player.getUserPlayer().getId());
 		assertEquals(playerDTO.getName(), player.getUserPlayer().getName());
-		assertEquals(playerDTO.getEmail(), player.getUserPlayer().getEmail());
+		assertEquals(playerDTO.getMail(), player.getUserPlayer().getMail());
 		assertEquals(playerDTO.getDateOfBirth(), player.getUserPlayer().getDateOfBirth());
 		assertEquals(playerDTO.getGender(), player.getUserPlayer().getGender());
-		assertEquals(playerDTO.getPlayerType(), player.getUserPlayer().getPlayerType());
-		assertEquals(playerDTO.getDorsalNumber(), player.getDorsalNumber());
+		assertEquals(10, player.getDorsalNumber());
 		assertEquals(playerDTO.getPosition(), player.getPosition());
 		assertEquals(PlayerStatus.DISPONIBLE, player.getStatus());
 		assertNotEquals(playerDTO.getPassword(), player.getUserPlayer().getPassword());
@@ -52,22 +49,22 @@ class TechcupFutbolApplicationTests {
 
 	@Test
 	void testCreationPlayerWithInvalidEmailShouldThrowException() {
-		PlayerDTO playerDTO = buildValidPlayerDTO();
-		playerDTO.setEmail("correo-invalido");
+		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
+		playerDTO.setMail("correo-invalido");
 
 		assertThrows(ValidationException.class, () -> playerService.createSportsProfile(playerDTO));
 	}
 
-	private PlayerDTO buildValidPlayerDTO() {
-		PlayerDTO playerDTO = new PlayerDTO();
-		playerDTO.setName("Andres");
-		playerDTO.setEmail("andres@techcup.com");
-		playerDTO.setDateOfBirth(LocalDate.of(2000, 1, 15));
-		playerDTO.setGender(Gender.HOMBRE);
-		playerDTO.setPlayerType(PlayerType.ESTUDIANTE);
-		playerDTO.setDorsalNumber(10);
-		playerDTO.setPosition(Position.VOLANTE);
-		playerDTO.setPassword("1234");
-		return playerDTO;
+	private StudentPlayerDTO buildValidPlayerDTO() {
+		return new StudentPlayerDTO(
+			"Andres",
+			"andres@techcup.com",
+			LocalDate.of(2000, 1, 15),
+			Gender.HOMBRE,
+			"A123456789",
+			4,
+			10,
+			Position.VOLANTE
+		);
 	}
 }

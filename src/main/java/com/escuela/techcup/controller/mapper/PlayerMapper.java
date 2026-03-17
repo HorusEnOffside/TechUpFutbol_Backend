@@ -14,17 +14,13 @@ public class PlayerMapper {
     }
 
     public static Player toPlayer(PlayerDTO dto, String id, String password) {
-        if (dto == null) {
-            throw new InvalidInputException("PlayerDTO no puede ser null");
-        }
 
         UserPlayer userPlayer = new UserPlayer(
             id,
             dto.getName(),
-            dto.getEmail(),
+            dto.getMail(),
             dto.getDateOfBirth(),
             dto.getGender(),
-            dto.getPlayerType(),
             password
         );
 
@@ -36,18 +32,14 @@ public class PlayerMapper {
     }
 
     public static Player toPlayer(PlayerDTO dto, String id, BufferedImage profilePicture, String password) {
-        if (dto == null) {
-            throw new InvalidInputException("PlayerDTO no puede ser null");
-        }
 
         UserPlayer userPlayer = new UserPlayer(
             id,
             dto.getName(),
-            dto.getEmail(),
+            dto.getMail(),
             profilePicture,
             dto.getDateOfBirth(),
             dto.getGender(),
-            dto.getPlayerType(),
             password
         );
 
@@ -58,15 +50,6 @@ public class PlayerMapper {
         if (player == null) {
             throw new InvalidInputException("Player no puede ser null");
         }
-
-        PlayerDTO dto = new PlayerDTO();
-        dto.setName(player.getUserPlayer().getName());
-        dto.setEmail(player.getUserPlayer().getEmail());
-        dto.setDateOfBirth(player.getUserPlayer().getDateOfBirth());
-        dto.setGender(player.getUserPlayer().getGender());
-        dto.setPlayerType(player.getUserPlayer().getPlayerType());
-        dto.setDorsalNumber(player.getDorsalNumber());
-        dto.setPosition(player.getPosition());
-        return dto;
+        return new PlayerDTO(player.getName(), player.getMail(), player.getDateOfBirth(), player.getGender(), player.getPassword(), player.getDorsalNumber(), player.getPosition());
     }
 }

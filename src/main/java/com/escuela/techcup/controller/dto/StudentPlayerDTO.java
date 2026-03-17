@@ -12,18 +12,18 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PlayerDTO extends UserPlayerDTO {
+public class StudentPlayerDTO extends StudentUserDTO {
 
-	@Min(value = 1, message = "El dorsal debe ser mayor a 0")
+    @Min(value = 1, message = "El dorsal debe ser mayor a 0")
 	private int dorsalNumber;
 
 	@NotNull(message = "position es obligatorio")
 	private Position position;
 
-	public PlayerDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, String password, int dorsalNumber, Position position) {
-		super(name, mail, dateOfBirth, gender, password);
+    public StudentPlayerDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, String password, Integer semester, int dorsalNumber, Position position) {
+        super(name, mail, dateOfBirth, gender, password, semester);
 		this.dorsalNumber = dorsalNumber;
 		this.position = position;
 	}
-
+    
 }

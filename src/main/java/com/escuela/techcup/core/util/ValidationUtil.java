@@ -17,16 +17,33 @@ public class ValidationUtil {
 		}
 	}
 
-    public static void requireCorrectEmail(String email) {
-        requireNotBlank(email, "email");
-        if (!email.contains("@") || !email.contains(".")) {
-            throw new ValidationException("email es invalido");
+    public static void requireCorrectMail(String mail) {
+        requireNotBlank(mail, "mail");
+        if (!mail.contains("@") || !mail.contains(".")) {
+            throw new ValidationException("mail es invalido");
         }
     }
 
     public static void requirePositive(int value, String fieldName) {
         if (value <= 0) {
             throw new ValidationException(fieldName + " debe ser mayor a 0");
+        }
+    }
+
+    public static void passwordRules(String password) { //logica password
+        requireNotBlank(password, "password");
+        if (password.length() < 8) {
+            throw new ValidationException("password debe tener al menos 8 caracteres");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new ValidationException("password debe contener al menos una letra mayúscula");
+        }
+    }
+
+    public static void semesterRules(int semester) {
+        requirePositive(semester, "semester");
+        if (semester > 10) {
+            throw new ValidationException("semester debe ser menor o igual a 10");
         }
     }
 }

@@ -3,11 +3,11 @@ package com.escuela.techcup.core.validator;
 import com.escuela.techcup.core.util.ValidationUtil;
 
 public final class PlayerValidator {
+
+    private PlayerValidator() {
+    }
     
-    public static void validateInput(String id, String name, String email, int dorsalNumber) {
-        ValidationUtil.requireNotBlank(id, "id");
-        ValidationUtil.requireNotBlank(name, "name");
-        ValidationUtil.requireCorrectEmail(email);
+    public static void validateInput(int dorsalNumber) {
         ValidationUtil.requirePositive(dorsalNumber, "dorsalNumber");
     }
 

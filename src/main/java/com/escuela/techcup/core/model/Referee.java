@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 import com.escuela.techcup.core.model.enums.Gender;
 
-public class Referee extends User { //arbitro
+public class Referee extends User implements RefereeActions { //arbitro
     
-    public Referee( String id, String name, String email, LocalDate dateOfBirth, Gender gender, String password) {
-        super(id, name, email, dateOfBirth, gender, password);
+    public Referee( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password) {
+        super(id, name, mail, dateOfBirth, gender, password);
     }
 }
