@@ -9,9 +9,16 @@ import com.escuela.techcup.core.model.Player;
 public interface PlayerService {
 
 
-    Player createSportsProfile(StudentPlayerDTO studentPlayerDTO);
-    Player createSportsProfile(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture);
+    Player createSportsProfileStudent(StudentPlayerDTO studentPlayerDTO);
+    Player createSportsProfileStudent(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture);
 
-    //Student createSportsProfile(StudentPlayerDTO studentPlayerDTO);
-    //Student createSportsProfile(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture);
+    Player createSportsProfileTeacher(PlayerDTO playerDTO);
+    Player createSportsProfileTeacher(PlayerDTO playerDTO, BufferedImage profilePicture);
+
+    Player createSportsProfileFamiliar(PlayerDTO playerDTO);
+    Player createSportsProfileFamiliar(PlayerDTO playerDTO, BufferedImage profilePicture);
+
+    Player createSportsProfileGraduate(PlayerDTO playerDTO);
+    Player createSportsProfileGraduate(PlayerDTO playerDTO, BufferedImage profilePicture);
+
 }

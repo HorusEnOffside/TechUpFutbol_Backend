@@ -31,7 +31,7 @@ class TechcupFutbolApplicationTests {
 	void testCreationPlayer() {
 		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
 
-		Player player = playerService.createSportsProfile(playerDTO);
+		Player player = playerService.createSportsProfileStudent(playerDTO);
 
 		assertNotNull(player);
 		assertNotNull(player.getUserPlayer());
@@ -52,7 +52,7 @@ class TechcupFutbolApplicationTests {
 		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
 		playerDTO.setMail("correo-invalido");
 
-		assertThrows(ValidationException.class, () -> playerService.createSportsProfile(playerDTO));
+		assertThrows(ValidationException.class, () -> playerService.createSportsProfileStudent(playerDTO));
 	}
 
 	private StudentPlayerDTO buildValidPlayerDTO() {

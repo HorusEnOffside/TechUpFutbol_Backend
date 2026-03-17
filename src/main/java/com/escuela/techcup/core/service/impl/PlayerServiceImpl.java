@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.dto.StudentUserDTO;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
 import com.escuela.techcup.core.service.PlayerService;
+import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.core.validator.PlayerValidator;
 
 @Service
@@ -19,14 +21,14 @@ public class PlayerServiceImpl implements PlayerService {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerServiceImpl.class);
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
-    public PlayerServiceImpl(UserServiceImpl userService) {
+    public PlayerServiceImpl(UserService userService) {
         this.userService = userService;
     }
 
     @Override
-    public Player createSportsProfile(StudentPlayerDTO studentPlayerDTO) {
+    public Player createSportsProfileStudent(StudentPlayerDTO studentPlayerDTO) {
         log.debug("Starting player sports profile creation without photo. mail={}, dorsal={}, position={}",
             studentPlayerDTO.getMail(), studentPlayerDTO.getDorsalNumber(), studentPlayerDTO.getPosition());
 
@@ -35,15 +37,15 @@ public class PlayerServiceImpl implements PlayerService {
 
         StudentUserDTO studentUserDTO = new StudentUserDTO(studentPlayerDTO.getName(), studentPlayerDTO.getMail(), studentPlayerDTO.getDateOfBirth(), studentPlayerDTO.getGender(), studentPlayerDTO.getPassword(), studentPlayerDTO.getSemester());
 
-        UserPlayer playerUSer = userService.createStudentUser(studentUserDTO);
-        Player createdPlayer = new Player(playerUSer, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
+        UserPlayer playerUser = userService.createStudentUser(studentUserDTO);
+        Player createdPlayer = new Player(playerUser, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
 
-        log.info("Player sports profile created in service. userId={}, mail={}", createdPlayer.getUserId(), createdPlayer.getMail());
+        log.info("Player sports profile created in service. userId={}", createdPlayer.getUserId());
         return createdPlayer;
     }
 
     @Override
-    public Player createSportsProfile(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture) {
+    public Player createSportsProfileStudent(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture) {
         log.debug("Starting player sports profile creation with photo. mail={}, dorsal={}, position={}",
             studentPlayerDTO.getMail(), studentPlayerDTO.getDorsalNumber(), studentPlayerDTO.getPosition());
 
@@ -52,14 +54,120 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (profilePicture == null) {
             log.warn("Profile picture is null for mail={}", studentPlayerDTO.getMail());
+            return createSportsProfileStudent(studentPlayerDTO);
         }
 
         StudentUserDTO studentUserDTO = new StudentUserDTO(studentPlayerDTO.getName(), studentPlayerDTO.getMail(), studentPlayerDTO.getDateOfBirth(), studentPlayerDTO.getGender(), studentPlayerDTO.getPassword(), studentPlayerDTO.getSemester());
 
-        UserPlayer playerUSer = userService.createStudentUser(studentUserDTO, profilePicture);
-        Player createdPlayer = new Player(playerUSer, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
+        UserPlayer playerUser = userService.createStudentUser(studentUserDTO, profilePicture);
+        Player createdPlayer = new Player(playerUser, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
 
-        log.info("Player sports profile with photo created in service. userId={}, mail={}", createdPlayer.getUserId(), createdPlayer.getMail());
+        log.info("Player sports profile with photo created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileTeacher(PlayerDTO playerDTO) {
+        log.debug("Starting teacher player sports profile creation without photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createTeacherUser(playerDTO);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Teacher player sports profile created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileTeacher(PlayerDTO playerDTO, BufferedImage profilePicture) {
+        log.debug("Starting teacher player sports profile creation with photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        if (profilePicture == null) {
+            log.warn("Profile picture is null for mail={}", playerDTO.getMail());
+            return createSportsProfileTeacher(playerDTO);
+        }
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createTeacherUser(playerDTO, profilePicture);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Teacher player sports profile with photo created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileFamiliar(PlayerDTO playerDTO) {
+        log.debug("Starting familiar player sports profile creation without photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createFamiliarUser(playerDTO);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Familiar player sports profile created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileFamiliar(PlayerDTO playerDTO, BufferedImage profilePicture) {
+        log.debug("Starting familiar player sports profile creation with photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        if (profilePicture == null) {
+            log.warn("Profile picture is null for mail={}", playerDTO.getMail());
+            return createSportsProfileFamiliar(playerDTO);
+        }
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createFamiliarUser(playerDTO, profilePicture);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Familiar player sports profile with photo created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileGraduate(PlayerDTO playerDTO) {
+        log.debug("Starting graduate player sports profile creation without photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createGraduateUser(playerDTO);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Graduate player sports profile created in service. userId={}", createdPlayer.getUserId());
+        return createdPlayer;
+    }
+
+    @Override
+    public Player createSportsProfileGraduate(PlayerDTO playerDTO, BufferedImage profilePicture) {
+        log.debug("Starting graduate player sports profile creation with photo. mail={}, dorsal={}, position={}",
+            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition());
+
+        if (profilePicture == null) {
+            log.warn("Profile picture is null for mail={}", playerDTO.getMail());
+            return createSportsProfileGraduate(playerDTO);
+        }
+
+        PlayerValidator.validateInput(playerDTO.getDorsalNumber());
+        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+
+        UserPlayer playerUser = userService.createGraduateUser(playerDTO, profilePicture);
+        Player createdPlayer = new Player(playerUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
+
+        log.info("Graduate player sports profile with photo created in service. userId={}", createdPlayer.getUserId());
         return createdPlayer;
     }
 

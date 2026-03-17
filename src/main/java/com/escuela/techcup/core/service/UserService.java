@@ -17,6 +17,9 @@ public interface UserService {
     UserPlayer createStudentUser(StudentUserDTO studentUserDTO);
     UserPlayer createStudentUser(StudentUserDTO studentUserDTO, BufferedImage profilePicture);
     UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO);
+    UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture);
     UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO);
+    UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture);
     UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO);
+    UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture);
 }

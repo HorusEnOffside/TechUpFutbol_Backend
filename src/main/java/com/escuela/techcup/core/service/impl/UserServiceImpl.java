@@ -89,11 +89,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
+        log.debug("Starting teacher user creation with profile picture. mail={}", userPlayerDTO.getMail());
+        verifyUser(userPlayerDTO);
+        UserPlayer teacher = new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Teacher user with profile picture created. userId={}, mail={}", teacher.getId(), teacher.getMail());
+        return teacher;
+    }
+
+    @Override
     public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO) {
         log.debug("Starting familiar user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
         UserPlayer familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
         log.info("Familiar user created. userId={}, mail={}", familiar.getId(), familiar.getMail());
+        return familiar;
+    }
+
+    @Override
+    public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
+        log.debug("Starting familiar user creation with profile picture. mail={}", userPlayerDTO.getMail());
+        verifyUser(userPlayerDTO);
+        UserPlayer familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Familiar user with profile picture created. userId={}, mail={}", familiar.getId(), familiar.getMail());
         return familiar;
     }
 
@@ -106,7 +124,14 @@ public class UserServiceImpl implements UserService {
         return graduate;
     }
 
-
+    @Override
+    public UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
+        log.debug("Starting graduate user creation with profile picture. mail={}", userPlayerDTO.getMail());
+        verifyUser(userPlayerDTO);
+        UserPlayer graduate = new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Graduate user with profile picture created. userId={}, mail={}", graduate.getId(), graduate.getMail());
+        return graduate;
+    }
 
 
     private String idGenerator() {
