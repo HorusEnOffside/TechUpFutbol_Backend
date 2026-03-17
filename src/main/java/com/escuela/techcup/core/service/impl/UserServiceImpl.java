@@ -2,6 +2,8 @@ package com.escuela.techcup.core.service.impl;
 
 import java.awt.image.BufferedImage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.escuela.techcup.controller.dto.StudentUserDTO;
@@ -25,56 +27,83 @@ import com.escuela.techcup.core.validator.UserValidator;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Override
     public User createAdminUser(UserDTO userDTO) {
+        log.debug("Starting admin user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        return new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+        User admin = new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+        log.info("Admin user created. userId={}, mail={}", admin.getId(), admin.getMail());
+        return admin;
     }
 
     @Override
     public User createOrganizerUser(UserDTO userDTO) {
+        log.debug("Starting organizer user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        return new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(),  hashPassword(userDTO.getPassword()));
+        User organizer = new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(),  hashPassword(userDTO.getPassword()));
+        log.info("Organizer user created. userId={}, mail={}", organizer.getId(), organizer.getMail());
+        return organizer;
     }
 
     @Override
     public User createRefereeUser(UserDTO userDTO) {
+        log.debug("Starting referee user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        return new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+        User referee = new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+        log.info("Referee user created. userId={}, mail={}", referee.getId(), referee.getMail());
+        return referee;
     }
 
     @Override
     public UserPlayer createStudentUser(StudentUserDTO studentUserDTO) {
+        log.debug("Starting student user creation. mail={}, semester={}", studentUserDTO.getMail(), studentUserDTO.getSemester());
         verifyUser(studentUserDTO);
         ValidationUtil.semesterRules(studentUserDTO.getSemester());
-        return new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), 
+        UserPlayer student = new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), 
         studentUserDTO.getDateOfBirth(), studentUserDTO.getGender(), studentUserDTO.getSemester(), hashPassword(studentUserDTO.getPassword()));
+        log.info("Student user created. userId={}, mail={}", student.getId(), student.getMail());
+        return student;
     }
 
     @Override
     public UserPlayer createStudentUser(StudentUserDTO studentUserDTO, BufferedImage profilePicture) {
+        log.debug("Starting student user creation with profile picture. mail={}, semester={}, hasPhoto={}",
+            studentUserDTO.getMail(), studentUserDTO.getSemester(), profilePicture != null);
         verifyUser(studentUserDTO);
         ValidationUtil.semesterRules(studentUserDTO.getSemester());
-        return new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), profilePicture,
+        UserPlayer student = new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), profilePicture,
         studentUserDTO.getDateOfBirth(), studentUserDTO.getGender(), studentUserDTO.getSemester(), hashPassword(studentUserDTO.getPassword()));
+        log.info("Student user with profile picture created. userId={}, mail={}", student.getId(), student.getMail());
+        return student;
     }
 
     @Override
     public UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO) {
+        log.debug("Starting teacher user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        return new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        UserPlayer teacher = new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Teacher user created. userId={}, mail={}", teacher.getId(), teacher.getMail());
+        return teacher;
     }
 
     @Override
     public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO) {
+        log.debug("Starting familiar user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        return new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        UserPlayer familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Familiar user created. userId={}, mail={}", familiar.getId(), familiar.getMail());
+        return familiar;
     }
 
     @Override
     public UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO) {
+        log.debug("Starting graduate user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        return new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        UserPlayer graduate = new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        log.info("Graduate user created. userId={}, mail={}", graduate.getId(), graduate.getMail());
+        return graduate;
     }
 
 
@@ -87,6 +116,8 @@ public class UserServiceImpl implements UserService {
         return PasswordHashUtil.hashPassword(password);
     }
     private void verifyUser(UserDTO userDTO) {
+        log.trace("Validating user input. mail={}", userDTO.getMail());
         UserValidator.validateInput(userDTO.getName(), userDTO.getMail(), userDTO.getPassword(), userDTO.getDateOfBirth());
+        log.trace("User input validation completed. mail={}", userDTO.getMail());
     }
 }

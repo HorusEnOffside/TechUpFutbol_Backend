@@ -7,6 +7,8 @@ import javax.imageio.ImageIO;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,8 @@ import com.escuela.techcup.core.service.PlayerService;
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
+	private static final Logger log = LoggerFactory.getLogger(PlayerController.class);
+
 	private final PlayerService playerService;
 
 	public PlayerController(PlayerService playerService) {
@@ -34,15 +38,25 @@ public class PlayerController {
 
 	@PostMapping("/sports-profile")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudent(@Valid @RequestBody StudentPlayerDTO studentPlayerDTO) {
+		log.info("Request received to create player sports profile. mail={}, position={}, dorsal={}",
+			studentPlayerDTO.getMail(), studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
+		log.debug("Creating sports profile without photo for mail={}", studentPlayerDTO.getMail());
+
 		Player createdPlayer = playerService.createSportsProfile(studentPlayerDTO);
+
+		log.info("Player sports profile created successfully. userId={}", createdPlayer.getUserId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
-
 	
 	@PostMapping("/sports-profile/with-photo")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudentWithPhoto(@Valid @RequestPart("player") StudentPlayerDTO studentPlayerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
+		log.info("Request received to create player sports profile with photo. mail={}, position={}, dorsal={}, hasPhoto={}",
+			studentPlayerDTO.getMail(), studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber(), profilePicture != null && !profilePicture.isEmpty());
+		log.debug("Reading profile picture bytes for mail={}", studentPlayerDTO.getMail());
+
 		BufferedImage picture = ImageIO.read(profilePicture.getInputStream());
 		if (picture == null) {
+			log.warn("Invalid profile picture received for mail={}", studentPlayerDTO.getMail());
 			throw new InvalidImageException("El archivo de imagen no es valido");
 		}
 
@@ -50,6 +64,7 @@ public class PlayerController {
 			studentPlayerDTO,
 			picture
 		);
+		log.info("Player sports profile with photo created successfully. userId={}", createdPlayer.getUserId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
