@@ -30,7 +30,7 @@ class OrganizerTest {
 
     @Test
     void testGetEmail() {
-        assertEquals("carlos@test.com", organizer.getEmail());
+        assertEquals("carlos@test.com", organizer.getMail());
     }
 
     @Test
@@ -66,8 +66,8 @@ class OrganizerTest {
 
     @Test
     void testSetEmail() {
-        organizer.setEmail("nuevo@test.com");
-        assertEquals("nuevo@test.com", organizer.getEmail());
+        organizer.setMail("nuevo@test.com");
+        assertEquals("nuevo@test.com", organizer.getMail());
     }
 
     @Test

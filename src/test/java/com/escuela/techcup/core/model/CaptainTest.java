@@ -2,7 +2,6 @@ package com.escuela.techcup.core.model;
 
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
-import com.escuela.techcup.core.model.enums.PlayerType;
 import com.escuela.techcup.core.model.enums.Position;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ class CaptainTest {
     @BeforeEach
     void setUp() {
         UserPlayer userPlayer = new UserPlayer("u1", "Lucas", "lucas@test.com",
-                LocalDate.of(1999, 7, 3), Gender.HOMBRE, PlayerType.ESTUDIANTE, "pass");
+                LocalDate.of(1999, 7, 3), Gender.HOMBRE, "pass");
         player = new Player(userPlayer, Position.VOLANTE, 10);
         captain = new Captain(player);
     }
@@ -62,7 +61,7 @@ class CaptainTest {
 
     @Test
     void testGetUserPlayerEmail() {
-        assertEquals("lucas@test.com", captain.getUserPlayer().getEmail());
+        assertEquals("lucas@test.com", captain.getUserPlayer().getMail());
     }
 
     @Test

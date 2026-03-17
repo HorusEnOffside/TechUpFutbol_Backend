@@ -1,7 +1,6 @@
 package com.escuela.techcup.core.model;
 
 import com.escuela.techcup.core.model.enums.Gender;
-import com.escuela.techcup.core.model.enums.PlayerType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +16,7 @@ class UserPlayerTest {
     @BeforeEach
     void setUp() {
         userPlayer = new UserPlayer("u1", "Ana", "ana@test.com",
-                LocalDate.of(2000, 3, 10), Gender.MUJER, PlayerType.ESTUDIANTE, "pass456");
+                LocalDate.of(2000, 3, 10), Gender.MUJER, "pass456");
     }
 
     @Test
@@ -32,7 +31,7 @@ class UserPlayerTest {
 
     @Test
     void testGetEmail() {
-        assertEquals("ana@test.com", userPlayer.getEmail());
+        assertEquals("ana@test.com", userPlayer.getMail());
     }
 
     @Test
@@ -46,11 +45,6 @@ class UserPlayerTest {
     }
 
     @Test
-    void testGetPlayerType() {
-        assertEquals(PlayerType.ESTUDIANTE, userPlayer.getPlayerType());
-    }
-
-    @Test
     void testGetPassword() {
         assertEquals("pass456", userPlayer.getPassword());
     }
@@ -61,12 +55,6 @@ class UserPlayerTest {
     }
 
     @Test
-    void testSetPlayerType() {
-        userPlayer.setPlayerType(PlayerType.GRADUADO);
-        assertEquals(PlayerType.GRADUADO, userPlayer.getPlayerType());
-    }
-
-    @Test
     void testSetName() {
         userPlayer.setName("Laura");
         assertEquals("Laura", userPlayer.getName());
@@ -74,23 +62,10 @@ class UserPlayerTest {
 
     @Test
     void testSetEmail() {
-        userPlayer.setEmail("laura@test.com");
-        assertEquals("laura@test.com", userPlayer.getEmail());
+        userPlayer.setMail("laura@test.com");
+        assertEquals("laura@test.com", userPlayer.getMail());
     }
 
-    @Test
-    void testPlayerTypePROFESOR() {
-        UserPlayer profesor = new UserPlayer("u2", "Luis", "luis@test.com",
-                LocalDate.of(1985, 1, 1), Gender.HOMBRE, PlayerType.PROFESOR, "abc");
-        assertEquals(PlayerType.PROFESOR, profesor.getPlayerType());
-    }
-
-    @Test
-    void testPlayerTypeFAMILIAR() {
-        UserPlayer familiar = new UserPlayer("u3", "Maria", "maria@test.com",
-                LocalDate.of(1995, 6, 20), Gender.MUJER, PlayerType.FAMILIAR, "xyz");
-        assertEquals(PlayerType.FAMILIAR, familiar.getPlayerType());
-    }
 
     @Test
     void testConstructorConProfilePicture() {
@@ -100,10 +75,9 @@ class UserPlayerTest {
 
         assertEquals("s4", s.getId());
         assertEquals("Sofia", s.getName());
-        assertEquals("sofia@test.com", s.getEmail());
+        assertEquals("sofia@test.com", s.getMail());
         assertEquals(3, s.getSemester());
         assertEquals(Gender.MUJER, s.getGender());
-        assertEquals(PlayerType.ESTUDIANTE, s.getPlayerType());
         assertNotNull(s.getProfilePicture());
     }
 }

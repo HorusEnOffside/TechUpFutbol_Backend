@@ -2,7 +2,6 @@ package com.escuela.techcup.core.model;
 
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
-import com.escuela.techcup.core.model.enums.PlayerType;
 import com.escuela.techcup.core.model.enums.Position;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ class PlayerTest {
     @BeforeEach
     void setUp() {
         userPlayer = new UserPlayer("u1", "Pedro", "pedro@test.com",
-                LocalDate.of(2001, 4, 12), Gender.HOMBRE, PlayerType.ESTUDIANTE, "pass");
+                LocalDate.of(2001, 4, 12), Gender.HOMBRE, "pass");
         team = new Team();
     }
 

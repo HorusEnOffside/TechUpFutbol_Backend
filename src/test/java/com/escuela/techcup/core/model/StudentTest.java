@@ -1,7 +1,6 @@
 package com.escuela.techcup.core.model;
 
 import com.escuela.techcup.core.model.enums.Gender;
-import com.escuela.techcup.core.model.enums.PlayerType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +30,7 @@ class StudentTest {
 
     @Test
     void testGetEmail() {
-        assertEquals("juan@test.com", student.getEmail());
+        assertEquals("juan@test.com", student.getMail());
     }
 
     @Test
@@ -47,11 +46,6 @@ class StudentTest {
     @Test
     void testGetSemester() {
         assertEquals(5, student.getSemester());
-    }
-
-    @Test
-    void testPlayerTypeEsEstudiante() {
-        assertEquals(PlayerType.ESTUDIANTE, student.getPlayerType());
     }
 
     @Test
