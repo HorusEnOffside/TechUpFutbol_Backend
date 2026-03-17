@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.escuela.techcup.controller.dto.UserDTO;
-import com.escuela.techcup.controller.dto.UserPlayerDTO;
+import com.escuela.techcup.controller.dto.UserResponseDTO;
 import com.escuela.techcup.controller.mapper.UserMapper;
 import com.escuela.techcup.core.service.UserService;
 
@@ -25,17 +25,17 @@ public class UserController {
 	}
 
 	@PostMapping("/admin")
-	public ResponseEntity<UserDTO> createAdminUser(@Valid @RequestBody UserDTO userDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(userService.createAdminUser(userDTO)));
+	public ResponseEntity<UserResponseDTO> createAdminUser(@Valid @RequestBody UserDTO userDTO) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toResponseDTO(userService.createAdminUser(userDTO)));
 	}
 
 	@PostMapping("/organizer")
-	public ResponseEntity<UserDTO> createOrganizerUser(@Valid @RequestBody UserDTO userDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(userService.createOrganizerUser(userDTO)));
+	public ResponseEntity<UserResponseDTO> createOrganizerUser(@Valid @RequestBody UserDTO userDTO) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toResponseDTO(userService.createOrganizerUser(userDTO)));
 	}
 
 	@PostMapping("/referee")
-	public ResponseEntity<UserDTO> createRefereeUser(@Valid @RequestBody UserDTO userDTO) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(userService.createRefereeUser(userDTO)));
+	public ResponseEntity<UserResponseDTO> createRefereeUser(@Valid @RequestBody UserDTO userDTO) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toResponseDTO(userService.createRefereeUser(userDTO)));
 	}
 }

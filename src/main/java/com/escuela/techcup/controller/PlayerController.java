@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.escuela.techcup.controller.dto.PlayerDTO;
+import com.escuela.techcup.controller.dto.PlayerResponseDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.mapper.PlayerMapper;
 import com.escuela.techcup.core.exception.InvalidImageException;
@@ -33,14 +33,14 @@ public class PlayerController {
 	}
 
 	@PostMapping("/sports-profile")
-	public ResponseEntity<PlayerDTO> createSportsProfileStudent(@Valid @RequestBody StudentPlayerDTO studentPlayerDTO) {
+	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudent(@Valid @RequestBody StudentPlayerDTO studentPlayerDTO) {
 		Player createdPlayer = playerService.createSportsProfile(studentPlayerDTO);
-		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toDTO(createdPlayer));
+		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
 	
 	@PostMapping("/sports-profile/with-photo")
-	public ResponseEntity<PlayerDTO> createSportsProfileStudentWithPhoto(@Valid @RequestPart("player") StudentPlayerDTO studentPlayerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
+	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudentWithPhoto(@Valid @RequestPart("player") StudentPlayerDTO studentPlayerDTO, @RequestPart("profilePicture") MultipartFile profilePicture) throws IOException {
 		BufferedImage picture = ImageIO.read(profilePicture.getInputStream());
 		if (picture == null) {
 			throw new InvalidImageException("El archivo de imagen no es valido");
@@ -50,7 +50,7 @@ public class PlayerController {
 			studentPlayerDTO,
 			picture
 		);
-		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toDTO(createdPlayer));
+		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
 }

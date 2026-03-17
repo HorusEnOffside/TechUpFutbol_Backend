@@ -3,11 +3,15 @@ package com.escuela.techcup.controller.mapper;
 import java.awt.image.BufferedImage;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
+import com.escuela.techcup.controller.dto.PlayerResponseDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
 
 public class PlayerMapper {
+
+    private PlayerMapper() {
+    }
 
     public static Player toPlayer(PlayerDTO dto, String id) {
         return toPlayer(dto, id, dto.getPassword());
@@ -46,10 +50,10 @@ public class PlayerMapper {
         return new Player(userPlayer, dto.getPosition(), dto.getDorsalNumber());
     }
 
-    public static PlayerDTO toDTO(Player player) {
+    public static PlayerResponseDTO toResponseDTO(Player player) {
         if (player == null) {
             throw new InvalidInputException("Player no puede ser null");
         }
-        return new PlayerDTO(player.getName(), player.getMail(), player.getDateOfBirth(), player.getGender(), player.getPassword(), player.getDorsalNumber(), player.getPosition());
+        return new PlayerResponseDTO(player.getName(), player.getMail(), player.getDateOfBirth(), player.getGender(), player.getDorsalNumber(), player.getPosition());
     }
 }
