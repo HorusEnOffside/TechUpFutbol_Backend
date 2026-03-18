@@ -122,4 +122,39 @@ class PlayerTest {
         Player player = new Player(userPlayer, Position.DEFENSA, 5);
         assertEquals(Position.DEFENSA, player.getPosition());
     }
+    @Test
+    void testGetUserId() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals("u1", player.getUserId());
+    }
+
+    @Test
+    void testGetName() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals("Pedro", player.getName());
+    }
+
+    @Test
+    void testGetMail() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals("pedro@test.com", player.getMail());
+    }
+
+    @Test
+    void testGetDateOfBirth() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals(LocalDate.of(2001, 4, 12), player.getDateOfBirth());
+    }
+
+    @Test
+    void testGetGender() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals(Gender.HOMBRE, player.getGender());
+    }
+
+    @Test
+    void testGetPassword() {
+        Player player = new Player(userPlayer, Position.DELANTERO, 9);
+        assertEquals("pass", player.getPassword());
+    }
 }

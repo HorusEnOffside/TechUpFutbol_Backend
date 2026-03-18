@@ -31,18 +31,6 @@ import com.escuela.techcup.core.model.enums.Gender;
 /**
  * Tests unitarios para UserServiceImpl.
  *
- * Sin dependencias externas inyectadas: no hay @Mock.
- * IdGeneratorUtil usa UUID.randomUUID() → NO determinista → IDs siempre distintos.
- * PasswordHashUtil usa BCrypt           → NO determinista → mismo input ≠ mismo hash.
- * La verificación correcta es: BCryptPasswordEncoder.matches(raw, hashed) == true.
- *
- * Excepción real de validación: ValidationException (lanzada por ValidationUtil).
- *
- * Reglas de negocio cubiertas:
- *  - name:     no puede ser nulo ni vacío
- *  - mail:     debe contener '@' y '.'
- *  - password: ≥ 8 caracteres + al menos una mayúscula
- *  - semester: 1–10 (semesterRules en ValidationUtil)
  *
  * Cobertura:
  *  ✅ Happy path  – cada tipo retorna la instancia correcta con ID y datos
@@ -55,7 +43,7 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    // ── DTOs base ────────────────────────────────────────────────────────────
+    // ── DTOs base
     private UserDTO          validUserDTO;
     private StudentUserDTO   validStudentDTO;
     private UserPlayerDTO    validUserPlayerDTO;
@@ -71,7 +59,7 @@ class UserServiceImplTest {
             "maria@escuela.edu",
             PAST_DATE,
             Gender.MUJER,
-            "Password1"          // ≥8 chars + mayúscula
+            "Password1"
         );
 
         validStudentDTO = new StudentUserDTO(
@@ -80,7 +68,7 @@ class UserServiceImplTest {
             PAST_DATE,
             Gender.MUJER,
             "Password1",
-            4                    // semester válido: 1–10
+            4
         );
 
         validUserPlayerDTO = new UserPlayerDTO(
@@ -94,9 +82,9 @@ class UserServiceImplTest {
         dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Admin
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para administrador
+     */
     @Nested
     @DisplayName("createAdminUser")
     class CreateAdminUser {
@@ -187,9 +175,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Organizer
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para Organizador
+     */
     @Nested
     @DisplayName("createOrganizerUser")
     class CreateOrganizerUser {
@@ -204,9 +192,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Referee
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para arbitro
+     */
     @Nested
     @DisplayName("createRefereeUser")
     class CreateRefereeUser {
@@ -221,9 +209,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Student
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para estudiante
+     */
     @Nested
     @DisplayName("createStudentUser")
     class CreateStudentUser {
@@ -291,9 +279,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Teacher
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para profesor
+     */
     @Nested
     @DisplayName("createTeacherUser")
     class CreateTeacherUser {
@@ -325,9 +313,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Familiar
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para familiar
+     */
     @Nested
     @DisplayName("createFamiliarUser")
     class CreateFamiliarUser {
@@ -359,9 +347,9 @@ class UserServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // Graduate
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas para graduado
+     */
     @Nested
     @DisplayName("createGraduateUser")
     class CreateGraduateUser {
