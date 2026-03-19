@@ -17,6 +17,8 @@ Thumbs.db
 
 # Archivos de log
 *.log
+*.log.*
+logs/
 
 # Archivos temporales
 *.tmp
@@ -63,3 +65,5 @@ buildNumber.properties
  # Sublime Text
  *.sublime-workspace
  *.sublime-project
+
+

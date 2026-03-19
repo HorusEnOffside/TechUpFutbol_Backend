@@ -41,22 +41,19 @@ import com.escuela.techcup.core.service.UserService;
 @ExtendWith(MockitoExtension.class)
 class PlayerServiceImplTest {
 
-    // ── MOCK: importa QUÉ método se llama y CON QUÉ parámetros ─────────────
     @Mock
     private UserService userService;
 
     @InjectMocks
     private PlayerServiceImpl playerService;
 
-    // ── Datos de prueba ──────────────────────────────────────────────────────
     private StudentPlayerDTO validStudentDTO;
     private PlayerDTO         validPlayerDTO;
-    private UserPlayer        stubUserPlayer;   // STUB: respuesta fija de userService
+    private UserPlayer        stubUserPlayer;
     private BufferedImage     dummyImage;
 
     @BeforeEach
     void setUp() {
-        // Stub mínimo de UserPlayer (Student es la subclase concreta más simple)
         stubUserPlayer = new Student(
             "user-001",
             "Test User",
@@ -79,7 +76,6 @@ class PlayerServiceImplTest {
             Position.DELANTERO
         );
 
-        // DTO genérico para teacher / familiar / graduate
         validPlayerDTO = new PlayerDTO(
             "Carlos Díaz",
             "carlos@escuela.edu",
@@ -93,9 +89,9 @@ class PlayerServiceImplTest {
         dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // createSportsProfileStudent
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     *Pruebas perfil esstudiante
+     */
     @Nested
     @DisplayName("createSportsProfileStudent")
     class CreateSportsProfileStudent {
@@ -186,9 +182,9 @@ class PlayerServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // createSportsProfileTeacher
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas perfil profesor
+     */
     @Nested
     @DisplayName("createSportsProfileTeacher")
     class CreateSportsProfileTeacher {
@@ -244,9 +240,9 @@ class PlayerServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // createSportsProfileFamiliar
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruebas perfil familiar
+     */
     @Nested
     @DisplayName("createSportsProfileFamiliar")
     class CreateSportsProfileFamiliar {
@@ -301,9 +297,9 @@ class PlayerServiceImplTest {
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // createSportsProfileGraduate
-    // ════════════════════════════════════════════════════════════════════════
+    /**
+     * Pruenas para graduado
+     */
     @Nested
     @DisplayName("createSportsProfileGraduate")
     class CreateSportsProfileGraduate {
