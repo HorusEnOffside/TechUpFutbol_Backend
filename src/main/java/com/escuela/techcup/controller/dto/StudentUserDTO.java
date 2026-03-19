@@ -1,6 +1,6 @@
 package com.escuela.techcup.controller.dto;
 
-import java.time.LocalDate;
+import  java.time.LocalDate;
 
 import com.escuela.techcup.core.model.enums.Gender;
 
@@ -8,8 +8,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class StudentUserDTO extends UserPlayerDTO {
 
