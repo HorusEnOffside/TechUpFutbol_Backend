@@ -5,8 +5,10 @@ import java.time.LocalDate;
 import com.escuela.techcup.core.model.enums.Gender;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class UserResponseDTO {
     private String name;
     private String mail;
