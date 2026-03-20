@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,8 +30,13 @@ import com.escuela.techcup.controller.dto.PlayerResponseDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.mapper.PlayerMapper;
 import com.escuela.techcup.core.exception.InvalidImageException;
+import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.service.PlayerService;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/players")
@@ -42,6 +49,7 @@ public class PlayerController {
 		this.playerService = playerService;
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/students/sports-profile")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudent(@Valid @RequestBody StudentPlayerDTO studentPlayerDTO) {
 		log.info("Request received to create student sports profile. mail={}, position={}, dorsal={}",
@@ -54,6 +62,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 	
+	@PreAuthorize("permitAll()")
 	@PostMapping(value = "/students/sports-profile/with-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileStudentWithPhoto(
 		@Valid
@@ -73,6 +82,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/teachers/sports-profile")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileTeacher(@Valid @RequestBody PlayerDTO playerDTO) {
 		log.info("Request received to create teacher sports profile. mail={}, position={}, dorsal={}",
@@ -85,6 +95,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping(value = "/teachers/sports-profile/with-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileTeacherWithPhoto(
 		@Valid
@@ -104,6 +115,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/familiars/sports-profile")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileFamiliar(@Valid @RequestBody PlayerDTO playerDTO) {
 		log.info("Request received to create familiar sports profile. mail={}, position={}, dorsal={}",
@@ -116,6 +128,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping(value = "/familiars/sports-profile/with-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileFamiliarWithPhoto(
 		@Valid
@@ -135,6 +148,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping("/graduates/sports-profile")
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileGraduate(@Valid @RequestBody PlayerDTO playerDTO) {
 		log.info("Request received to create graduate sports profile. mail={}, position={}, dorsal={}",
@@ -147,6 +161,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("permitAll()")
 	@PostMapping(value = "/graduates/sports-profile/with-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlayerResponseDTO> createSportsProfileGraduateWithPhoto(
 		@Valid
@@ -164,6 +179,24 @@ public class PlayerController {
 		Player createdPlayer = playerService.createSportsProfileGraduate(playerDTO, picture);
 		log.info("Graduate sports profile with photo created successfully. userId={}", createdPlayer.getUserId());
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
+	}
+
+	@GetMapping
+	public ResponseEntity<List<PlayerResponseDTO>> getAllPlayers() {
+		log.info("Request received to list all players");
+		List<PlayerResponseDTO> players = playerService.getAllPlayers().stream()
+			.map(PlayerMapper::toResponseDTO)
+			.toList();
+		return ResponseEntity.ok(players);
+	}
+
+	@GetMapping("/{userId}")
+	public ResponseEntity<PlayerResponseDTO> getPlayerByUserId(@PathVariable String userId) {
+		log.info("Request received to get player by userId={}", userId);
+		PlayerResponseDTO player = playerService.getPlayerByUserId(userId)
+			.map(PlayerMapper::toResponseDTO)
+			.orElseThrow(() -> new TechcupException("Jugador no encontrado", HttpStatus.NOT_FOUND));
+		return ResponseEntity.ok(player);
 	}
 
 	private BufferedImage readProfilePictureOrThrow(MultipartFile profilePicture, String mail) throws IOException {

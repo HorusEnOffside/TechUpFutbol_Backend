@@ -1,6 +1,7 @@
 package com.escuela.techcup.controller.mapper;
 
 import java.awt.image.BufferedImage;
+import java.util.EnumSet;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerResponseDTO;
@@ -54,6 +55,14 @@ public class PlayerMapper {
         if (player == null) {
             throw new InvalidInputException("Player no puede ser null");
         }
-        return new PlayerResponseDTO(player.getName(), player.getMail(), player.getDateOfBirth(), player.getGender(), player.getDorsalNumber(), player.getPosition());
+        return new PlayerResponseDTO(
+            player.getName(),
+            player.getMail(),
+            player.getDateOfBirth(),
+            player.getGender(),
+            player.getDorsalNumber(),
+            player.getPosition(),
+            EnumSet.copyOf(player.getUserPlayer().getRoles())
+        );
     }
 }

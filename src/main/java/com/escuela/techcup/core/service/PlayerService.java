@@ -1,6 +1,8 @@
 package com.escuela.techcup.core.service;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Optional;
 
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
@@ -20,5 +22,8 @@ public interface PlayerService {
 
     Player createSportsProfileGraduate(PlayerDTO playerDTO);
     Player createSportsProfileGraduate(PlayerDTO playerDTO, BufferedImage profilePicture);
+
+    List<Player> getAllPlayers();
+    Optional<Player> getPlayerByUserId(String userId);
 
 }

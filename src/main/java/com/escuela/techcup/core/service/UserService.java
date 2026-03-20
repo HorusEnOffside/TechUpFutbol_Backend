@@ -1,6 +1,8 @@
 package com.escuela.techcup.core.service;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Optional;
 
 import com.escuela.techcup.controller.dto.StudentUserDTO;
 import com.escuela.techcup.controller.dto.UserDTO;
@@ -22,4 +24,8 @@ public interface UserService {
     UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture);
     UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO);
     UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture);
+
+    List<User> getAllUsers();
+    Optional<User> getUserById(String id);
+    Optional<User> getUserByMail(String mail);
 }

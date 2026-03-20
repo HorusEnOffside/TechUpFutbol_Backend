@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.escuela.techcup.controller.dto.StudentUserDTO;
 import com.escuela.techcup.controller.dto.UserDTO;
 import com.escuela.techcup.controller.dto.UserPlayerDTO;
+import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.ValidationException;
 import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.Familiar;
@@ -112,12 +113,22 @@ class UserServiceImplTest {
         }
 
         @Test
-        @DisplayName("⚠️ Dos usuarios creados con el mismo DTO tienen IDs únicos")
+        @DisplayName("⚠️ Dos usuarios creados con correos distintos tienen IDs únicos")
         void shouldGenerateUniqueIds() {
             User first  = userService.createAdminUser(validUserDTO);
+            validUserDTO.setMail("maria2@escuela.edu");
             User second = userService.createAdminUser(validUserDTO);
 
             assertThat(first.getId()).isNotEqualTo(second.getId());
+        }
+
+        @Test
+        @DisplayName("❌ No permite crear dos usuarios con el mismo correo")
+        void shouldThrowWhenMailAlreadyExists() {
+            userService.createAdminUser(validUserDTO);
+
+            assertThrows(InvalidInputException.class,
+                () -> userService.createOrganizerUser(validUserDTO));
         }
 
         @Test

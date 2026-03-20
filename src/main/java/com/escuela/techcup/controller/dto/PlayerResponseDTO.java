@@ -1,9 +1,11 @@
 package com.escuela.techcup.controller.dto;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.Position;
+import com.escuela.techcup.core.model.enums.UserRole;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,8 +17,8 @@ public class PlayerResponseDTO extends UserResponseDTO {
     private int dorsalNumber;
     private Position position;
 
-    public PlayerResponseDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, int dorsalNumber, Position position) {
-        super(name, mail, dateOfBirth, gender);
+    public PlayerResponseDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, int dorsalNumber, Position position, Set<UserRole> roles) {
+        super(name, mail, dateOfBirth, gender, roles);
         this.dorsalNumber = dorsalNumber;
         this.position = position;
     }

@@ -1,5 +1,7 @@
 package com.escuela.techcup.core.service;
 
-public interface AuthService {
 
+import java.util.Optional;
+
+public interface AuthService {
 }
