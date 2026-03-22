@@ -1,0 +1,21 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: techcup-futbol
+  security:
+    user:
+      name: admin
+      password: 1234
+
+logging:
+  level:
+    root: INFO
+    "com.escuela.techcup": DEBUG
+  file:
+    name: logs/api.log
+
+jwt:
+  secret: test-secret-key-for-jwt-signing-must-be-long-enough-for-security-purposes-change-this-in-production-xd
+  expiration: 86400000
