@@ -9,5 +9,4 @@ public class TechupFutbol {
     private List<Tournament> tournaments;
     private List<User> users;
     private List<Player> players;
-    
 }

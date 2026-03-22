@@ -23,7 +23,6 @@ class GlobalExceptionHandlerTest {
         handler = new GlobalExceptionHandler();
     }
 
-    // --- handleBusinessErrors (TechcupException) ---
 
     @Test
     void testHandleBusinessErrors_statusCode() {
@@ -82,7 +81,6 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getBody().getStatus());
     }
 
-    // --- handleGeneralErrors (Exception) ---
 
     @Test
     void testHandleGeneralErrors_statusCode() {
@@ -126,7 +124,6 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
-    // --- handleValidationErrors (MethodArgumentNotValidException) ---
 
     @Test
     void testHandleValidationErrors_statusCode() {
