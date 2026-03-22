@@ -1,6 +1,6 @@
 package com.escuela.techcup.controller;
 
-import com.escuela.techcup.config.SecurityConfig;
+import com.escuela.techcup.core.Handler.GlobalExceptionHandler;
 import com.escuela.techcup.controller.dto.PlayerResponseDTO;
 import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Player;
@@ -10,18 +10,23 @@ import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.PlayerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
 import java.util.EnumSet;
@@ -33,17 +38,16 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PlayerController.class)
-@Import(SecurityConfig.class)
+@ExtendWith(MockitoExtension.class)
 class PlayerControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+        @Mock
     private PlayerService playerService;
-    @MockBean
-    private PasswordEncoder passwordEncoder;
+
+        @InjectMocks
+        private PlayerController playerController;
 
 
     private ObjectMapper objectMapper;
@@ -52,8 +56,20 @@ class PlayerControllerTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper = JsonMapper.builder()
+                .addModule(new ParameterNamesModule())
+                .addModule(new Jdk8Module())
+                .addModule(new JavaTimeModule())
+                .build();
+
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+
+        mockMvc = MockMvcBuilders.standaloneSetup(playerController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setValidator(validator)
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
 
         UserPlayer userPlayer = new UserPlayer("u1", "Pedro", "pedro@test.com",
                 LocalDate.of(2001, 4, 12), Gender.HOMBRE, "pass");

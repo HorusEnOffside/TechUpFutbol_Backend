@@ -42,28 +42,28 @@ buildNumber.properties
 # https://maven.apache.org/wrapper/#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 
- # Visual Studio Code
- .vscode/
- *.code-workspace
+# Visual Studio Code
+.vscode/
+*.code-workspace
 
- # Visual Studio (Windows)
- .vs/
- *.suo
- *.user
- *.userosscache
- *.sln.docstates
+# Visual Studio (Windows)
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
- # Eclipse
- .project
- .classpath
- .settings/
+# Eclipse
+.project
+.classpath
+.settings/
 
- # NetBeans
- nbproject/
- nbactions.xml
+# NetBeans
+nbproject/
+nbactions.xml
 
- # Sublime Text
- *.sublime-workspace
- *.sublime-project
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
 
 

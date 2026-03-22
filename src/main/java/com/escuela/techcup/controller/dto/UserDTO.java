@@ -3,7 +3,6 @@ import java.time.LocalDate;
 
 import com.escuela.techcup.core.model.enums.Gender;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +18,6 @@ public class UserDTO {
 
 	@NotBlank(message = "mail es obligatorio")
 	@Email(message = "mail no es valido")
-	@Schema(example = "ejemplo@ejemplo.com")
 	private String mail;
 
 	@NotNull(message = "dateOfBirth es obligatorio")
