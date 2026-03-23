@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class StudentUserDTO extends UserPlayerDTO {
 
-    @NotNull(message = "semester es obligatorio para estudiantes")
-    @Min(value = 1, message = "semester debe ser mayor a 0")
+    @NotNull(message = "semester is required for students")
+    @Min(value = 1, message = "semester must be greater than 0")
     private Integer semester;
 
     public StudentUserDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, String password, Integer semester) {

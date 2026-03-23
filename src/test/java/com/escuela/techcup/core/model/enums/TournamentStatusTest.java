@@ -12,18 +12,18 @@ class TournamentStatusTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(TournamentStatus.valueOf("BORRADOR"));
-        assertNotNull(TournamentStatus.valueOf("ACTIVO"));
-        assertNotNull(TournamentStatus.valueOf("EN_PROCESO"));
-        assertNotNull(TournamentStatus.valueOf("FINALIZADO"));
+        assertNotNull(TournamentStatus.valueOf("DRAFT"));
+        assertNotNull(TournamentStatus.valueOf("ACTIVE"));
+        assertNotNull(TournamentStatus.valueOf("IN_PROGRESS"));
+        assertNotNull(TournamentStatus.valueOf("COMPLETED"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("BORRADOR",   TournamentStatus.BORRADOR.name());
-        assertEquals("ACTIVO",     TournamentStatus.ACTIVO.name());
-        assertEquals("EN_PROCESO", TournamentStatus.EN_PROCESO.name());
-        assertEquals("FINALIZADO", TournamentStatus.FINALIZADO.name());
+        assertEquals("DRAFT",       TournamentStatus.DRAFT.name());
+        assertEquals("ACTIVE",      TournamentStatus.ACTIVE.name());
+        assertEquals("IN_PROGRESS", TournamentStatus.IN_PROGRESS.name());
+        assertEquals("COMPLETED",   TournamentStatus.COMPLETED.name());
     }
 
     @Test

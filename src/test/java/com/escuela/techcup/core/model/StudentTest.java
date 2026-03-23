@@ -15,7 +15,7 @@ class StudentTest {
     @BeforeEach
     void setUp() {
         student = new Student("s1", "Juan", "juan@test.com",
-                LocalDate.of(2003, 8, 22), Gender.HOMBRE, 5, "pass789");
+                LocalDate.of(2003, 8, 22), Gender.MALE, 5, "pass789");
     }
 
     @Test
@@ -35,7 +35,7 @@ class StudentTest {
 
     @Test
     void testGetGender() {
-        assertEquals(Gender.HOMBRE, student.getGender());
+        assertEquals(Gender.MALE, student.getGender());
     }
 
     @Test
@@ -73,14 +73,14 @@ class StudentTest {
     @Test
     void testSemesterCero() {
         Student s = new Student("s2", "Test", "t@test.com",
-                LocalDate.of(2005, 1, 1), Gender.MUJER, 0, "p");
+                LocalDate.of(2005, 1, 1), Gender.FEMALE, 0, "p");
         assertEquals(0, s.getSemester());
     }
 
     @Test
     void testSemesterPrimerSemestre() {
         Student s = new Student("s3", "Nuevo", "n@test.com",
-                LocalDate.of(2006, 2, 2), Gender.HOMBRE, 1, "p");
+                LocalDate.of(2006, 2, 2), Gender.MALE, 1, "p");
         assertEquals(1, s.getSemester());
     }
 }

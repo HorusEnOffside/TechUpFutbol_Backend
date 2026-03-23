@@ -1,4 +1,4 @@
-package com.escuela.techcup.core.Handler;
+package com.escuela.techcup.handler;
 
 
 import org.slf4j.Logger;
@@ -37,6 +37,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralErrors(Exception ex) {
         log.error("Unexpected error occurred", ex);
-        return new ResponseEntity<>(new ErrorResponse("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new ErrorResponse("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

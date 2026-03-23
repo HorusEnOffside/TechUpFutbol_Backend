@@ -21,14 +21,14 @@ public class Player implements ComponentPlayer {
         this.userPlayer = userPlayer;
         this.position = position;
         this.dorsalNumber = dorsalNumber;
-        this.status = PlayerStatus.DISPONIBLE;
+        this.status = PlayerStatus.AVAILABLE;
     }
 
     public Player(UserPlayer userPlayer, Position position, int dorsalNumber, Team team) {
         this.userPlayer = userPlayer;
         this.position = position;
         this.dorsalNumber = dorsalNumber;
-        this.status = PlayerStatus.EN_EQUIPO;
+        this.status = PlayerStatus.IN_TEAM;
         this.team = team;
     }
 

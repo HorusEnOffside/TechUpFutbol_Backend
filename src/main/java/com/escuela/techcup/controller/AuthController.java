@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.escuela.techcup.controller.dto.LoginRequest;
 import com.escuela.techcup.controller.dto.LoginResponse;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autentication", description = "Inicio de sesion y emision de token")
 public class AuthController {
 	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
@@ -45,12 +46,12 @@ public class AuthController {
 		User user = userService.getUserByMail(loginRequest.getEmail())
 			.orElseThrow(() -> {
 				log.warn("Login failed: user not found for email={}", loginRequest.getEmail());
-				return new TechcupException("Email o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+				return new TechcupException("Invalid email or password", HttpStatus.UNAUTHORIZED);
 			});
 
 		if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
 			log.warn("Login failed: invalid password for email={}", loginRequest.getEmail());
-			throw new TechcupException("Email o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+			throw new TechcupException("Invalid email or password", HttpStatus.UNAUTHORIZED);
 		}
 
 		String rolesAsString = user.getRoles().stream()

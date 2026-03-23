@@ -18,7 +18,7 @@ class OrganizerTest {
     @BeforeEach
     void setUp() {
         organizer = new Organizer("1", "Carlos", "carlos@test.com",
-                LocalDate.of(1990, 5, 15), Gender.HOMBRE, "pass123");
+                LocalDate.of(1990, 5, 15), Gender.MALE, "pass123");
     }
 
     @Test
@@ -38,7 +38,7 @@ class OrganizerTest {
 
     @Test
     void testGetGender() {
-        assertEquals(Gender.HOMBRE, organizer.getGender());
+        assertEquals(Gender.MALE, organizer.getGender());
     }
 
     @Test
@@ -141,8 +141,8 @@ class OrganizerTest {
 
     @Test
     void testSetGender() {
-        organizer.setGender(Gender.MUJER);
-        assertEquals(Gender.MUJER, organizer.getGender());
+        organizer.setGender(Gender.FEMALE);
+        assertEquals(Gender.FEMALE, organizer.getGender());
     }
 
     @Test
@@ -178,38 +178,38 @@ class OrganizerTest {
     @Test
     void testEquals_objetosIguales() {
         Organizer o2 = new Organizer("1", "Carlos", "carlos@test.com",
-                LocalDate.of(1990, 5, 15), Gender.HOMBRE, "pass123");
+                LocalDate.of(1990, 5, 15), Gender.MALE, "pass123");
         assertEquals(organizer, o2);
     }
 
     @Test
     void testEquals_objetosDiferentes() {
         Organizer o2 = new Organizer("2", "Pedro", "pedro@test.com",
-                LocalDate.of(1985, 1, 1), Gender.HOMBRE, "pass");
+                LocalDate.of(1985, 1, 1), Gender.MALE, "pass");
         assertNotEquals(organizer, o2);
     }
 
     @Test
     void testEquals_conNulo() {
-        assertNotEquals(organizer, null);
+        assertNotEquals(null, organizer);
     }
 
     @Test
     void testEquals_distintaClase() {
-        assertNotEquals(organizer, "un string cualquiera");
+        assertNotEquals("un string cualquiera", organizer);
     }
 
     @Test
     void testHashCode_objetosIguales() {
         Organizer o2 = new Organizer("1", "Carlos", "carlos@test.com",
-                LocalDate.of(1990, 5, 15), Gender.HOMBRE, "pass123");
+                LocalDate.of(1990, 5, 15), Gender.MALE, "pass123");
         assertEquals(organizer.hashCode(), o2.hashCode());
     }
 
     @Test
     void testHashCode_objetosDiferentes() {
         Organizer o2 = new Organizer("2", "Pedro", "pedro@test.com",
-                LocalDate.of(1985, 1, 1), Gender.HOMBRE, "pass");
+                LocalDate.of(1985, 1, 1), Gender.MALE, "pass");
         assertNotEquals(organizer.hashCode(), o2.hashCode());
     }
 

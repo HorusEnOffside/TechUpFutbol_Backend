@@ -2,11 +2,13 @@ package com.escuela.techcup.core.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.service.JwtService;
 
 import javax.crypto.SecretKey;
@@ -17,6 +19,8 @@ import java.util.Set;
 @Service
 public class JwtServiceImpl implements JwtService {
 
+	private static final Logger log = LoggerFactory.getLogger(JwtServiceImpl.class);
+
 	@Value("${jwt.secret}")
 	private String jwtSecret;
 
@@ -25,6 +29,16 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public String generateToken(String userId, String email, Set<String> roles) {
+		if (userId == null || userId.isBlank()) {
+			throw new InvalidInputException("userId is required");
+		}
+		if (email == null || email.isBlank()) {
+			throw new InvalidInputException("email is required");
+		}
+		if (roles == null || roles.isEmpty()) {
+			throw new InvalidInputException("At least one role is required");
+		}
+
 		long now = System.currentTimeMillis();
 		long expirationTime = now + jwtExpiration;
 
@@ -36,7 +50,7 @@ public class JwtServiceImpl implements JwtService {
 			.claim("roles", roles)
 			.issuedAt(new Date(now))
 			.expiration(new Date(expirationTime))
-			.signWith(key, SignatureAlgorithm.HS256)
+			.signWith(key)
 			.compact();
 	}
 
@@ -52,10 +66,16 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public boolean isTokenValid(String token) {
+		if (token == null || token.isBlank()) {
+			log.debug("JWT validation failed: token is empty");
+			return false;
+		}
+
 		try {
 			parseToken(token);
 			return true;
 		} catch (Exception e) {
+			log.debug("JWT validation failed: {}", e.getMessage());
 			return false;
 		}
 	}

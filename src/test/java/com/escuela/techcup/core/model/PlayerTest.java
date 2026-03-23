@@ -20,63 +20,63 @@ class PlayerTest {
     @BeforeEach
     void setUp() {
         userPlayer = new UserPlayer("u1", "Pedro", "pedro@test.com",
-                LocalDate.of(2001, 4, 12), Gender.HOMBRE, "pass");
+                LocalDate.of(2001, 4, 12), Gender.MALE, "pass");
         team = new Team();
-        player = new Player(userPlayer, Position.DELANTERO, 9);
+        player = new Player(userPlayer, Position.FORWARD, 9);
     }
 
     @Test
-    void testConstructorSinEquipo_userPlayer() {
+    void testConstructorWithoutTeam_userPlayer() {
         assertEquals(userPlayer, player.getUserPlayer());
     }
 
     @Test
-    void testConstructorSinEquipo_position() {
-        assertEquals(Position.DELANTERO, player.getPosition());
+    void testConstructorWithoutTeam_position() {
+        assertEquals(Position.FORWARD, player.getPosition());
     }
 
     @Test
-    void testConstructorSinEquipo_dorsalNumber() {
+    void testConstructorWithoutTeam_dorsalNumber() {
         assertEquals(9, player.getDorsalNumber());
     }
 
     @Test
-    void testConstructorSinEquipo_statusEsDisponible() {
-        assertEquals(PlayerStatus.DISPONIBLE, player.getStatus());
+    void testConstructorWithoutTeam_statusIsAvailable() {
+        assertEquals(PlayerStatus.AVAILABLE, player.getStatus());
     }
 
     @Test
-    void testConstructorSinEquipo_equipoEsNulo() {
+    void testConstructorWithoutTeam_teamIsNull() {
         assertNull(player.getTeam());
     }
 
     @Test
-    void testConstructorConEquipo_userPlayer() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1, team);
+    void testConstructorWithTeam_userPlayer() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
         assertEquals(userPlayer, p.getUserPlayer());
     }
 
     @Test
-    void testConstructorConEquipo_position() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1, team);
-        assertEquals(Position.PORTERO, p.getPosition());
+    void testConstructorWithTeam_position() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
+        assertEquals(Position.GOALKEEPER, p.getPosition());
     }
 
     @Test
-    void testConstructorConEquipo_dorsalNumber() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1, team);
+    void testConstructorWithTeam_dorsalNumber() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
         assertEquals(1, p.getDorsalNumber());
     }
 
     @Test
-    void testConstructorConEquipo_statusEsEnEquipo() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1, team);
-        assertEquals(PlayerStatus.EN_EQUIPO, p.getStatus());
+    void testConstructorWithTeam_statusIsInTeam() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
+        assertEquals(PlayerStatus.IN_TEAM, p.getStatus());
     }
 
     @Test
-    void testConstructorConEquipo_equipoAsignado() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1, team);
+    void testConstructorWithTeam_teamAssigned() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
         assertEquals(team, p.getTeam());
     }
 
@@ -102,7 +102,7 @@ class PlayerTest {
 
     @Test
     void testGetGender() {
-        assertEquals(Gender.HOMBRE, player.getGender());
+        assertEquals(Gender.MALE, player.getGender());
     }
 
     @Test
@@ -111,23 +111,23 @@ class PlayerTest {
     }
 
     @Test
-    void testGetProfilePictureEsNuloPorDefecto() {
+    void testGetProfilePictureIsNullByDefault() {
         assertNull(player.getProfilePicture());
     }
 
     @Test
-    void testGetProfilePictureConImagen() {
+    void testGetProfilePictureWithImage() {
         BufferedImage imagen = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         UserPlayer upConFoto = new UserPlayer("u2", "Ana", "ana@test.com", imagen,
-                LocalDate.of(2000, 1, 1), Gender.MUJER, "pass");
-        Player p = new Player(upConFoto, Position.VOLANTE, 7);
+                LocalDate.of(2000, 1, 1), Gender.FEMALE, "pass");
+        Player p = new Player(upConFoto, Position.MIDFIELDER, 7);
         assertNotNull(p.getProfilePicture());
     }
 
     @Test
     void testSetPosition() {
-        player.setPosition(Position.VOLANTE);
-        assertEquals(Position.VOLANTE, player.getPosition());
+        player.setPosition(Position.MIDFIELDER);
+        assertEquals(Position.MIDFIELDER, player.getPosition());
     }
 
     @Test
@@ -138,8 +138,8 @@ class PlayerTest {
 
     @Test
     void testSetStatus() {
-        player.setStatus(PlayerStatus.EN_EQUIPO);
-        assertEquals(PlayerStatus.EN_EQUIPO, player.getStatus());
+        player.setStatus(PlayerStatus.IN_TEAM);
+        assertEquals(PlayerStatus.IN_TEAM, player.getStatus());
     }
 
     @Test
@@ -149,74 +149,75 @@ class PlayerTest {
     }
 
     @Test
-    void testPosicionVolante() {
-        Player p = new Player(userPlayer, Position.VOLANTE, 8);
-        assertEquals(Position.VOLANTE, p.getPosition());
+    void testMidfielderPosition() {
+        Player p = new Player(userPlayer, Position.MIDFIELDER, 8);
+        assertEquals(Position.MIDFIELDER, p.getPosition());
     }
 
     @Test
-    void testPosicionDefensa() {
-        Player p = new Player(userPlayer, Position.DEFENSA, 5);
-        assertEquals(Position.DEFENSA, p.getPosition());
+    void testDefenderPosition() {
+        Player p = new Player(userPlayer, Position.DEFENDER, 5);
+        assertEquals(Position.DEFENDER, p.getPosition());
     }
 
     @Test
-    void testPosicionPortero() {
-        Player p = new Player(userPlayer, Position.PORTERO, 1);
-        assertEquals(Position.PORTERO, p.getPosition());
+    void testGoalkeeperPosition() {
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1);
+        assertEquals(Position.GOALKEEPER, p.getPosition());
     }
 
     @Test
-    void testEquals_mismoObjeto() {
+    void testEquals_sameObject() {
         assertEquals(player, player);
     }
 
     @Test
-    void testEquals_objetosIguales() {
-        Player p2 = new Player(userPlayer, Position.DELANTERO, 9);
+    void testEquals_equalObjects() {
+        Player p2 = new Player(userPlayer, Position.FORWARD, 9);
         assertEquals(player, p2);
     }
 
     @Test
-    void testEquals_objetosDiferentes() {
-        Player p2 = new Player(userPlayer, Position.PORTERO, 1);
+    void testEquals_differentObjects() {
+        Player p2 = new Player(userPlayer, Position.GOALKEEPER, 1);
         assertNotEquals(player, p2);
     }
 
     @Test
-    void testEquals_conNulo() {
-        assertNotEquals(player, null);
+    void testEquals_withNull() {
+        assertNotEquals(null, player);
     }
 
     @Test
-    void testEquals_distintaClase() {
-        assertNotEquals(player, "un string cualquiera");
+    void testEquals_differentClass() {
+        assertNotEquals("un string cualquiera", player);
     }
 
     @Test
-    void testHashCode_objetosIguales() {
-        Player p2 = new Player(userPlayer, Position.DELANTERO, 9);
+    void testHashCode_equalObjects() {
+        Player p2 = new Player(userPlayer, Position.FORWARD, 9);
         assertEquals(player.hashCode(), p2.hashCode());
     }
 
     @Test
-    void testHashCode_objetosDiferentes() {
-        Player p2 = new Player(userPlayer, Position.PORTERO, 1);
+    void testHashCode_differentObjects() {
+        Player p2 = new Player(userPlayer, Position.GOALKEEPER, 1);
         assertNotEquals(player.hashCode(), p2.hashCode());
     }
 
     @Test
-    void testToString_noEsNulo() {
+    void testToString_notNull() {
         assertNotNull(player.toString());
     }
 
     @Test
-    void testToString_contienePosition() {
-        assertTrue(player.toString().contains("DELANTERO"));
+    void testToString_containsPosition() {
+        assertTrue(player.toString().contains("FORWARD"));
     }
 
     @Test
-    void testToString_contieneDorsalNumber() {
+    void testToString_containsDorsalNumber() {
         assertTrue(player.toString().contains("9"));
     }
 }
+

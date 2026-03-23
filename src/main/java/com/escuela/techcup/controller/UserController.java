@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.escuela.techcup.controller.dto.UserDTO;
 import com.escuela.techcup.controller.dto.UserResponseDTO;
@@ -23,6 +24,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Gestion de usuarios", description = "Administracion y consulta de usuarios")
 public class UserController {
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
@@ -82,7 +84,7 @@ public class UserController {
 		log.info("Request received to get user by id={}", id);
 		UserResponseDTO user = userService.getUserById(id)
 			.map(UserMapper::toResponseDTO)
-			.orElseThrow(() -> new TechcupException("Usuario no encontrado", HttpStatus.NOT_FOUND));
+			.orElseThrow(() -> new TechcupException("User not found", HttpStatus.NOT_FOUND));
 		return ResponseEntity.ok(user);
 	}
 }

@@ -59,31 +59,30 @@ class PlayerServiceImplTest {
             "Test User",
             "test@escuela.edu",
             LocalDate.of(2000, 1, 1),
-            Gender.HOMBRE,
+            Gender.MALE,
             5,
             "HashedPass1"
         );
 
         // DTO estudiante-jugador válido (password: ≥8 chars + mayúscula)
-        validStudentDTO = new StudentPlayerDTO(
-            "Juan Pérez",
-            "juan@escuela.edu",
-            LocalDate.of(2000, 6, 15),
-            Gender.HOMBRE,
-            "Password1",
-            4,                   // semester: 1–10
-            10,                  // dorsalNumber: > 0
-            Position.DELANTERO
-        );
+        validStudentDTO = new StudentPlayerDTO();
+        validStudentDTO.setName("Juan Pérez");
+        validStudentDTO.setMail("juan@escuela.edu");
+        validStudentDTO.setDateOfBirth(LocalDate.of(2000, 6, 15));
+        validStudentDTO.setGender(Gender.MALE);
+        validStudentDTO.setPassword("Password1");
+        validStudentDTO.setSemester(4);                   // semester: 1–10
+        validStudentDTO.setDorsalNumber(10);              // dorsalNumber: > 0
+        validStudentDTO.setPosition(Position.FORWARD);
 
         validPlayerDTO = new PlayerDTO(
             "Carlos Díaz",
             "carlos@escuela.edu",
             LocalDate.of(1985, 3, 20),
-            Gender.HOMBRE,
+            Gender.MALE,
             "Password1",
             1,
-            Position.PORTERO
+            Position.GOALKEEPER
         );
 
         dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
@@ -103,12 +102,12 @@ class PlayerServiceImplTest {
             when(userService.createStudentUser(any(StudentUserDTO.class)))
                 .thenReturn(stubUserPlayer);
 
-            Player result = playerService.createSportsProfileStudent(validStudentDTO);
+            Player result = playerService.createSportsProfileStudent(validStudentDTO, null);
 
             assertThat(result).isNotNull();
-            assertThat(result.getPosition()).isEqualTo(Position.DELANTERO);
+            assertThat(result.getPosition()).isEqualTo(Position.FORWARD);
             assertThat(result.getDorsalNumber()).isEqualTo(10);
-            assertThat(result.getStatus()).isEqualTo(PlayerStatus.DISPONIBLE);
+            assertThat(result.getStatus()).isEqualTo(PlayerStatus.AVAILABLE);
 
             // MOCK: delegó exactamente 1 vez al método sin foto, nunca al de con foto
             verify(userService, times(1)).createStudentUser(any(StudentUserDTO.class));
@@ -152,7 +151,7 @@ class PlayerServiceImplTest {
             validStudentDTO.setDorsalNumber(0);
 
             assertThrows(ValidationException.class,
-                () -> playerService.createSportsProfileStudent(validStudentDTO));
+                () -> playerService.createSportsProfileStudent(validStudentDTO, null));
 
             // MOCK: userService nunca fue invocado — la validación cortó el flujo
             verify(userService, never()).createStudentUser(any(StudentUserDTO.class));
@@ -164,7 +163,7 @@ class PlayerServiceImplTest {
             validStudentDTO.setDorsalNumber(-5);
 
             assertThrows(ValidationException.class,
-                () -> playerService.createSportsProfileStudent(validStudentDTO));
+                () -> playerService.createSportsProfileStudent(validStudentDTO, null));
 
             verify(userService, never()).createStudentUser(any(StudentUserDTO.class));
         }
@@ -176,7 +175,7 @@ class PlayerServiceImplTest {
             when(userService.createStudentUser(any(StudentUserDTO.class)))
                 .thenReturn(stubUserPlayer);
 
-            Player result = playerService.createSportsProfileStudent(validStudentDTO);
+            Player result = playerService.createSportsProfileStudent(validStudentDTO, null);
 
             assertThat(result.getDorsalNumber()).isEqualTo(1);
         }
@@ -195,10 +194,10 @@ class PlayerServiceImplTest {
             when(userService.createTeacherUser(any(PlayerDTO.class)))
                 .thenReturn(stubUserPlayer);
 
-            Player result = playerService.createSportsProfileTeacher(validPlayerDTO);
+            Player result = playerService.createSportsProfileTeacher(validPlayerDTO, null);
 
             assertThat(result).isNotNull();
-            assertThat(result.getPosition()).isEqualTo(Position.PORTERO);
+            assertThat(result.getPosition()).isEqualTo(Position.GOALKEEPER);
             verify(userService, times(1)).createTeacherUser(any(PlayerDTO.class));
         }
 
@@ -234,7 +233,7 @@ class PlayerServiceImplTest {
             validPlayerDTO.setDorsalNumber(0);
 
             assertThrows(ValidationException.class,
-                () -> playerService.createSportsProfileTeacher(validPlayerDTO));
+                () -> playerService.createSportsProfileTeacher(validPlayerDTO, null));
 
             verify(userService, never()).createTeacherUser(any(PlayerDTO.class));
         }
@@ -253,7 +252,7 @@ class PlayerServiceImplTest {
             when(userService.createFamiliarUser(any(PlayerDTO.class)))
                 .thenReturn(stubUserPlayer);
 
-            Player result = playerService.createSportsProfileFamiliar(validPlayerDTO);
+            Player result = playerService.createSportsProfileFamiliar(validPlayerDTO, null);
 
             assertThat(result).isNotNull();
             verify(userService, times(1)).createFamiliarUser(any(PlayerDTO.class));
@@ -291,7 +290,7 @@ class PlayerServiceImplTest {
             validPlayerDTO.setDorsalNumber(0);
 
             assertThrows(ValidationException.class,
-                () -> playerService.createSportsProfileFamiliar(validPlayerDTO));
+                () -> playerService.createSportsProfileFamiliar(validPlayerDTO, null));
 
             verify(userService, never()).createFamiliarUser(any(PlayerDTO.class));
         }
@@ -310,7 +309,7 @@ class PlayerServiceImplTest {
             when(userService.createGraduateUser(any(PlayerDTO.class)))
                 .thenReturn(stubUserPlayer);
 
-            Player result = playerService.createSportsProfileGraduate(validPlayerDTO);
+            Player result = playerService.createSportsProfileGraduate(validPlayerDTO, null);
 
             assertThat(result).isNotNull();
             verify(userService, times(1)).createGraduateUser(any(PlayerDTO.class));
@@ -348,7 +347,7 @@ class PlayerServiceImplTest {
             validPlayerDTO.setDorsalNumber(0);
 
             assertThrows(ValidationException.class,
-                () -> playerService.createSportsProfileGraduate(validPlayerDTO));
+                () -> playerService.createSportsProfileGraduate(validPlayerDTO, null));
 
             verify(userService, never()).createGraduateUser(any(PlayerDTO.class));
         }

@@ -18,8 +18,8 @@ class CaptainTest {
     @BeforeEach
     void setUp() {
         UserPlayer userPlayer = new UserPlayer("u1", "Lucas", "lucas@test.com",
-                LocalDate.of(1999, 7, 3), Gender.HOMBRE, "pass");
-        player = new Player(userPlayer, Position.VOLANTE, 10);
+                LocalDate.of(1999, 7, 3), Gender.MALE, "pass");
+        player = new Player(userPlayer, Position.MIDFIELDER, 10);
         captain = new Captain(player);
     }
 
@@ -30,7 +30,7 @@ class CaptainTest {
 
     @Test
     void testGetPosition() {
-        assertEquals(Position.VOLANTE, captain.getPosition());
+        assertEquals(Position.MIDFIELDER, captain.getPosition());
     }
 
     @Test
@@ -40,7 +40,7 @@ class CaptainTest {
 
     @Test
     void testGetStatus() {
-        assertEquals(PlayerStatus.DISPONIBLE, captain.getStatus());
+        assertEquals(PlayerStatus.AVAILABLE, captain.getStatus());
     }
 
     @Test
@@ -66,14 +66,14 @@ class CaptainTest {
 
     @Test
     void testDecoratorDelegaPosition() {
-        player.setPosition(Position.DEFENSA);
-        assertEquals(Position.DEFENSA, captain.getPosition());
+        player.setPosition(Position.DEFENDER);
+        assertEquals(Position.DEFENDER, captain.getPosition());
     }
 
     @Test
     void testDecoratorDelegaStatus() {
-        player.setStatus(PlayerStatus.EN_EQUIPO);
-        assertEquals(PlayerStatus.EN_EQUIPO, captain.getStatus());
+        player.setStatus(PlayerStatus.IN_TEAM);
+        assertEquals(PlayerStatus.IN_TEAM, captain.getStatus());
     }
 
     @Test

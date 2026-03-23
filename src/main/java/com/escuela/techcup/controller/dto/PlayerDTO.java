@@ -14,10 +14,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PlayerDTO extends UserPlayerDTO {
 
-	@Min(value = 1, message = "El dorsal debe ser mayor a 0")
+	@Min(value = 1, message = "Dorsal number must be greater than 0")
 	private int dorsalNumber;
 
-	@NotNull(message = "position es obligatorio")
+	@NotNull(message = "position is required")
 	private Position position;
 
 	public PlayerDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, String password, int dorsalNumber, Position position) {

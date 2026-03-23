@@ -1,24 +1,21 @@
 package com.escuela.techcup.controller;
 
-import com.escuela.techcup.core.Handler.GlobalExceptionHandler;
+import com.escuela.techcup.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.JwtService;
 import com.escuela.techcup.core.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,11 +23,13 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,28 +49,20 @@ class AuthControllerTest {
     @InjectMocks
     private AuthController authController;
 
-    private ObjectMapper objectMapper;
     private Administrator userMock;
 
     @BeforeEach
     void setUp() {
-        objectMapper = JsonMapper.builder()
-            .addModule(new ParameterNamesModule())
-            .addModule(new Jdk8Module())
-            .addModule(new JavaTimeModule())
-            .build();
-
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
 
         mockMvc = MockMvcBuilders.standaloneSetup(authController)
             .setControllerAdvice(new GlobalExceptionHandler())
             .setValidator(validator)
-            .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
             .build();
 
         userMock = new Administrator("1", "Carlos", "carlos@test.com",
-                LocalDate.of(1990, 5, 15), Gender.HOMBRE, "encodedPass");
+                LocalDate.of(1990, 5, 15), Gender.MALE, "encodedPass");
         userMock.setPrimaryRole(UserRole.ADMIN);
     }
 
@@ -87,7 +78,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_retorna200() throws Exception {
+    void testLogin_returns200() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches("pass123", "encodedPass")).thenReturn(true);
         when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
@@ -98,8 +89,9 @@ class AuthControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    void testLogin_retornaToken() throws Exception {
+            @ParameterizedTest
+            @MethodSource("loginResponseFields")
+            void testLogin_returnsExpectedField(String jsonPathExpression, String expectedValue) throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches("pass123", "encodedPass")).thenReturn(true);
         when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
@@ -107,35 +99,19 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson("carlos@test.com", "pass123")))
-                .andExpect(jsonPath("$.token").value("token.jwt.test"));
+                .andExpect(jsonPath(jsonPathExpression).value(expectedValue));
+    }
+
+            private static Stream<Arguments> loginResponseFields() {
+            return Stream.of(
+                Arguments.of("$.token", "token.jwt.test"),
+                Arguments.of("$.email", "carlos@test.com"),
+                Arguments.of("$.userId", "1")
+            );
     }
 
     @Test
-    void testLogin_retornaEmail() throws Exception {
-        when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
-        when(passwordEncoder.matches("pass123", "encodedPass")).thenReturn(true);
-        when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
-
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginJson("carlos@test.com", "pass123")))
-                .andExpect(jsonPath("$.email").value("carlos@test.com"));
-    }
-
-    @Test
-    void testLogin_retornaUserId() throws Exception {
-        when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
-        when(passwordEncoder.matches("pass123", "encodedPass")).thenReturn(true);
-        when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
-
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginJson("carlos@test.com", "pass123")))
-                .andExpect(jsonPath("$.userId").value("1"));
-    }
-
-    @Test
-    void testLogin_retornaRoles() throws Exception {
+    void testLogin_returnsRoles() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches("pass123", "encodedPass")).thenReturn(true);
         when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
@@ -147,7 +123,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_llamaAlServicioDeUsuario() throws Exception {
+    void testLogin_callsUserService() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
@@ -160,7 +136,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_llamaAlJwtService() throws Exception {
+    void testLogin_callsJwtService() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtService.generateToken(anyString(), anyString(), any())).thenReturn("token.jwt.test");
@@ -173,7 +149,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_usuarioNoExiste_retorna401() throws Exception {
+    void testLogin_userDoesNotExist_returns401() throws Exception {
         when(userService.getUserByMail("noexiste@test.com")).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/auth/login")
@@ -183,7 +159,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_passwordIncorrecta_retorna401() throws Exception {
+    void testLogin_wrongPassword_returns401() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches("wrongPass", "encodedPass")).thenReturn(false);
 
@@ -194,7 +170,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_sinEmail_retorna400() throws Exception {
+    void testLogin_withoutEmail_returns400() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson(null, "pass123")))
@@ -202,7 +178,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_emailInvalido_retorna400() throws Exception {
+    void testLogin_invalidEmail_returns400() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson("no-es-email", "pass123")))
@@ -210,7 +186,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_sinPassword_retorna400() throws Exception {
+    void testLogin_withoutPassword_returns400() throws Exception {
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson("carlos@test.com", null)))
@@ -218,7 +194,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_noLlamaJwtSiPasswordIncorrecta() throws Exception {
+    void testLogin_doesNotCallJwtIfWrongPassword() throws Exception {
         when(userService.getUserByMail("carlos@test.com")).thenReturn(Optional.of(userMock));
         when(passwordEncoder.matches("wrongPass", "encodedPass")).thenReturn(false);
 
@@ -230,7 +206,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void testLogin_noLlamaJwtSiUsuarioNoExiste() throws Exception {
+    void testLogin_doesNotCallJwtIfUserDoesNotExist() throws Exception {
         when(userService.getUserByMail("noexiste@test.com")).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/auth/login")

@@ -1,4 +1,4 @@
-package com.escuela.techcup.core.Handler;
+package com.escuela.techcup.handler;
 
 import java.time.LocalDateTime;
 

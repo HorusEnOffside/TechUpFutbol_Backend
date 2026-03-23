@@ -53,7 +53,7 @@ public class PlayerMapper {
 
     public static PlayerResponseDTO toResponseDTO(Player player) {
         if (player == null) {
-            throw new InvalidInputException("Player no puede ser null");
+            throw new InvalidInputException("Player cannot be null");
         }
         return new PlayerResponseDTO(
             player.getName(),

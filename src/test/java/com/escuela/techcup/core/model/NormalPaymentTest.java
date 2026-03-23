@@ -1,6 +1,5 @@
 package com.escuela.techcup.core.model;
 
-import com.escuela.techcup.core.model.enums.PaymentStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

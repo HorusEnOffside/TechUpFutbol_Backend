@@ -12,14 +12,14 @@ class PlayerStatusTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(PlayerStatus.valueOf("DISPONIBLE"));
-        assertNotNull(PlayerStatus.valueOf("EN_EQUIPO"));
+        assertNotNull(PlayerStatus.valueOf("AVAILABLE"));
+        assertNotNull(PlayerStatus.valueOf("IN_TEAM"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("DISPONIBLE", PlayerStatus.DISPONIBLE.name());
-        assertEquals("EN_EQUIPO",  PlayerStatus.EN_EQUIPO.name());
+        assertEquals("AVAILABLE", PlayerStatus.AVAILABLE.name());
+        assertEquals("IN_TEAM",   PlayerStatus.IN_TEAM.name());
     }
 
     @Test

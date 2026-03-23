@@ -1,5 +1,7 @@
-package com.escuela.techcup.core.Handler;
+package com.escuela.techcup.core.handler;
 
+import com.escuela.techcup.handler.ErrorResponse;
+import com.escuela.techcup.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.exception.TechcupException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,10 +92,10 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void testHandleGeneralErrors_mensaje() {
+    void testHandleGeneralErrors_message() {
         Exception ex = new Exception("Error inesperado");
         ResponseEntity<ErrorResponse> response = handler.handleGeneralErrors(ex);
-        assertEquals("Error interno del servidor", response.getBody().getMessage());
+        assertEquals("Internal server error", response.getBody().getMessage());
     }
 
     @Test

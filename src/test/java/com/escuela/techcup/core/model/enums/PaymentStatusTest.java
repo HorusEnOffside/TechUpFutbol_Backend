@@ -12,18 +12,18 @@ class PaymentStatusTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(PaymentStatus.valueOf("PENDIENTE"));
-        assertNotNull(PaymentStatus.valueOf("EN_REVISION"));
-        assertNotNull(PaymentStatus.valueOf("APROBADO"));
-        assertNotNull(PaymentStatus.valueOf("RECHAZADO"));
+        assertNotNull(PaymentStatus.valueOf("PENDING"));
+        assertNotNull(PaymentStatus.valueOf("IN_REVIEW"));
+        assertNotNull(PaymentStatus.valueOf("APPROVED"));
+        assertNotNull(PaymentStatus.valueOf("REJECTED"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("PENDIENTE",   PaymentStatus.PENDIENTE.name());
-        assertEquals("EN_REVISION", PaymentStatus.EN_REVISION.name());
-        assertEquals("APROBADO",    PaymentStatus.APROBADO.name());
-        assertEquals("RECHAZADO",   PaymentStatus.RECHAZADO.name());
+        assertEquals("PENDING",   PaymentStatus.PENDING.name());
+        assertEquals("IN_REVIEW", PaymentStatus.IN_REVIEW.name());
+        assertEquals("APPROVED",  PaymentStatus.APPROVED.name());
+        assertEquals("REJECTED",  PaymentStatus.REJECTED.name());
     }
 
     @Test

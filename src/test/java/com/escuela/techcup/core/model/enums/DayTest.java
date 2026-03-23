@@ -12,24 +12,24 @@ class DayTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(Day.valueOf("LUNES"));
-        assertNotNull(Day.valueOf("MARTES"));
-        assertNotNull(Day.valueOf("MIERCOLES"));
-        assertNotNull(Day.valueOf("JUEVES"));
-        assertNotNull(Day.valueOf("VIERNES"));
-        assertNotNull(Day.valueOf("SABADO"));
-        assertNotNull(Day.valueOf("DOMINGO"));
+        assertNotNull(Day.valueOf("MONDAY"));
+        assertNotNull(Day.valueOf("TUESDAY"));
+        assertNotNull(Day.valueOf("WEDNESDAY"));
+        assertNotNull(Day.valueOf("THURSDAY"));
+        assertNotNull(Day.valueOf("FRIDAY"));
+        assertNotNull(Day.valueOf("SATURDAY"));
+        assertNotNull(Day.valueOf("SUNDAY"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("LUNES",     Day.LUNES.name());
-        assertEquals("MARTES",    Day.MARTES.name());
-        assertEquals("MIERCOLES", Day.MIERCOLES.name());
-        assertEquals("JUEVES",    Day.JUEVES.name());
-        assertEquals("VIERNES",   Day.VIERNES.name());
-        assertEquals("SABADO",    Day.SABADO.name());
-        assertEquals("DOMINGO",   Day.DOMINGO.name());
+        assertEquals("MONDAY",    Day.MONDAY.name());
+        assertEquals("TUESDAY",   Day.TUESDAY.name());
+        assertEquals("WEDNESDAY", Day.WEDNESDAY.name());
+        assertEquals("THURSDAY",  Day.THURSDAY.name());
+        assertEquals("FRIDAY",    Day.FRIDAY.name());
+        assertEquals("SATURDAY",  Day.SATURDAY.name());
+        assertEquals("SUNDAY",    Day.SUNDAY.name());
     }
 
     @Test

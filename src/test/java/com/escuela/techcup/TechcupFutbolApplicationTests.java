@@ -25,13 +25,14 @@ class TechcupFutbolApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Este test simplemente verifica que el contexto de Spring se carga correctamente.
 	}
 
 	@Test
 	void testCreationPlayer() {
 		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
 
-		Player player = playerService.createSportsProfileStudent(playerDTO);
+		Player player = playerService.createSportsProfileStudent(playerDTO, null);
 
 		assertNotNull(player);
 		assertNotNull(player.getUserPlayer());
@@ -42,7 +43,7 @@ class TechcupFutbolApplicationTests {
 		assertEquals(playerDTO.getGender(), player.getUserPlayer().getGender());
 		assertEquals(10, player.getDorsalNumber());
 		assertEquals(playerDTO.getPosition(), player.getPosition());
-		assertEquals(PlayerStatus.DISPONIBLE, player.getStatus());
+		assertEquals(PlayerStatus.AVAILABLE, player.getStatus());
 		assertNotEquals(playerDTO.getPassword(), player.getUserPlayer().getPassword());
 		assertTrue(PasswordHashUtil.verifyPassword(playerDTO.getPassword(), player.getUserPlayer().getPassword()));
 	}
@@ -52,19 +53,19 @@ class TechcupFutbolApplicationTests {
 		StudentPlayerDTO playerDTO = buildValidPlayerDTO();
 		playerDTO.setMail("correo-invalido");
 
-		assertThrows(ValidationException.class, () -> playerService.createSportsProfileStudent(playerDTO));
+		assertThrows(ValidationException.class, () -> playerService.createSportsProfileStudent(playerDTO, null));
 	}
 
 	private StudentPlayerDTO buildValidPlayerDTO() {
-		return new StudentPlayerDTO(
-			"Andres",
-			"andres@techcup.com",
-			LocalDate.of(2000, 1, 15),
-			Gender.HOMBRE,
-			"A123456789",
-			4,
-			10,
-			Position.VOLANTE
-		);
+		StudentPlayerDTO dto = new StudentPlayerDTO();
+		dto.setName("Andres");
+		dto.setMail("andres@techcup.com");
+		dto.setDateOfBirth(LocalDate.of(2000, 1, 15));
+		dto.setGender(Gender.MALE);
+		dto.setPassword("A123456789");
+		dto.setSemester(4);
+		dto.setDorsalNumber(10);
+		dto.setPosition(Position.MIDFIELDER);
+		return dto;
 	}
 }

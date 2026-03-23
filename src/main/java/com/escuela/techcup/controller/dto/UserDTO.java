@@ -13,21 +13,21 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UserDTO {
-    @NotBlank(message = "name es obligatorio")
+	@NotBlank(message = "name is required")
 	private String name;
 
-	@NotBlank(message = "mail es obligatorio")
-	@Email(message = "mail no es valido")
+	@NotBlank(message = "mail is required")
+	@Email(message = "mail is not valid")
 	private String mail;
 
-	@NotNull(message = "dateOfBirth es obligatorio")
-	@Past(message = "dateOfBirth debe ser una fecha pasada")
+	@NotNull(message = "dateOfBirth is required")
+	@Past(message = "dateOfBirth must be a past date")
 	private LocalDate dateOfBirth;
 
-	@NotNull(message = "gender es obligatorio")
+	@NotNull(message = "gender is required")
 	private Gender gender;
 
-	@NotBlank(message = "password es obligatorio")
+	@NotBlank(message = "password is required")
 	private String password;
 
 	public UserDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, String password) {

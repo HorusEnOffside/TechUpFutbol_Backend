@@ -33,6 +33,9 @@ import com.escuela.techcup.core.validator.UserValidator;
 public class UserServiceImpl implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final String USER_DTO_IS_REQUIRED = "User data is required";
+    private static final String USER_ID_IS_REQUIRED = "id is required";
+    private static final String USER_MAIL_IS_REQUIRED = "mail is required";
     private final List<User> users = new ArrayList<>();
 
     @Override
@@ -160,6 +163,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUserById(String id) {
+        if (id == null || id.isBlank()) {
+            log.warn("Cannot search user by empty id");
+            throw new InvalidInputException(USER_ID_IS_REQUIRED);
+        }
+
         return users.stream()
             .filter(user -> user.getId().equals(id))
             .findFirst();
@@ -167,6 +175,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUserByMail(String mail) {
+        if (mail == null || mail.isBlank()) {
+            log.warn("Cannot search user by empty mail");
+            throw new InvalidInputException(USER_MAIL_IS_REQUIRED);
+        }
+
         return users.stream()
             .filter(user -> user.getMail().equalsIgnoreCase(mail))
             .findFirst();
@@ -180,10 +193,16 @@ public class UserServiceImpl implements UserService {
         return PasswordHashUtil.hashPassword(password);
     }
     private void verifyUser(UserDTO userDTO) {
+        if (userDTO == null) {
+            log.warn("User creation rejected: payload is null");
+            throw new InvalidInputException(USER_DTO_IS_REQUIRED);
+        }
+
         log.trace("Validating user input. mail={}", userDTO.getMail());
         UserValidator.validateInput(userDTO.getName(), userDTO.getMail(), userDTO.getPassword(), userDTO.getDateOfBirth());
         if (getUserByMail(userDTO.getMail()).isPresent()) {
-            throw new InvalidInputException("Ya existe un usuario registrado con ese correo");
+            log.warn("User already exists for mail={}", userDTO.getMail());
+            throw new InvalidInputException("A user is already registered with that email");
         }
         log.trace("User input validation completed. mail={}", userDTO.getMail());
     }

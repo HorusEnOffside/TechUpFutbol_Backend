@@ -59,7 +59,7 @@ class UserServiceImplTest {
             "María López",
             "maria@escuela.edu",
             PAST_DATE,
-            Gender.MUJER,
+            Gender.FEMALE,
             "Password1"
         );
 
@@ -67,7 +67,7 @@ class UserServiceImplTest {
             "Pedro Gómez",
             "pedro@escuela.edu",
             PAST_DATE,
-            Gender.MUJER,
+            Gender.FEMALE,
             "Password1",
             4
         );
@@ -76,7 +76,7 @@ class UserServiceImplTest {
             "Ana Torres",
             "ana@escuela.edu",
             PAST_DATE,
-            Gender.MUJER,
+            Gender.FEMALE,
             "Password1"
         );
 

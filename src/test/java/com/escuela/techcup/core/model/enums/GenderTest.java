@@ -12,14 +12,14 @@ class GenderTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(Gender.valueOf("HOMBRE"));
-        assertNotNull(Gender.valueOf("MUJER"));
+        assertNotNull(Gender.valueOf("MALE"));
+        assertNotNull(Gender.valueOf("FEMALE"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("HOMBRE", Gender.HOMBRE.name());
-        assertEquals("MUJER",  Gender.MUJER.name());
+        assertEquals("MALE", Gender.MALE.name());
+        assertEquals("FEMALE",  Gender.FEMALE.name());
     }
 
     @Test

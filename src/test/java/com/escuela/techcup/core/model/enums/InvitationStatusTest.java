@@ -12,14 +12,14 @@ class InvitationStatusTest {
 
     @Test
     void testValoresExisten() {
-        assertNotNull(InvitationStatus.valueOf("ACEPTAR"));
-        assertNotNull(InvitationStatus.valueOf("RECHAZAR"));
+        assertNotNull(InvitationStatus.valueOf("ACCEPTED"));
+        assertNotNull(InvitationStatus.valueOf("REJECTED"));
     }
 
     @Test
     void testNombreDeValores() {
-        assertEquals("ACEPTAR",  InvitationStatus.ACEPTAR.name());
-        assertEquals("RECHAZAR", InvitationStatus.RECHAZAR.name());
+        assertEquals("ACCEPTED", InvitationStatus.ACCEPTED.name());
+        assertEquals("REJECTED", InvitationStatus.REJECTED.name());
     }
 
     @Test
