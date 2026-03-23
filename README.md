@@ -25,7 +25,9 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 4. [Mockup](#mockup)
 5. [Manual de identidad](#manual-de-identidad)
 6. [Jira: Gestión de tareas y funcionalidades](#jira)
-
+7. [Diagrama de componentes general](#diagrama-de-componentes-general)
+8. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
+9. [Diagrama de clases](#diagrama-de-clases)
 ---
 
 ## Diagrama de contexto del sistema
@@ -88,6 +90,15 @@ https://dosw-2026-01.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 
 
 ---
+
+## Diagrama de componentes general
+![Diagrama componentes especificos](docs/images/DiagramaComponentesGeneral.drawio.png)
+
+## Diagrama de componentes especificos
+![Diagrama componentes especificos](docs/images/Diagramacomponentesespecificos.drawio.png)
+
+## Diagrama de clases
+![Diagrama de clases](docs/images/DiagramaClases.png)
 
 ## Sustento y justificación técnica
 

@@ -1,5 +1,18 @@
 package com.escuela.techcup.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@RestController
+@RequestMapping("/api/teams")
+@Tag(name = "Gestion de equipos", description = "Operaciones de equipos")
 public class TeamController {
+
+	@GetMapping("/health")
+	public String health() {
+		return "Team controller OK";
+	}
 
 }
