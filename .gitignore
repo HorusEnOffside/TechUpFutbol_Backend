@@ -26,6 +26,21 @@ logs/
 
 # Archivos de configuración local
 *.properties.local
+.env
+.env.*
+!.env.example
+
+# Certificados y llaves (no versionar secretos)
+*.p12
+*.jks
+*.pfx
+*.key
+*.pem
+*.crt
+*.cer
+
+# Si necesitas plantillas para certs, mantenlas con extensión .example
+!*.example
 
 # Directorios de dependencias
 target/

@@ -7,10 +7,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final HttpsEnforcementFilter httpsEnforcementFilter;
+
     //http://localhost:8080/swagger-ui.html
+    //https://localhost:8443/swagger-ui.html
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -20,6 +27,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http){
         http
+            .addFilterBefore(httpsEnforcementFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(csrf -> csrf.ignoringRequestMatchers(
                 "/api/**",
                 "/v3/api-docs/**",
