@@ -11,8 +11,8 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:1234}
+    username: techcup_owner
+    password: techcup123
 
   jpa:
     hibernate:
