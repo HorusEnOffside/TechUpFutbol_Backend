@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ class TechcupFutbolApplicationTests {
 	private StudentPlayerDTO buildValidPlayerDTO() {
 		StudentPlayerDTO dto = new StudentPlayerDTO();
 		dto.setName("Andres");
-		dto.setMail("andres@techcup.com");
+		dto.setMail("andres_" + UUID.randomUUID().toString().substring(0, 8) + "@techcup.com");
 		dto.setDateOfBirth(LocalDate.of(2000, 1, 15));
 		dto.setGender(Gender.MALE);
 		dto.setPassword("A123456789");
