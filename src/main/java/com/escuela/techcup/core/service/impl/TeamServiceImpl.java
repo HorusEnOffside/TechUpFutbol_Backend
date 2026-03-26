@@ -1,11 +1,11 @@
 package com.escuela.techcup.core.service.impl;
 
 import com.escuela.techcup.controller.dto.TeamDTO;
-import com.escuela.techcup.controller.dto.UserDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
+import com.escuela.techcup.core.validator.TeamValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,8 +22,9 @@ public class TeamServiceImpl implements TeamService {
     private static final Logger log = LoggerFactory.getLogger(TeamServiceImpl.class);
     private static final String TEAM_DTO_IS_REQUIRED = "Team data is required";
 
-
+    @Override
     public Team createTeam(TeamDTO teamDTO, BufferedImage logo){
+        log.debug("Starting team creation. name={}", teamDTO.getName());
         verifyTeam(teamDTO);
         verifyColors(teamDTO.getUniformColors());
 
@@ -37,6 +38,8 @@ public class TeamServiceImpl implements TeamService {
         if (logo != null) {
             team.setLogo(logo);
         }
+
+        log.info("Team created. teamId={}, name={}", team.getId(), team.getName());
 
         //IMPLEMENTAR REPOSITOY ---- teamRepository.save(team)
         return team;
@@ -58,7 +61,11 @@ public class TeamServiceImpl implements TeamService {
         //}
         log.trace("Team input validation completed. name={}", teamDTO.getName());
     }
+
+    //RELACIONADO CON PERSISTENCIA, FALTA POR HACER
     public void verifyColors(List<Color> colors){}
+
+    //FALTA
     private String idGenerator() {
         return IdGeneratorUtil.generateId();
     }
