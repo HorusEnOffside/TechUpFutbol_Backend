@@ -16,7 +16,7 @@ import java.util.List;
 public class TeamEntity {
 
     @Id
-    @Column(name = "id", columnDefinition = "uuid")
+    @Column(name = "id")
     private String id;
 
     @Column(name = "name", nullable = false, length = 120, unique = true)

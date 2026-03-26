@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.repository;
+package com.escuela.techcup.persistence.repository.users;
 
 import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;

@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.repository;
+package com.escuela.techcup.persistence.repository.payment;
 
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
@@ -6,9 +6,8 @@ import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.UUID;
 
-public interface PaymentRepository extends JpaRepository<PaymentEntity, UUID> {
+public interface PaymentRepository extends JpaRepository<PaymentEntity, String> {
 
     List<PaymentEntity> findByStatus(PaymentStatus status);
 }

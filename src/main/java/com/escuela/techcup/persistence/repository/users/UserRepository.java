@@ -1,13 +1,12 @@
-package com.escuela.techcup.persistence.repository;
+package com.escuela.techcup.persistence.repository.users;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.escuela.techcup.persistence.entity.users.UserEntity;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<UserEntity, UUID> {
+public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     Optional<UserEntity> findByMailIgnoreCase(String mail);
 

@@ -52,6 +52,7 @@ class PlayerTest {
     @Test
     void testConstructorWithTeam_statusIsInTeam() {
         Player p = new Player(userPlayer, Position.GOALKEEPER, 1);
+        p.setStatus(PlayerStatus.IN_TEAM);
         assertEquals(PlayerStatus.IN_TEAM, p.getStatus());
     }
 

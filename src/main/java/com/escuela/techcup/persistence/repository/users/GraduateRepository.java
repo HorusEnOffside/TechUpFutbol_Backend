@@ -1,13 +1,12 @@
-package com.escuela.techcup.persistence.repository;
+package com.escuela.techcup.persistence.repository.users;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.escuela.techcup.persistence.entity.users.GraduateEntity;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public interface GraduateRepository extends JpaRepository<GraduateEntity, UUID> {
+public interface GraduateRepository extends JpaRepository<GraduateEntity, String> {
     Optional<GraduateEntity> findByMailIgnoreCase(String mail);
     boolean existsByMailIgnoreCase(String mail);
 }

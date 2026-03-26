@@ -21,7 +21,7 @@ import lombok.Setter;
 public class PlayerEntity {
 
     @Id
-    @Column(name = "id", columnDefinition = "uuid")
+    @Column(name = "id")
     private String id;
 
     // 1-1: un user_player solo puede tener 1 perfil deportivo
