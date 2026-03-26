@@ -1,12 +1,16 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.tournament;
 
 import com.escuela.techcup.core.model.enums.TournamentStatus;
+import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
+
+import java.util.List;
+
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,9 +19,8 @@ import java.util.UUID;
 public class TournamentEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
@@ -25,8 +28,8 @@ public class TournamentEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
-    @Column(name = "teams_amount", nullable = false)
-    private int teamsAmount;
+    @Column(name = "teams_max_amount", nullable = false)
+    private int teamsMaxAmount;
 
     @Column(name = "team_cost", nullable = false)
     private Double teamCost;
@@ -42,4 +45,10 @@ public class TournamentEntity {
             foreignKey = @ForeignKey(name = "fk_tournaments_organizer")
     )
     private OrganizerEntity organizer;
+
+    @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<MatchEntity> matches;
+
+    @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TeamEntity> teams;
 }

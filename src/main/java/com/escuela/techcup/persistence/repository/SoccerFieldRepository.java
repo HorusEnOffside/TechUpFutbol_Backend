@@ -1,7 +1,8 @@
 package com.escuela.techcup.persistence.repository;
 
-import com.escuela.techcup.persistence.entity.SoccerFieldEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.escuela.techcup.persistence.entity.tournament.SoccerFieldEntity;
 
 import java.util.List;
 import java.util.UUID;

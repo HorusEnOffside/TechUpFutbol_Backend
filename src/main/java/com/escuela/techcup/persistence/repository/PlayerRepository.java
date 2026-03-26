@@ -2,18 +2,18 @@ package com.escuela.techcup.persistence.repository;
 
 import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
-import com.escuela.techcup.persistence.entity.PlayerEntity;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface PlayerRepository extends JpaRepository<PlayerEntity, UUID> {
+public interface PlayerRepository extends JpaRepository<PlayerEntity, String> {
 
-    Optional<PlayerEntity> findByUserId(UUID userId);
+    Optional<PlayerEntity> findByUserId(String userId);
 
-    boolean existsByUserId(UUID userId);
+    boolean existsByUserId(String userId);
 
     List<PlayerEntity> findByStatus(PlayerStatus status);
 

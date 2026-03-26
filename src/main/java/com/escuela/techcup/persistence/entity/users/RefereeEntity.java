@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.users;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

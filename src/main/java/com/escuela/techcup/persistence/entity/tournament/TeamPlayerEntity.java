@@ -1,10 +1,10 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.tournament;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 
 @Getter
 @Setter
@@ -18,9 +18,8 @@ import java.util.UUID;
 public class TeamPlayerEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false, foreignKey = @ForeignKey(name = "fk_team_players_team"))

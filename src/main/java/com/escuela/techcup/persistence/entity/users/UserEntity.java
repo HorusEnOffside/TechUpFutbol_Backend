@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.users;
 
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -24,9 +23,8 @@ import java.util.UUID;
 public abstract class UserEntity {
 
     @Id
-    @GeneratedValue
-    @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    @Column(name = "id")
+    private String id;
 
     @Column(name = "name", nullable = false, length = 120)
     private String name;

@@ -1,7 +1,8 @@
 package com.escuela.techcup.persistence.repository;
 
-import com.escuela.techcup.persistence.entity.TeamPlayerEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 
 import java.util.List;
 import java.util.Optional;

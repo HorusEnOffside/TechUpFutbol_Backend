@@ -14,14 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlayerTest {
 
     private UserPlayer userPlayer;
-    private Team team;
     private Player player;
 
     @BeforeEach
     void setUp() {
         userPlayer = new UserPlayer("u1", "Pedro", "pedro@test.com",
                 LocalDate.of(2001, 4, 12), Gender.MALE, "pass");
-        team = new Team();
         player = new Player(userPlayer, Position.FORWARD, 9);
     }
 
@@ -46,39 +44,17 @@ class PlayerTest {
     }
 
     @Test
-    void testConstructorWithoutTeam_teamIsNull() {
-        assertNull(player.getTeam());
-    }
-
-    @Test
-    void testConstructorWithTeam_userPlayer() {
-        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
-        assertEquals(userPlayer, p.getUserPlayer());
-    }
-
-    @Test
-    void testConstructorWithTeam_position() {
-        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
-        assertEquals(Position.GOALKEEPER, p.getPosition());
-    }
-
-    @Test
     void testConstructorWithTeam_dorsalNumber() {
-        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1);
         assertEquals(1, p.getDorsalNumber());
     }
 
     @Test
     void testConstructorWithTeam_statusIsInTeam() {
-        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
+        Player p = new Player(userPlayer, Position.GOALKEEPER, 1);
         assertEquals(PlayerStatus.IN_TEAM, p.getStatus());
     }
 
-    @Test
-    void testConstructorWithTeam_teamAssigned() {
-        Player p = new Player(userPlayer, Position.GOALKEEPER, 1, team);
-        assertEquals(team, p.getTeam());
-    }
 
     @Test
     void testGetUserId() {
@@ -118,8 +94,8 @@ class PlayerTest {
     @Test
     void testGetProfilePictureWithImage() {
         BufferedImage imagen = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
-        UserPlayer upConFoto = new UserPlayer("u2", "Ana", "ana@test.com", imagen,
-                LocalDate.of(2000, 1, 1), Gender.FEMALE, "pass");
+        UserPlayer upConFoto = new UserPlayer("u2", "Ana", "ana@test.com",
+                LocalDate.of(2000, 1, 1), Gender.FEMALE, "pass", imagen);
         Player p = new Player(upConFoto, Position.MIDFIELDER, 7);
         assertNotNull(p.getProfilePicture());
     }
@@ -140,12 +116,6 @@ class PlayerTest {
     void testSetStatus() {
         player.setStatus(PlayerStatus.IN_TEAM);
         assertEquals(PlayerStatus.IN_TEAM, player.getStatus());
-    }
-
-    @Test
-    void testSetTeam() {
-        player.setTeam(team);
-        assertEquals(team, player.getTeam());
     }
 
     @Test

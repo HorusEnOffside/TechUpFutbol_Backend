@@ -1,11 +1,10 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.payment;
 
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,9 +14,8 @@ import java.util.UUID;
 public abstract class PaymentEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)

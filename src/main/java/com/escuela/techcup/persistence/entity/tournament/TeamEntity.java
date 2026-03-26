@@ -1,10 +1,13 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.tournament;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
+import com.escuela.techcup.core.model.enums.Formation;
+import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,9 +16,8 @@ import java.util.UUID;
 public class TeamEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @Column(name = "name", nullable = false, length = 120, unique = true)
     private String name;
@@ -25,13 +27,13 @@ public class TeamEntity {
     @Column(name = "logo")
     private byte[] logo;
 
+    //guarda hexadecimal
+    @Column(name = "uniform_color", length = 200)
+    private String uniformColor;
 
-    @Column(name = "uniform_colors", length = 200)
-    private String uniformColors;
-
-    // texto por ahora pq falta implementar el enum de formation
+    @Enumerated(EnumType.STRING)
     @Column(name = "formation", length = 50)
-    private String formation;
+    private Formation formation;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,4 +44,11 @@ public class TeamEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", foreignKey = @ForeignKey(name = "fk_teams_payment"))
     private PaymentEntity payment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id", nullable = false, foreignKey = @ForeignKey(name = "fk_teams_tournament"))
+    private TournamentEntity tournament;
+
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PlayerEntity> players;
 }

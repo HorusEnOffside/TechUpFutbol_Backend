@@ -42,10 +42,10 @@ public class PlayerMapper {
             id,
             dto.getName(),
             dto.getMail(),
-            profilePicture,
             dto.getDateOfBirth(),
             dto.getGender(),
-            password
+            password,
+            profilePicture
         );
 
         return new Player(userPlayer, dto.getPosition(), dto.getDorsalNumber());

@@ -1,7 +1,8 @@
 package com.escuela.techcup.persistence.repository;
 
-import com.escuela.techcup.persistence.entity.StudentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.escuela.techcup.persistence.entity.users.StudentEntity;
 
 import java.util.Optional;
 import java.util.UUID;

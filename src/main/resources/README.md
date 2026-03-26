@@ -2,7 +2,7 @@
 
 1. **Levantar la base de datos con Docker:**
 
-    En terminal
+	En terminal
      ```sh
      docker run --name techcup-postgres -e POSTGRES_DB=techcup -e POSTGRES_USER=techcup_owner -e POSTGRES_PASSWORD=techcup123 -p 5432:5432 -d postgres:16
      ```

@@ -15,7 +15,6 @@ public class Player implements ComponentPlayer {
     private Position position;
     private int dorsalNumber;
     private PlayerStatus status;
-    private Team team;
     
     public Player(UserPlayer userPlayer, Position position, int dorsalNumber) {
         this.userPlayer = userPlayer;
@@ -24,13 +23,6 @@ public class Player implements ComponentPlayer {
         this.status = PlayerStatus.AVAILABLE;
     }
 
-    public Player(UserPlayer userPlayer, Position position, int dorsalNumber, Team team) {
-        this.userPlayer = userPlayer;
-        this.position = position;
-        this.dorsalNumber = dorsalNumber;
-        this.status = PlayerStatus.IN_TEAM;
-        this.team = team;
-    }
 
     public String getUserId() {
         return userPlayer.getId();

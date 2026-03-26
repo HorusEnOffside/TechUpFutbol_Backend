@@ -29,14 +29,14 @@ import com.escuela.techcup.core.model.UserPlayer;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.util.ValidationUtil;
 import com.escuela.techcup.core.validator.UserValidator;
-import com.escuela.techcup.persistence.entity.AdministratorEntity;
-import com.escuela.techcup.persistence.entity.FamiliarEntity;
-import com.escuela.techcup.persistence.entity.GraduateEntity;
-import com.escuela.techcup.persistence.entity.OrganizerEntity;
-import com.escuela.techcup.persistence.entity.RefereeEntity;
-import com.escuela.techcup.persistence.entity.StudentEntity;
-import com.escuela.techcup.persistence.entity.TeacherEntity;
-import com.escuela.techcup.persistence.entity.UserEntity;
+import com.escuela.techcup.persistence.entity.users.AdministratorEntity;
+import com.escuela.techcup.persistence.entity.users.FamiliarEntity;
+import com.escuela.techcup.persistence.entity.users.GraduateEntity;
+import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
+import com.escuela.techcup.persistence.entity.users.RefereeEntity;
+import com.escuela.techcup.persistence.entity.users.StudentEntity;
+import com.escuela.techcup.persistence.entity.users.TeacherEntity;
+import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.repository.AdministratorRepository;
 import com.escuela.techcup.persistence.repository.FamiliarRepository;
 import com.escuela.techcup.persistence.repository.GraduateRepository;
@@ -222,11 +222,11 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
                 saved.getId().toString(),
                 saved.getName(),
                 saved.getMail(),
-                profilePicture,
                 saved.getDateOfBirth(),
                 saved.getGender(),
                 saved.getSemester(),
-                saved.getPasswordHash()
+                saved.getPasswordHash(),
+                profilePicture
         );
         student.setPrimaryRole(UserRole.BASEUSER);
         student.getRoles().addAll(saved.getRoles());
@@ -281,10 +281,10 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
                 saved.getId().toString(),
                 saved.getName(),
                 saved.getMail(),
-                profilePicture,
                 saved.getDateOfBirth(),
                 saved.getGender(),
-                saved.getPasswordHash()
+                saved.getPasswordHash(),
+                profilePicture
         );
         teacher.setPrimaryRole(UserRole.BASEUSER);
         teacher.getRoles().addAll(saved.getRoles());
@@ -339,10 +339,10 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
                 saved.getId().toString(),
                 saved.getName(),
                 saved.getMail(),
-                profilePicture,
                 saved.getDateOfBirth(),
                 saved.getGender(),
-                saved.getPasswordHash()
+                saved.getPasswordHash(),
+                profilePicture
         );
         familiar.setPrimaryRole(UserRole.BASEUSER);
         familiar.getRoles().addAll(saved.getRoles());
@@ -397,10 +397,10 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
                 saved.getId().toString(),
                 saved.getName(),
                 saved.getMail(),
-                profilePicture,
                 saved.getDateOfBirth(),
                 saved.getGender(),
-                saved.getPasswordHash()
+                saved.getPasswordHash(),
+                profilePicture
         );
         graduate.setPrimaryRole(UserRole.BASEUSER);
         graduate.getRoles().addAll(saved.getRoles());

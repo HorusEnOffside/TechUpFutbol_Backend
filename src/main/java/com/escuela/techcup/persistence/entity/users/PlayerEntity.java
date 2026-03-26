@@ -1,12 +1,13 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.users;
 
 import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
+import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,9 +21,8 @@ import java.util.UUID;
 public class PlayerEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     // 1-1: un user_player solo puede tener 1 perfil deportivo
     @OneToOne(optional = false, fetch = FetchType.LAZY)
@@ -39,4 +39,8 @@ public class PlayerEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private PlayerStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", foreignKey = @ForeignKey(name = "fk_players_team"))
+    private TeamEntity team;
 }

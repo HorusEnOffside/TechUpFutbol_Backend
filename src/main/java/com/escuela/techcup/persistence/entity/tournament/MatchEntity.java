@@ -1,11 +1,11 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.tournament;
 
+import com.escuela.techcup.persistence.entity.users.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,9 +14,8 @@ import java.util.UUID;
 public class MatchEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;
@@ -36,4 +35,8 @@ public class MatchEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referee_id", foreignKey = @ForeignKey(name = "fk_matches_referee"))
     private RefereeEntity referee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id", nullable = false, foreignKey = @ForeignKey(name = "fk_matches_tournament"))
+    private TournamentEntity tournament;
 }

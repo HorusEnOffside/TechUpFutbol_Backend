@@ -21,8 +21,8 @@ import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.core.validator.PlayerValidator;
-import com.escuela.techcup.persistence.entity.PlayerEntity;
-import com.escuela.techcup.persistence.entity.UserPlayerEntity;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 import com.escuela.techcup.persistence.repository.PlayerRepository;
 import com.escuela.techcup.persistence.repository.UserPlayerRepository;
 
@@ -113,8 +113,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (userId == null || userId.isBlank()) {
             throw new InvalidInputException(USER_ID_IS_REQUIRED);
         }
-        UUID uuid = UUID.fromString(userId);
-        return playerRepository.findByUserId(uuid).map(this::toCorePlayer);
+        return playerRepository.findByUserId(userId).map(this::toCorePlayer);
     }
 
     private Player createSportsProfileFromUserPlayer(

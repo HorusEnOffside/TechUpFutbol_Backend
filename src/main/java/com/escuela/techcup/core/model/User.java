@@ -14,12 +14,12 @@ import lombok.Data;
 public abstract class User {
     protected String id;
     protected String name;
-    protected String mail;
-    protected BufferedImage profilePicture;
+    protected String mail;  
     protected LocalDate dateOfBirth;
     protected Gender gender;
     protected String password;
     protected Set<UserRole> roles;
+    protected BufferedImage profilePicture;
 
     protected User( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password) {
         this.id = id;
@@ -31,7 +31,7 @@ public abstract class User {
         this.roles = EnumSet.of(UserRole.BASEUSER);
     }
 
-    protected User( String id, String name, String mail, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, String password) {
+    protected User(String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password, BufferedImage profilePicture) {
         this(id, name, mail, dateOfBirth, gender, password);
         this.profilePicture = profilePicture;
     }

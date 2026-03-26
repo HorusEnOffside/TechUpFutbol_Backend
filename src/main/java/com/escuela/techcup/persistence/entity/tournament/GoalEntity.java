@@ -1,10 +1,10 @@
-package com.escuela.techcup.persistence.entity;
+package com.escuela.techcup.persistence.entity.tournament;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 
 @Getter
 @Setter
@@ -13,9 +13,8 @@ import java.util.UUID;
 public class GoalEntity {
 
     @Id
-    @GeneratedValue
     @Column(name = "id", columnDefinition = "uuid")
-    private UUID id;
+    private String id;
 
     @Column(name = "minute", nullable = false)
     private int minute;
