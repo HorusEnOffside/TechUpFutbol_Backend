@@ -2,19 +2,19 @@ package com.escuela.techcup.core.model;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import com.escuela.techcup.core.model.enums.Formation;
+import lombok.Data;
 
+@Data
 public class Team {
     private String id;
     private String name;
     private BufferedImage logo;
-    private List<Color> UniformColors;
+    private Color uniformColor;
     private Formation formation;
 
     private Captain captain;
-    private List<Player> players;
 
     private Payment payment;
 

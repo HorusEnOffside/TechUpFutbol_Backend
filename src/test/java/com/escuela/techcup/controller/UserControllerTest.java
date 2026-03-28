@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,7 +89,7 @@ class UserControllerTest {
 
     @Test
     void testCreateAdminUser_returns201() throws Exception {
-        when(userService.createAdminUser(any())).thenReturn(adminMock);
+        when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
         mockMvc.perform(post("/api/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +99,7 @@ class UserControllerTest {
 
     @Test
     void testCreateAdminUser_returnsResponseBody() throws Exception {
-        when(userService.createAdminUser(any())).thenReturn(adminMock);
+        when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
         mockMvc.perform(post("/api/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -109,13 +110,13 @@ class UserControllerTest {
 
     @Test
     void testCreateAdminUser_callsService() throws Exception {
-        when(userService.createAdminUser(any())).thenReturn(adminMock);
+        when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
         mockMvc.perform(post("/api/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")));
 
-        verify(userService, times(1)).createAdminUser(any());
+        verify(userService, times(1)).createAdminUser(any(), eq(null));
     }
 
     @Test
@@ -125,12 +126,12 @@ class UserControllerTest {
                 .content(userJson(null, "admin@test.com", "1990-01-10", "MALE", "Password1")))
             .andExpect(status().isBadRequest());
 
-        verify(userService, never()).createAdminUser(any());
+        verify(userService, never()).createAdminUser(any(), eq(null));
     }
 
     @Test
     void testCreateAdminUser_serviceThrows_returns409() throws Exception {
-        when(userService.createAdminUser(any()))
+        when(userService.createAdminUser(any(), eq(null)))
             .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
 
         mockMvc.perform(post("/api/users/admin")
@@ -141,7 +142,7 @@ class UserControllerTest {
 
     @Test
     void testCreateOrganizerUser_returns201() throws Exception {
-        when(userService.createOrganizerUser(any())).thenReturn(organizerMock);
+        when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
 
         mockMvc.perform(post("/api/users/organizer")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -152,13 +153,13 @@ class UserControllerTest {
 
     @Test
     void testCreateOrganizerUser_callsService() throws Exception {
-        when(userService.createOrganizerUser(any())).thenReturn(organizerMock);
+        when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
 
         mockMvc.perform(post("/api/users/organizer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")));
 
-        verify(userService, times(1)).createOrganizerUser(any());
+        verify(userService, times(1)).createOrganizerUser(any(), eq(null));
     }
 
     @Test
@@ -168,12 +169,12 @@ class UserControllerTest {
                 .content(userJson("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1")))
             .andExpect(status().isBadRequest());
 
-        verify(userService, never()).createOrganizerUser(any());
+        verify(userService, never()).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_returns201() throws Exception {
-        when(userService.createRefereeUser(any())).thenReturn(refereeMock);
+        when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
 
         mockMvc.perform(post("/api/users/referee")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -184,13 +185,13 @@ class UserControllerTest {
 
     @Test
     void testCreateRefereeUser_callsService() throws Exception {
-        when(userService.createRefereeUser(any())).thenReturn(refereeMock);
+        when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
 
         mockMvc.perform(post("/api/users/referee")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")));
 
-        verify(userService, times(1)).createRefereeUser(any());
+        verify(userService, times(1)).createRefereeUser(any(), eq(null));
     }
 
     @Test
@@ -200,7 +201,7 @@ class UserControllerTest {
                 .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", null)))
             .andExpect(status().isBadRequest());
 
-        verify(userService, never()).createRefereeUser(any());
+        verify(userService, never()).createRefereeUser(any(), eq(null));
     }
 
     @Test
