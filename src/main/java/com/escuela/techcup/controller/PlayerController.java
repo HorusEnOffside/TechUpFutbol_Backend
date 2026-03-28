@@ -142,6 +142,7 @@ public class PlayerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(createdPlayer));
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping
 	public ResponseEntity<List<PlayerResponseDTO>> getAllPlayers() {
 		log.info("Request received to list all players");
@@ -151,6 +152,7 @@ public class PlayerController {
 		return ResponseEntity.ok(players);
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{userId}")
 	public ResponseEntity<PlayerResponseDTO> getPlayerByUserId(@PathVariable String userId) {
 		log.info("Request received to get player by userId={}", userId);

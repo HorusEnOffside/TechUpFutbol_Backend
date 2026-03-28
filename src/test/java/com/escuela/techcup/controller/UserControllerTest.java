@@ -33,7 +33,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -266,7 +265,7 @@ class UserControllerTest {
         verify(userService, times(1)).getUserById("u-admin");
     }
 
-    private MockMultipartFile userPart(String name, String mail, String dateOfBirth, String gender, String password) throws Exception {
+    private MockMultipartFile userPart(String name, String mail, String dateOfBirth, String gender, String password)  {
         String json = String.format("""
         {
             "name": %s,

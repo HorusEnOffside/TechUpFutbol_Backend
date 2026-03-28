@@ -1,4 +1,4 @@
-package com.escuela.techcup.core.service;
+package com.escuela.techcup.security.service;
 
 import java.util.Set;
 

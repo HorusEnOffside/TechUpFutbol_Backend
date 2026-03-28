@@ -1,4 +1,4 @@
-package com.escuela.techcup.core.service.impl;
+package com.escuela.techcup.security.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.escuela.techcup.core.exception.InvalidInputException;
-import com.escuela.techcup.core.service.JwtService;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;

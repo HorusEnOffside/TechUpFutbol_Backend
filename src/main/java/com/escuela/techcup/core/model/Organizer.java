@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 
 import com.escuela.techcup.core.model.enums.Gender;
-import com.escuela.techcup.core.model.enums.UserRole;
 
 public class Organizer extends User implements OrganizerActions {
 
