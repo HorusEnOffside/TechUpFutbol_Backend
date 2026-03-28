@@ -10,11 +10,9 @@ public class Administrator extends User implements AdministratorActions {
 
     public Administrator( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password) {
         super(id, name, mail, dateOfBirth, gender, password);
-        roles.add(UserRole.ADMIN);
     }
 
     public Administrator( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password, BufferedImage profilePicture) {
         super(id, name, mail, dateOfBirth, gender, password, profilePicture);
-        roles.add(UserRole.ADMIN);
     }
 }

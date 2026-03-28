@@ -10,11 +10,9 @@ public class Organizer extends User implements OrganizerActions {
 
     public Organizer( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password) {
         super(id, name, mail, dateOfBirth, gender, password);
-        roles.add(UserRole.ORGANIZER);
     }
 
     public Organizer( String id, String name, String mail, LocalDate dateOfBirth, Gender gender, String password, BufferedImage profilePicture) {
         super(id, name, mail, dateOfBirth, gender, password, profilePicture);
-        roles.add(UserRole.ORGANIZER);
     }
 }

@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.mock.web.MockMultipartFile;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -91,40 +93,36 @@ class UserControllerTest {
     void testCreateAdminUser_returns201() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-            .andExpect(status().isCreated());
+        mockMvc.perform(multipart("/api/users/admin")
+                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+                .andExpect(status().isCreated());
     }
 
     @Test
     void testCreateAdminUser_returnsResponseBody() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-            .andExpect(jsonPath("$.name").value("Admin"))
-            .andExpect(jsonPath("$.mail").value("admin@test.com"));
+        mockMvc.perform(multipart("/api/users/admin")
+                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+                .andExpect(jsonPath("$.name").value("Admin"))
+                .andExpect(jsonPath("$.mail").value("admin@test.com"));
     }
 
     @Test
     void testCreateAdminUser_callsService() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
 
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")));
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")));
 
         verify(userService, times(1)).createAdminUser(any(), eq(null));
     }
 
     @Test
     void testCreateAdminUser_invalidBody_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson(null, "admin@test.com", "1990-01-10", "MALE", "Password1")))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(multipart("/api/users/admin")
+                        .file(userPart(null, "admin@test.com", "1990-01-10", "MALE", "Password1")))
+                .andExpect(status().isBadRequest());
 
         verify(userService, never()).createAdminUser(any(), eq(null));
     }
@@ -132,42 +130,38 @@ class UserControllerTest {
     @Test
     void testCreateAdminUser_serviceThrows_returns409() throws Exception {
         when(userService.createAdminUser(any(), eq(null)))
-            .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
+                .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
 
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-            .andExpect(status().isConflict());
+        mockMvc.perform(multipart("/api/users/admin")
+                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+                .andExpect(status().isConflict());
     }
 
     @Test
     void testCreateOrganizerUser_returns201() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
 
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.mail").value("org@test.com"));
+        mockMvc.perform(multipart("/api/users/organizer")
+                        .file(userPart("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.mail").value("org@test.com"));
     }
 
     @Test
     void testCreateOrganizerUser_callsService() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
 
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")));
+        mockMvc.perform(multipart("/api/users/organizer")
+                .file(userPart("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")));
 
         verify(userService, times(1)).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateOrganizerUser_invalidMail_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1")))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(multipart("/api/users/organizer")
+                        .file(userPart("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1")))
+                .andExpect(status().isBadRequest());
 
         verify(userService, never()).createOrganizerUser(any(), eq(null));
     }
@@ -176,30 +170,27 @@ class UserControllerTest {
     void testCreateRefereeUser_returns201() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
 
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.mail").value("ref@test.com"));
+        mockMvc.perform(multipart("/api/users/referee")
+                        .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.mail").value("ref@test.com"));
     }
 
     @Test
     void testCreateRefereeUser_callsService() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
 
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")));
+        mockMvc.perform(multipart("/api/users/referee")
+                .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")));
 
         verify(userService, times(1)).createRefereeUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_missingPassword_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", null)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(multipart("/api/users/referee")
+                        .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", null)))
+                .andExpect(status().isBadRequest());
 
         verify(userService, never()).createRefereeUser(any(), eq(null));
     }
@@ -273,5 +264,24 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users/u-admin"));
 
         verify(userService, times(1)).getUserById("u-admin");
+    }
+
+    private MockMultipartFile userPart(String name, String mail, String dateOfBirth, String gender, String password) throws Exception {
+        String json = String.format("""
+        {
+            "name": %s,
+            "mail": %s,
+            "dateOfBirth": %s,
+            "gender": %s,
+            "password": %s
+        }
+        """,
+                name == null ? "null" : "\"" + name + "\"",
+                mail == null ? "null" : "\"" + mail + "\"",
+                dateOfBirth == null ? "null" : "\"" + dateOfBirth + "\"",
+                gender == null ? "null" : "\"" + gender + "\"",
+                password == null ? "null" : "\"" + password + "\""
+        );
+        return new MockMultipartFile("user", "", MediaType.APPLICATION_JSON_VALUE, json.getBytes());
     }
 }
