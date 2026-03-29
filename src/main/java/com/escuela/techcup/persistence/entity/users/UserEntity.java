@@ -55,4 +55,12 @@ public abstract class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 30)
     private Set<UserRole> roles = new HashSet<>();
+
+    public void addRole(UserRole role){
+        roles.add(role);
+    }
+
+    public void setPrimaryRole(UserRole PrimaryRole){
+        roles.add(PrimaryRole);
+    }
 }

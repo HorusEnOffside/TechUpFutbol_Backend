@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.escuela.techcup.controller.dto.LoginRequest;
@@ -19,6 +16,7 @@ import com.escuela.techcup.core.service.JwtService;
 import com.escuela.techcup.core.service.UserService;
 import jakarta.validation.Valid;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -67,5 +65,31 @@ public class AuthController {
 
 		LoginResponse response = new LoginResponse(token, user.getId(), user.getMail(), user.getRoles());
 		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<LoginResponse> refresh(
+			@RequestHeader("Authorization") String authHeader) {
+		log.info("Refresh token request received");
+
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			throw new TechcupException("Token invalido o no proporcionado", HttpStatus.UNAUTHORIZED);
+		}
+
+		String token = authHeader.substring(7);
+
+		if (!jwtService.isTokenValid(token)) {
+			log.warn("Refresh token failed: invalid token");
+			throw new TechcupException("Token invalido o expirado", HttpStatus.UNAUTHORIZED);
+		}
+
+		String userId = jwtService.extractUserId(token);
+		String email = jwtService.extractEmail(token);
+		Set<String> roles = jwtService.extractRoles(token);
+
+		String newToken = jwtService.generateToken(userId, email, roles);
+		log.info("Token refreshed successfully for userId={}", userId);
+
+		return ResponseEntity.ok(new LoginResponse(newToken, userId, email, null));
 	}
 }

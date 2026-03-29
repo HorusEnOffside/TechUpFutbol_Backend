@@ -45,10 +45,8 @@ public class AdminServiceImpl implements AdminService {
                     return new UserNotFoundException(userId);
                 });
 
-        User user = UserMapper.toModel(entity);
-        user.setPrimaryRole(role);
-        
-        // paso faltante
+        entity.setPrimaryRole(role);
+        userRepository.save(entity);
 
         userRepository.save(entity);
         log.info("Role assigned successfully. userId={}, role={}", userId, role);
