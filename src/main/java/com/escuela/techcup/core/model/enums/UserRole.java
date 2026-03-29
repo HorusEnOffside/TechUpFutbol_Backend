@@ -4,5 +4,8 @@ public enum UserRole {
     ADMIN,
     ORGANIZER,
     REFEREE,
-    BASEUSER
+    BASEUSER,
+    CAPTAIN,
+    PLAYER,
+
 }

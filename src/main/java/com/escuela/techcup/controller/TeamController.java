@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Gestion de equipos", description = "Operaciones de equipos")
 public class TeamController {
 
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
 	@GetMapping("/health")
 	public String health() {
 		return "Team controller OK";
