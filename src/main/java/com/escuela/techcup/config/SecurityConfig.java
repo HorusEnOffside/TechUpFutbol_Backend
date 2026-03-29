@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.config;
+package com.escuela.techcup.config;
 
 import com.escuela.techcup.security.filter.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;

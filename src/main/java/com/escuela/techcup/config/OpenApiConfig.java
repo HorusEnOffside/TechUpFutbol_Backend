@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.config;
+package com.escuela.techcup.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
