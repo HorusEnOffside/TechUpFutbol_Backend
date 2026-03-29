@@ -1,190 +1,258 @@
 package com.escuela.techcup.core.service.impl;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.escuela.techcup.controller.dto.StudentUserDTO;
 import com.escuela.techcup.controller.dto.UserDTO;
 import com.escuela.techcup.controller.dto.UserPlayerDTO;
-import com.escuela.techcup.core.model.Administrator;
-import com.escuela.techcup.core.model.Familiar;
-import com.escuela.techcup.core.model.Graduate;
-import com.escuela.techcup.core.model.Organizer;
-import com.escuela.techcup.core.model.Referee;
-import com.escuela.techcup.core.model.Student;
-import com.escuela.techcup.core.model.Teacher;
-import com.escuela.techcup.core.model.User;
-import com.escuela.techcup.core.model.UserPlayer;
-import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.exception.InvalidInputException;
-import com.escuela.techcup.core.service.UserService;
-import com.escuela.techcup.core.util.IdGeneratorUtil;
-import com.escuela.techcup.core.util.PasswordHashUtil;
-import com.escuela.techcup.core.util.ValidationUtil;
+import com.escuela.techcup.core.model.*;
+import com.escuela.techcup.core.util.*;
+import com.escuela.techcup.core.validator.StudentValidator;
 import com.escuela.techcup.core.validator.UserValidator;
+import com.escuela.techcup.persistence.entity.users.*;
+import com.escuela.techcup.persistence.mapper.*;
+import com.escuela.techcup.persistence.repository.users.*;
+
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements com.escuela.techcup.core.service.UserService {
+
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private static final String USER_DTO_IS_REQUIRED = "User data is required";
     private static final String USER_ID_IS_REQUIRED = "id is required";
     private static final String USER_MAIL_IS_REQUIRED = "mail is required";
-    private final List<User> users = new ArrayList<>();
+
+    private final UserRepository userRepository;
+    private final AdministratorRepository administratorRepository;
+    private final OrganizerRepository organizerRepository;
+    private final RefereeRepository refereeRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
+    private final FamiliarRepository familiarRepository;
+    private final GraduateRepository graduateRepository;
+
+    public UserServiceImpl(
+            UserRepository userRepository,
+            AdministratorRepository administratorRepository,
+            OrganizerRepository organizerRepository,
+            RefereeRepository refereeRepository,
+            StudentRepository studentRepository,
+            TeacherRepository teacherRepository,
+            FamiliarRepository familiarRepository,
+            GraduateRepository graduateRepository
+    ) {
+        this.userRepository = userRepository;
+        this.administratorRepository = administratorRepository;
+        this.organizerRepository = organizerRepository;
+        this.refereeRepository = refereeRepository;
+        this.studentRepository = studentRepository;
+        this.teacherRepository = teacherRepository;
+        this.familiarRepository = familiarRepository;
+        this.graduateRepository = graduateRepository;
+    }
 
     @Override
-    public User createAdminUser(UserDTO userDTO) {
+    @Transactional
+    public User createAdminUser(UserDTO userDTO, BufferedImage profilePicture) {
         log.debug("Starting admin user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        User admin = new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
-        admin.setPrimaryRole(UserRole.ADMIN);
-        users.add(admin);
-        log.info("Admin user created. userId={}, mail={}", admin.getId(), admin.getMail());
+
+        Administrator admin = new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for admin user. mail={}", userDTO.getMail());
+            admin.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for admin user. mail={}", userDTO.getMail());
+        }
+        
+        AdministratorEntity entity = AdminMapper.toEntity(admin);
+        log.debug("Saving admin user. mail={}", admin.getMail());
+        
+        administratorRepository.save(entity);
+        log.debug("Admin user saved successfully. mail={}", admin.getMail());
         return admin;
     }
 
     @Override
-    public User createOrganizerUser(UserDTO userDTO) {
+    @Transactional
+    public User createOrganizerUser(UserDTO userDTO, BufferedImage profilePicture) {
         log.debug("Starting organizer user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        User organizer = new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(),  hashPassword(userDTO.getPassword()));
-        organizer.setPrimaryRole(UserRole.ORGANIZER);
-        users.add(organizer);
-        log.info("Organizer user created. userId={}, mail={}", organizer.getId(), organizer.getMail());
+
+        Organizer organizer = new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(),  hashPassword(userDTO.getPassword()));
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for organizer user. mail={}", userDTO.getMail());
+            organizer.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for organizer user. mail={}", userDTO.getMail());
+        }
+
+        OrganizerEntity entity = OrganizerMapper.toEntity(organizer);
+        log.debug("Saving organizer user. mail={}", organizer.getMail());
+        organizerRepository.save(entity);
+        log.debug("Organizer user saved successfully. mail={}", organizer.getMail());
         return organizer;
     }
 
     @Override
-    public User createRefereeUser(UserDTO userDTO) {
+    @Transactional
+    public User createRefereeUser(UserDTO userDTO, BufferedImage profilePicture) {
         log.debug("Starting referee user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
-        User referee = new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
-        referee.setPrimaryRole(UserRole.REFEREE);
-        users.add(referee);
-        log.info("Referee user created. userId={}, mail={}", referee.getId(), referee.getMail());
+
+        Referee referee = new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()), profilePicture);
+
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for referee user. mail={}", userDTO.getMail());
+            referee.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for referee user. mail={}", userDTO.getMail());
+        }
+
+        RefereeEntity entity = RefereeMapper.toEntity(referee);
+        log.debug("Saving referee user. mail={}", referee.getMail());
+        refereeRepository.save(entity);
+        log.debug("Referee user saved successfully. mail={}", referee.getMail());
         return referee;
     }
 
     @Override
-    public UserPlayer createStudentUser(StudentUserDTO studentUserDTO) {
-        log.debug("Starting student user creation. mail={}, semester={}", studentUserDTO.getMail(), studentUserDTO.getSemester());
-        verifyUser(studentUserDTO);
-        ValidationUtil.semesterRules(studentUserDTO.getSemester());
-        UserPlayer student = new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), 
-        studentUserDTO.getDateOfBirth(), studentUserDTO.getGender(), studentUserDTO.getSemester(), hashPassword(studentUserDTO.getPassword()));
-        users.add(student);
-        log.info("Student user created. userId={}, mail={}", student.getId(), student.getMail());
-        return student;
-    }
-
-    @Override
-    public UserPlayer createStudentUser(StudentUserDTO studentUserDTO, BufferedImage profilePicture) {
-        log.debug("Starting student user creation with profile picture. mail={}, semester={}, hasPhoto={}",
-            studentUserDTO.getMail(), studentUserDTO.getSemester(), profilePicture != null);
-        verifyUser(studentUserDTO);
-        ValidationUtil.semesterRules(studentUserDTO.getSemester());
-        UserPlayer student = new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), profilePicture,
-        studentUserDTO.getDateOfBirth(), studentUserDTO.getGender(), studentUserDTO.getSemester(), hashPassword(studentUserDTO.getPassword()));
-        users.add(student);
-        log.info("Student user with profile picture created. userId={}, mail={}", student.getId(), student.getMail());
-        return student;
-    }
-
-    @Override
-    public UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO) {
+    @Transactional
+    public UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
         log.debug("Starting teacher user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        UserPlayer teacher = new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(teacher);
-        log.info("Teacher user created. userId={}, mail={}", teacher.getId(), teacher.getMail());
+        
+        Teacher teacher = new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for teacher user. mail={}", userPlayerDTO.getMail());
+            teacher.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for teacher user. mail={}", userPlayerDTO.getMail());
+        }
+
+        TeacherEntity entity = TeacherMapper.toEntity(teacher);
+        log.debug("Saving teacher user. mail={}", teacher.getMail());
+        teacherRepository.save(entity);
+        log.debug("Teacher user saved successfully. mail={}", teacher.getMail());
         return teacher;
     }
 
     @Override
-    public UserPlayer createTeacherUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
-        log.debug("Starting teacher user creation with profile picture. mail={}", userPlayerDTO.getMail());
-        verifyUser(userPlayerDTO);
-        UserPlayer teacher = new Teacher(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(teacher);
-        log.info("Teacher user with profile picture created. userId={}, mail={}", teacher.getId(), teacher.getMail());
-        return teacher;
-    }
-
-    @Override
-    public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO) {
+    @Transactional
+    public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
         log.debug("Starting familiar user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        UserPlayer familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(familiar);
-        log.info("Familiar user created. userId={}, mail={}", familiar.getId(), familiar.getMail());
+        
+        Familiar familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for familiar user. mail={}", userPlayerDTO.getMail());
+            familiar.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for familiar user. mail={}", userPlayerDTO.getMail());
+        }
+
+        FamiliarEntity entity = FamiliarMapper.toEntity(familiar);
+        log.debug("Saving familiar user. mail={}", familiar.getMail());
+        familiarRepository.save(entity);
+        log.debug("Familiar user saved successfully. mail={}", familiar.getMail());
         return familiar;
     }
 
     @Override
-    public UserPlayer createFamiliarUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
-        log.debug("Starting familiar user creation with profile picture. mail={}", userPlayerDTO.getMail());
-        verifyUser(userPlayerDTO);
-        UserPlayer familiar = new Familiar(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(familiar);
-        log.info("Familiar user with profile picture created. userId={}, mail={}", familiar.getId(), familiar.getMail());
-        return familiar;
-    }
-
-    @Override
-    public UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO) {
+    @Transactional
+    public UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
         log.debug("Starting graduate user creation. mail={}", userPlayerDTO.getMail());
         verifyUser(userPlayerDTO);
-        UserPlayer graduate = new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(graduate);
-        log.info("Graduate user created. userId={}, mail={}", graduate.getId(), graduate.getMail());
+        
+        Graduate graduate = new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
+
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for graduate user. mail={}", userPlayerDTO.getMail());
+            graduate.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for graduate user. mail={}", userPlayerDTO.getMail());
+        }
+
+        GraduateEntity entity = GraduateMapper.toEntity(graduate);
+        log.debug("Saving graduate user. mail={}", graduate.getMail());
+        graduateRepository.save(entity);
+        log.debug("Graduate user saved successfully. mail={}", graduate.getMail());
         return graduate;
     }
 
     @Override
-    public UserPlayer createGraduateUser(UserPlayerDTO userPlayerDTO, BufferedImage profilePicture) {
-        log.debug("Starting graduate user creation with profile picture. mail={}", userPlayerDTO.getMail());
-        verifyUser(userPlayerDTO);
-        UserPlayer graduate = new Graduate(idGenerator(), userPlayerDTO.getName(), userPlayerDTO.getMail(), profilePicture, userPlayerDTO.getDateOfBirth(), userPlayerDTO.getGender(), hashPassword(userPlayerDTO.getPassword()));
-        users.add(graduate);
-        log.info("Graduate user with profile picture created. userId={}, mail={}", graduate.getId(), graduate.getMail());
-        return graduate;
+    @Transactional
+    public UserPlayer createStudentUser(StudentUserDTO studentUserDTO, BufferedImage profilePicture) {
+        log.debug("Starting student user creation. mail={}", studentUserDTO.getMail());
+        verifyUserStudent(studentUserDTO);
+        
+
+        Student student = new Student(idGenerator(), studentUserDTO.getName(), studentUserDTO.getMail(), studentUserDTO.getDateOfBirth(), studentUserDTO.getGender(), studentUserDTO.getSemester(), hashPassword(studentUserDTO.getPassword()));
+
+        if (profilePicture != null) {
+            log.debug("Profile picture provided for student user. mail={}", studentUserDTO.getMail());
+            student.setProfilePicture(profilePicture);
+        } else {
+            log.debug("No profile picture provided for student user. mail={}", studentUserDTO.getMail());
+        }
+
+        StudentEntity entity = StudentMapper.toEntity(student);
+        log.debug("Saving student user. mail={}", student.getMail());
+        studentRepository.save(entity);
+        log.debug("Student user saved successfully. mail={}", student.getMail());
+        return student;
     }
 
+
     @Override
+    @Transactional(readOnly = true) //dto response 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+        return userRepository.findAll().stream()
+            .map(UserMapper::toModel)
+            .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> getUserById(String id) {
         if (id == null || id.isBlank()) {
             log.warn("Cannot search user by empty id");
             throw new InvalidInputException(USER_ID_IS_REQUIRED);
         }
-
-        return users.stream()
-            .filter(user -> user.getId().equals(id))
-            .findFirst();
+        return userRepository.findById(id)
+                .map(UserMapper::toModel);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> getUserByMail(String mail) {
         if (mail == null || mail.isBlank()) {
             log.warn("Cannot search user by empty mail");
             throw new InvalidInputException(USER_MAIL_IS_REQUIRED);
         }
-
-        return users.stream()
-            .filter(user -> user.getMail().equalsIgnoreCase(mail))
-            .findFirst();
+        return userRepository.findByMailIgnoreCase(mail)
+                .map(UserMapper::toModel);
     }
 
+    
+    
+    //--------------------------------
+    //helper methods
 
     private String idGenerator() {
         return IdGeneratorUtil.generateId();
@@ -192,18 +260,45 @@ public class UserServiceImpl implements UserService {
     private String hashPassword(String password) {
         return PasswordHashUtil.hashPassword(password);
     }
+
     private void verifyUser(UserDTO userDTO) {
         if (userDTO == null) {
             log.warn("User creation rejected: payload is null");
             throw new InvalidInputException(USER_DTO_IS_REQUIRED);
         }
-
-        log.trace("Validating user input. mail={}", userDTO.getMail());
         UserValidator.validateInput(userDTO.getName(), userDTO.getMail(), userDTO.getPassword(), userDTO.getDateOfBirth());
-        if (getUserByMail(userDTO.getMail()).isPresent()) {
+        if (userRepository.existsByMailIgnoreCase(userDTO.getMail())) {
             log.warn("User already exists for mail={}", userDTO.getMail());
             throw new InvalidInputException("A user is already registered with that email");
         }
         log.trace("User input validation completed. mail={}", userDTO.getMail());
+    }
+
+    private void verifyUserStudent(StudentUserDTO studentUserDTO) {
+        if (studentUserDTO == null) {
+            log.warn("User creation rejected: payload is null");
+            throw new InvalidInputException(USER_DTO_IS_REQUIRED);
+        }
+        StudentValidator.validateInput(studentUserDTO.getName(), studentUserDTO.getMail(), studentUserDTO.getPassword(), studentUserDTO.getDateOfBirth(), studentUserDTO.getSemester());
+        if (userRepository.existsByMailIgnoreCase(studentUserDTO.getMail())) {
+            log.warn("User already exists for mail={}", studentUserDTO.getMail());
+            throw new InvalidInputException("A user is already registered with that email");
+        }
+        log.trace("User input validation completed. mail={}", studentUserDTO.getMail());
+    }
+
+
+    private byte[] toPngBytes(BufferedImage image) {
+        if (image == null) {
+            return new byte[0];
+        }
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            log.warn("Could not encode profile picture");
+            throw new InvalidInputException("Could not encode profile picture");
+        }
     }
 }

@@ -11,8 +11,8 @@ public class Familiar extends UserPlayer {
         super(id, name, email, dateOfBirth, gender, password);
     }
 
-     public Familiar(String id, String name, String email, BufferedImage profilePicture, LocalDate dateOfBirth, Gender gender, String password) {
-        super(id, name, email, profilePicture, dateOfBirth, gender, password);
+     public Familiar(String id, String name, String email, LocalDate dateOfBirth, Gender gender, String password, BufferedImage profilePicture) {
+        super(id, name, email, dateOfBirth, gender, password, profilePicture);
     }
 
 }
