@@ -64,7 +64,7 @@ class OrganizerTest {
 
     @Test
     void testRolesPorDefectoTieneUnSoloRol() {
-        assertEquals(2, organizer.getRoles().size());
+        assertEquals(1, organizer.getRoles().size());
     }
 
     @Test
@@ -118,7 +118,7 @@ class OrganizerTest {
     @Test
     void testAddRoleDuplicadoNoLoAgregaDosVeces() {
         organizer.addRole(UserRole.BASEUSER);
-        assertEquals(2, organizer.getRoles().size());
+        assertEquals(1, organizer.getRoles().size());
     }
 
     @Test

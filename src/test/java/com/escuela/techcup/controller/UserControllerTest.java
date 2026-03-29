@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 import java.time.LocalDate;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -262,22 +262,4 @@ class UserControllerTest {
         verify(userService, times(1)).getUserById("u-admin");
     }
 
-    private MockMultipartFile userPart(String name, String mail, String dateOfBirth, String gender, String password)  {
-        String json = String.format("""
-        {
-            "name": %s,
-            "mail": %s,
-            "dateOfBirth": %s,
-            "gender": %s,
-            "password": %s
-        }
-        """,
-                name == null ? "null" : "\"" + name + "\"",
-                mail == null ? "null" : "\"" + mail + "\"",
-                dateOfBirth == null ? "null" : "\"" + dateOfBirth + "\"",
-                gender == null ? "null" : "\"" + gender + "\"",
-                password == null ? "null" : "\"" + password + "\""
-        );
-        return new MockMultipartFile("user", "", MediaType.APPLICATION_JSON_VALUE, json.getBytes());
-    }
 }
