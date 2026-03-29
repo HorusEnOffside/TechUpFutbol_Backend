@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -31,7 +30,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.mock.web.MockMultipartFile;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,20 +90,18 @@ class UserControllerTest {
     @Test
     void testCreateAdminUser_returns201() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart))
             .andExpect(status().isCreated());
     }
 
     @Test
     void testCreateAdminUser_returnsResponseBody() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart))
             .andExpect(jsonPath("$.name").value("Admin"))
             .andExpect(jsonPath("$.mail").value("admin@test.com"));
     }
@@ -111,21 +109,18 @@ class UserControllerTest {
     @Test
     void testCreateAdminUser_callsService() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")));
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart));
         verify(userService, times(1)).createAdminUser(any(), eq(null));
     }
 
     @Test
     void testCreateAdminUser_invalidBody_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson(null, "admin@test.com", "1990-01-10", "MALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson(null, "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart))
             .andExpect(status().isBadRequest());
-
         verify(userService, never()).createAdminUser(any(), eq(null));
     }
 
@@ -133,20 +128,18 @@ class UserControllerTest {
     void testCreateAdminUser_serviceThrows_returns409() throws Exception {
         when(userService.createAdminUser(any(), eq(null)))
             .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
-
-        mockMvc.perform(post("/api/users/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/admin")
+                .file(userPart))
             .andExpect(status().isConflict());
     }
 
     @Test
     void testCreateOrganizerUser_returns201() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
-
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/organizer")
+                .file(userPart))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.mail").value("org@test.com"));
     }
@@ -154,31 +147,27 @@ class UserControllerTest {
     @Test
     void testCreateOrganizerUser_callsService() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
-
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")));
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/organizer")
+                .file(userPart));
         verify(userService, times(1)).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateOrganizerUser_invalidMail_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/organizer")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/organizer")
+                .file(userPart))
             .andExpect(status().isBadRequest());
-
         verify(userService, never()).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_returns201() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
-
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/referee")
+                .file(userPart))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.mail").value("ref@test.com"));
     }
@@ -186,21 +175,18 @@ class UserControllerTest {
     @Test
     void testCreateRefereeUser_callsService() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
-
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")));
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1").getBytes());
+        mockMvc.perform(multipart("/api/users/referee")
+                .file(userPart));
         verify(userService, times(1)).createRefereeUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_missingPassword_returns400() throws Exception {
-        mockMvc.perform(post("/api/users/referee")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(userJson("Referee", "ref@test.com", "1991-03-15", "MALE", null)))
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", null).getBytes());
+        mockMvc.perform(multipart("/api/users/referee")
+                .file(userPart))
             .andExpect(status().isBadRequest());
-
         verify(userService, never()).createRefereeUser(any(), eq(null));
     }
 
