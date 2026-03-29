@@ -14,6 +14,7 @@ import com.escuela.techcup.core.exception.InvalidInputException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -91,5 +92,14 @@ public class JwtServiceImpl implements JwtService {
 			.build()
 			.parseSignedClaims(token)
 			.getPayload();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Set<String> extractRoles(String token) {
+		Claims claims = extractClaims(token);
+		List<String> roles = (List<String>) claims.get("roles");
+		if (roles == null) return Set.of();
+		return new java.util.HashSet<>(roles);
 	}
 }
