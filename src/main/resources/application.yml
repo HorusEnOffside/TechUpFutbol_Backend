@@ -1,13 +1,21 @@
 server:
-  port: ${PORT:8080}
+  port: ${HTTPS_PORT}
+  ssl:
+    enabled: ${SSL_ENABLED:true}
+    key-store: ${SSL_KEY_STORE:classpath:certs/techup-local.p12}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:changeit}
+    key-store-type: PKCS12
+    key-alias: ${SSL_KEY_ALIAS:techup-local}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: techcup-futbol
   security:
     user:
-      name: admin
-      password: 1234
+      name: ${SPRING_SECURITY_USER_NAME}
+      password: ${SPRING_SECURITY_USER_PASSWORD}
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup}
@@ -31,5 +39,5 @@ logging:
     name: logs/api.log
 
 jwt:
-  secret: test-secret-key-for-jwt-signing-must-be-long-enough-for-security-purposes-change-this-in-production-xd
-  expiration: 86400000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
