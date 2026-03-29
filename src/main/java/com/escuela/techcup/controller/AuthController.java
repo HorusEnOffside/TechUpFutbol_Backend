@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.controller;
+package com.escuela.techcup.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import com.escuela.techcup.security.dto.LoginRequest;
-import com.escuela.techcup.security.dto.LoginResponse;
+import com.escuela.techcup.controller.dto.LoginRequest;
+import com.escuela.techcup.controller.dto.LoginResponse;
 import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.User;
-import com.escuela.techcup.security.service.JwtService;
+import com.escuela.techcup.core.service.JwtService;
 import com.escuela.techcup.core.service.UserService;
 import jakarta.validation.Valid;
 

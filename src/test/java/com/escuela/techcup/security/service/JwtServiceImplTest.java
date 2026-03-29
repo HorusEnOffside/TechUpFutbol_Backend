@@ -1,6 +1,7 @@
 package com.escuela.techcup.security.service;
 
 import com.escuela.techcup.core.exception.InvalidInputException;
+import com.escuela.techcup.core.service.impl.JwtServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

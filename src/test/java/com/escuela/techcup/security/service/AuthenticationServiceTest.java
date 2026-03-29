@@ -4,9 +4,11 @@ import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
+import com.escuela.techcup.core.service.AuthenticationService;
+import com.escuela.techcup.core.service.JwtService;
 import com.escuela.techcup.core.service.UserService;
-import com.escuela.techcup.security.dto.LoginRequest;
-import com.escuela.techcup.security.dto.LoginResponse;
+import com.escuela.techcup.controller.dto.LoginRequest;
+import com.escuela.techcup.controller.dto.LoginResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

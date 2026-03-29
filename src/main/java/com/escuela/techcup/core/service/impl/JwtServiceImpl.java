@@ -1,5 +1,6 @@
-package com.escuela.techcup.security.service;
+package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.core.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

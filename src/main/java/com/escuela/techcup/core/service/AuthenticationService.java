@@ -1,10 +1,8 @@
-package com.escuela.techcup.security.service;
+package com.escuela.techcup.core.service;
 
 import com.escuela.techcup.core.model.User;
-import com.escuela.techcup.core.service.UserService;
-import com.escuela.techcup.security.dto.LoginRequest;
-import com.escuela.techcup.security.dto.LoginResponse;
-import com.escuela.techcup.security.service.JwtService;
+import com.escuela.techcup.controller.dto.LoginRequest;
+import com.escuela.techcup.controller.dto.LoginResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;

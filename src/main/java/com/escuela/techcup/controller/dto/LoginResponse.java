@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.dto;
+package com.escuela.techcup.controller.dto;
 
 import com.escuela.techcup.core.model.enums.UserRole;
 import lombok.AllArgsConstructor;
