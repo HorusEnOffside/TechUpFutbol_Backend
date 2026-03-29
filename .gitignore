@@ -30,18 +30,6 @@ logs/
 .env.*
 !.env.example
 
-# Certificados y llaves (no versionar secretos)
-*.p12
-*.jks
-*.pfx
-*.key
-*.pem
-*.crt
-*.cer
-
-# Si necesitas plantillas para certs, mantenlas con extensión .example
-!*.example
-
 # Directorios de dependencias
 target/
 build/
