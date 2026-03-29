@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -33,6 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -91,106 +91,103 @@ class UserControllerTest {
     @Test
     void testCreateAdminUser_returns201() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/admin")
-                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-                .andExpect(status().isCreated());
+                .file(userPart))
+            .andExpect(status().isCreated());
     }
 
     @Test
     void testCreateAdminUser_returnsResponseBody() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/admin")
-                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-                .andExpect(jsonPath("$.name").value("Admin"))
-                .andExpect(jsonPath("$.mail").value("admin@test.com"));
+                .file(userPart))
+            .andExpect(jsonPath("$.name").value("Admin"))
+            .andExpect(jsonPath("$.mail").value("admin@test.com"));
     }
 
     @Test
     void testCreateAdminUser_callsService() throws Exception {
         when(userService.createAdminUser(any(), eq(null))).thenReturn(adminMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/admin")
-                .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")));
-
+                .file(userPart));
         verify(userService, times(1)).createAdminUser(any(), eq(null));
     }
 
     @Test
     void testCreateAdminUser_invalidBody_returns400() throws Exception {
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson(null, "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/admin")
-                        .file(userPart(null, "admin@test.com", "1990-01-10", "MALE", "Password1")))
-                .andExpect(status().isBadRequest());
-
+                .file(userPart))
+            .andExpect(status().isBadRequest());
         verify(userService, never()).createAdminUser(any(), eq(null));
     }
 
     @Test
     void testCreateAdminUser_serviceThrows_returns409() throws Exception {
         when(userService.createAdminUser(any(), eq(null)))
-                .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
-
+            .thenThrow(new TechcupException("duplicate user", HttpStatus.CONFLICT));
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/admin")
-                        .file(userPart("Admin", "admin@test.com", "1990-01-10", "MALE", "Password1")))
-                .andExpect(status().isConflict());
+                .file(userPart))
+            .andExpect(status().isConflict());
     }
 
     @Test
     void testCreateOrganizerUser_returns201() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/organizer")
-                        .file(userPart("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.mail").value("org@test.com"));
+                .file(userPart))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.mail").value("org@test.com"));
     }
 
     @Test
     void testCreateOrganizerUser_callsService() throws Exception {
         when(userService.createOrganizerUser(any(), eq(null))).thenReturn(organizerMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/organizer")
-                .file(userPart("Organizer", "org@test.com", "1992-02-20", "FEMALE", "Password1")));
-
+                .file(userPart));
         verify(userService, times(1)).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateOrganizerUser_invalidMail_returns400() throws Exception {
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/organizer")
-                        .file(userPart("Organizer", "invalid-mail", "1992-02-20", "FEMALE", "Password1")))
-                .andExpect(status().isBadRequest());
-
+                .file(userPart))
+            .andExpect(status().isBadRequest());
         verify(userService, never()).createOrganizerUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_returns201() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/referee")
-                        .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.mail").value("ref@test.com"));
+                .file(userPart))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.mail").value("ref@test.com"));
     }
 
     @Test
     void testCreateRefereeUser_callsService() throws Exception {
         when(userService.createRefereeUser(any(), eq(null))).thenReturn(refereeMock);
-
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1").getBytes());
         mockMvc.perform(multipart("/api/users/referee")
-                .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", "Password1")));
-
+                .file(userPart));
         verify(userService, times(1)).createRefereeUser(any(), eq(null));
     }
 
     @Test
     void testCreateRefereeUser_missingPassword_returns400() throws Exception {
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", userJson("Referee", "ref@test.com", "1991-03-15", "MALE", null).getBytes());
         mockMvc.perform(multipart("/api/users/referee")
-                        .file(userPart("Referee", "ref@test.com", "1991-03-15", "MALE", null)))
-                .andExpect(status().isBadRequest());
-
+                .file(userPart))
+            .andExpect(status().isBadRequest());
         verify(userService, never()).createRefereeUser(any(), eq(null));
     }
 

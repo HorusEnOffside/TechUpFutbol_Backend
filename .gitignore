@@ -26,6 +26,9 @@ logs/
 
 # Archivos de configuración local
 *.properties.local
+.env
+.env.*
+!.env.example
 
 # Directorios de dependencias
 target/
