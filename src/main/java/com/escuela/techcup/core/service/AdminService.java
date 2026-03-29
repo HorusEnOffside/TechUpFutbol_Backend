@@ -8,6 +8,4 @@ import com.escuela.techcup.core.model.enums.UserRole;
 
 public interface AdminService {
     User assignRole(String userId, UserRole role);
-    List<User> getAllUsers();
-    Optional<User> getUserById(String id);
 }

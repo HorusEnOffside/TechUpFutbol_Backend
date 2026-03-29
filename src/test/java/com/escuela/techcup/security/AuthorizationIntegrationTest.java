@@ -65,26 +65,6 @@ class AuthorizationIntegrationTest {
                 .build();
     }
 
-    // --- Admin endpoints con rol ADMIN ---
-
-    @Test
-    void getAllUsers_withAdminRole_returns200() throws Exception {
-        when(adminService.getAllUsers()).thenReturn(List.of());
-
-        adminMvc.perform(get("/api/admin/users")
-                        .with(user("admin").roles("ADMIN")))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void getUserById_withAdminRole_returns404WhenNotFound() throws Exception {
-        when(adminService.getUserById("no-existe")).thenReturn(java.util.Optional.empty());
-
-        adminMvc.perform(get("/api/admin/users/no-existe")
-                        .with(user("admin").roles("ADMIN")))
-                .andExpect(status().isNotFound());
-    }
-
     // --- Tournament endpoints con rol ORGANIZER ---
 
     @Test

@@ -44,24 +44,4 @@ public class AdminController {
         UserResponseDTO response = UserMapper.toResponseDTO(adminService.assignRole(userId, role));
         return ResponseEntity.ok(response);
     }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users")
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        log.info("Request to list all users");
-        List<UserResponseDTO> users = adminService.getAllUsers().stream()
-                .map(UserMapper::toResponseDTO)
-                .toList();
-        return ResponseEntity.ok(users);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable String id) {
-        log.info("Request to get user by id={}", id);
-        UserResponseDTO user = adminService.getUserById(id)
-                .map(UserMapper::toResponseDTO)
-                .orElseThrow(() -> new TechcupException("User not found", HttpStatus.NOT_FOUND));
-        return ResponseEntity.ok(user);
-    }
 }

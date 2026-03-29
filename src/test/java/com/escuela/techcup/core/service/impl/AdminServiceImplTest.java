@@ -81,38 +81,4 @@ class AdminServiceImplTest {
         assertThrows(UserNotFoundException.class,
                 () -> adminService.assignRole("no-existe", UserRole.ADMIN));
     }
-
-    @Test
-    void getAllUsers_shouldReturnList() {
-        when(userRepository.findAll()).thenReturn(List.of(mockUserEntity));
-
-        List<User> result = adminService.getAllUsers();
-
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void getUserById_shouldReturnUserWhenExists() {
-        when(userRepository.findById("user-001")).thenReturn(Optional.of(mockUserEntity));
-
-        Optional<User> result = adminService.getUserById("user-001");
-
-        assertTrue(result.isPresent());
-    }
-
-    @Test
-    void getUserById_shouldReturnEmptyWhenNotFound() {
-        when(userRepository.findById("no-existe")).thenReturn(Optional.empty());
-
-        Optional<User> result = adminService.getUserById("no-existe");
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void getUserById_shouldThrowWhenIdIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> adminService.getUserById(null));
-    }
 }

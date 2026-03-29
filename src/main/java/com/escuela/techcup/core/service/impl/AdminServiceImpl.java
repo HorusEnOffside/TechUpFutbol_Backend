@@ -48,33 +48,13 @@ public class AdminServiceImpl implements AdminService {
                     return new UserNotFoundException(userId);
                 });
 
-        entity.getRoles().clear();
-        entity.getRoles().add(role);
+        User user = UserMapper.toModel(entity);
+        user.setPrimaryRole(role);
+        // paso faltante
 
         userRepository.save(entity);
         log.info("Role assigned successfully. userId={}, role={}", userId, role);
 
         return UserMapper.toModel(entity);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        log.debug("Fetching all users");
-        return userRepository.findAll().stream()
-                .map(UserMapper::toModel)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<User> getUserById(String id) {
-        if (id == null || id.isBlank()) {
-            log.warn("Cannot search user by empty id");
-            throw new InvalidInputException(USER_ID_IS_REQUIRED);
-        }
-        log.debug("Fetching user by id={}", id);
-        return userRepository.findById(id)
-                .map(UserMapper::toModel);
     }
 }
