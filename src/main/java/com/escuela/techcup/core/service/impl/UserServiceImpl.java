@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import com.escuela.techcup.core.model.enums.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,20 +72,18 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
         log.debug("Starting admin user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
 
-        Administrator admin = new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+        Administrator admin = new Administrator(idGenerator(), userDTO.getName(), userDTO.getMail(),
+                userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+
+        admin.setPrimaryRole(UserRole.ADMIN);
 
         if (profilePicture != null) {
-            log.debug("Profile picture provided for admin user. mail={}", userDTO.getMail());
             admin.setProfilePicture(profilePicture);
-        } else {
-            log.debug("No profile picture provided for admin user. mail={}", userDTO.getMail());
         }
-        
+
         AdministratorEntity entity = AdminMapper.toEntity(admin);
-        log.debug("Saving admin user. mail={}", admin.getMail());
-        
         administratorRepository.save(entity);
-        log.debug("Admin user saved successfully. mail={}", admin.getMail());
+        log.info("Admin user created successfully. mail={}", admin.getMail());
         return admin;
     }
 
@@ -93,18 +93,18 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
         log.debug("Starting organizer user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
 
-        Organizer organizer = new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(),  hashPassword(userDTO.getPassword()));
+        Organizer organizer = new Organizer(idGenerator(), userDTO.getName(), userDTO.getMail(),
+                userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+
+        organizer.setPrimaryRole(UserRole.ORGANIZER);
+
         if (profilePicture != null) {
-            log.debug("Profile picture provided for organizer user. mail={}", userDTO.getMail());
             organizer.setProfilePicture(profilePicture);
-        } else {
-            log.debug("No profile picture provided for organizer user. mail={}", userDTO.getMail());
         }
 
         OrganizerEntity entity = OrganizerMapper.toEntity(organizer);
-        log.debug("Saving organizer user. mail={}", organizer.getMail());
         organizerRepository.save(entity);
-        log.debug("Organizer user saved successfully. mail={}", organizer.getMail());
+        log.info("Organizer user created successfully. mail={}", organizer.getMail());
         return organizer;
     }
 
@@ -114,19 +114,18 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
         log.debug("Starting referee user creation. mail={}", userDTO.getMail());
         verifyUser(userDTO);
 
-        Referee referee = new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(), userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()), profilePicture);
+        Referee referee = new Referee(idGenerator(), userDTO.getName(), userDTO.getMail(),
+                userDTO.getDateOfBirth(), userDTO.getGender(), hashPassword(userDTO.getPassword()));
+
+        referee.setPrimaryRole(UserRole.REFEREE);
 
         if (profilePicture != null) {
-            log.debug("Profile picture provided for referee user. mail={}", userDTO.getMail());
             referee.setProfilePicture(profilePicture);
-        } else {
-            log.debug("No profile picture provided for referee user. mail={}", userDTO.getMail());
         }
 
         RefereeEntity entity = RefereeMapper.toEntity(referee);
-        log.debug("Saving referee user. mail={}", referee.getMail());
         refereeRepository.save(entity);
-        log.debug("Referee user saved successfully. mail={}", referee.getMail());
+        log.info("Referee user created successfully. mail={}", referee.getMail());
         return referee;
     }
 

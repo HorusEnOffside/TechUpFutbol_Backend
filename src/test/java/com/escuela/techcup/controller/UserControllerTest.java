@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.mock.web.MockMultipartFile;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import org.springframework.mock.web.MockMultipartFile;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -259,5 +260,24 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users/u-admin"));
 
         verify(userService, times(1)).getUserById("u-admin");
+    }
+
+    private MockMultipartFile userPart(String name, String mail, String dateOfBirth, String gender, String password)  {
+        String json = String.format("""
+        {
+            "name": %s,
+            "mail": %s,
+            "dateOfBirth": %s,
+            "gender": %s,
+            "password": %s
+        }
+        """,
+                name == null ? "null" : "\"" + name + "\"",
+                mail == null ? "null" : "\"" + mail + "\"",
+                dateOfBirth == null ? "null" : "\"" + dateOfBirth + "\"",
+                gender == null ? "null" : "\"" + gender + "\"",
+                password == null ? "null" : "\"" + password + "\""
+        );
+        return new MockMultipartFile("user", "", MediaType.APPLICATION_JSON_VALUE, json.getBytes());
     }
 }

@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.escuela.techcup.security.filter.JwtAuthFilter;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -29,6 +31,13 @@ public class SecurityConfig {
     //http://localhost:8080/swagger-ui.html
     //https://localhost:8443/swagger-ui.html
 
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, HttpsEnforcementFilter httpsEnforcementFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.httpsEnforcementFilter = httpsEnforcementFilter;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,6 +48,7 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .addFilterBefore(httpsEnforcementFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(csrf -> csrf.ignoringRequestMatchers(
                 "/api/**",
                 "/v3/api-docs/**",
