@@ -9,8 +9,12 @@ import lombok.Data;
 public abstract class PlayerDecorator implements ComponentPlayer {
 	protected final ComponentPlayer componentPlayer;
 
-	public PlayerDecorator(ComponentPlayer componentPlayer) {
+	protected PlayerDecorator(ComponentPlayer componentPlayer) {
 		this.componentPlayer = componentPlayer;
+	}
+
+	public String getUserId() {
+		return componentPlayer.getUserId();
 	}
 
 	public Position getPosition() {

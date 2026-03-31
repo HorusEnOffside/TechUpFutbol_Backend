@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 import com.escuela.techcup.core.model.UserPlayer;
@@ -22,7 +22,7 @@ public class UserPlayerMapper {
                 // handle error or leave as null
             }
         }
-        return new UserPlayer(
+        UserPlayer userPlayer = new UserPlayer(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -31,6 +31,10 @@ public class UserPlayerMapper {
             entity.getPasswordHash(),
             profilePicture
         );
+        if (entity.getRoles() != null) {
+            userPlayer.setRoles(entity.getRoles());
+        }
+        return userPlayer;
     }
 
     public static UserPlayerEntity toEntity(UserPlayer model) {
@@ -42,6 +46,9 @@ public class UserPlayerMapper {
         entity.setDateOfBirth(model.getDateOfBirth());
         entity.setGender(model.getGender());
         entity.setPasswordHash(model.getPassword());
+        if (model.getRoles() != null) {
+            entity.setRoles(model.getRoles());
+        }
         return entity;
     }
 }

@@ -19,6 +19,9 @@ public class GoalEntity {
     @Column(name = "minute", nullable = false)
     private int minute;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false, foreignKey = @ForeignKey(name = "fk_goals_match"))
     private MatchEntity match;

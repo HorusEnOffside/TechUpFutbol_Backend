@@ -7,5 +7,4 @@ public enum UserRole {
     BASEUSER,
     CAPTAIN,
     PLAYER,
-
 }

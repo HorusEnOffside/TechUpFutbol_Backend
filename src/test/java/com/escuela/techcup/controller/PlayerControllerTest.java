@@ -1,6 +1,6 @@
 package com.escuela.techcup.controller;
 
-import com.escuela.techcup.handler.GlobalExceptionHandler;
+import com.escuela.techcup.controller.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,4 +41,12 @@ public class MatchEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id", nullable = false, foreignKey = @ForeignKey(name = "fk_matches_tournament"))
     private TournamentEntity tournament;
+
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<GoalEntity> goals = new ArrayList<>();
+
+    public void addGoal(GoalEntity goal) {
+        goals.add(goal);
+        goal.setMatch(this);
+    }
 }

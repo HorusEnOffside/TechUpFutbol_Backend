@@ -24,7 +24,14 @@ import com.escuela.techcup.core.util.*;
 import com.escuela.techcup.core.validator.StudentValidator;
 import com.escuela.techcup.core.validator.UserValidator;
 import com.escuela.techcup.persistence.entity.users.*;
-import com.escuela.techcup.persistence.mapper.*;
+import com.escuela.techcup.persistence.mapper.users.AdminMapper;
+import com.escuela.techcup.persistence.mapper.users.FamiliarMapper;
+import com.escuela.techcup.persistence.mapper.users.GraduateMapper;
+import com.escuela.techcup.persistence.mapper.users.OrganizerMapper;
+import com.escuela.techcup.persistence.mapper.users.RefereeMapper;
+import com.escuela.techcup.persistence.mapper.users.StudentMapper;
+import com.escuela.techcup.persistence.mapper.users.TeacherMapper;
+import com.escuela.techcup.persistence.mapper.users.UserMapper;
 import com.escuela.techcup.persistence.repository.users.*;
 
 

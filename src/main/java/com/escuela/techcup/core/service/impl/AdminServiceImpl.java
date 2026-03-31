@@ -11,7 +11,7 @@ import com.escuela.techcup.core.model.User;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.AdminService;
 import com.escuela.techcup.persistence.entity.users.UserEntity;
-import com.escuela.techcup.persistence.mapper.UserMapper;
+import com.escuela.techcup.persistence.mapper.users.UserMapper;
 import com.escuela.techcup.persistence.repository.users.UserRepository;
 
 @Service
@@ -40,17 +40,14 @@ public class AdminServiceImpl implements AdminService {
         }
 
         UserEntity entity = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.warn("Role assignment failed: user not found for userId={}", userId);
-                    return new UserNotFoundException(userId);
-                });
+            .orElseThrow(() -> {
+                log.warn("Role assignment failed: user not found for userId={}", userId);
+                return new UserNotFoundException(userId);
+            });
 
         entity.setPrimaryRole(role);
         userRepository.save(entity);
-
-        userRepository.save(entity);
         log.info("Role assigned successfully. userId={}, role={}", userId, role);
-
         return UserMapper.toModel(entity);
     }
 }

@@ -1,6 +1,6 @@
 package com.escuela.techcup.controller;
 
-import com.escuela.techcup.handler.GlobalExceptionHandler;
+import com.escuela.techcup.controller.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;

@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.RefereeEntity;
 import com.escuela.techcup.core.model.Referee;
@@ -10,7 +10,7 @@ public class RefereeMapper {
 
     public static Referee toModel(RefereeEntity entity) {
         if (entity == null) return null;
-        return new Referee(
+        Referee referee = new Referee(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,6 +18,10 @@ public class RefereeMapper {
             entity.getGender(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            referee.setRoles(entity.getRoles());
+        }
+        return referee;
     }
 
     public static RefereeEntity toEntity(Referee model) {

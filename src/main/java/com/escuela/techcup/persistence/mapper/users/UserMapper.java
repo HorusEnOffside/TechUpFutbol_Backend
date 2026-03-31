@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.core.model.User;
@@ -15,13 +15,12 @@ public class UserMapper {
 
 
     public static User toModel(UserEntity entity) {
-        if (entity == null) return null;
         BufferedImage profilePicture = null;
         if (entity.getProfilePicture() != null) {
             try {
                 profilePicture = ImageIO.read(new ByteArrayInputStream(entity.getProfilePicture()));
             } catch (IOException e) {
-                // handle error or leave as null
+                profilePicture = null;
             }
         }
         User user = new User(
@@ -38,7 +37,6 @@ public class UserMapper {
     }
 
     public static void updateEntityFromModel(User model, UserEntity entity) {
-        if (model == null || entity == null) return;
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setMail(model.getMail());

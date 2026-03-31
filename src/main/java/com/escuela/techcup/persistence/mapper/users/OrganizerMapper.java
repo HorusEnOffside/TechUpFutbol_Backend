@@ -1,16 +1,16 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
-import com.escuela.techcup.persistence.entity.users.AdministratorEntity;
-import com.escuela.techcup.core.model.Administrator;
+import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
+import com.escuela.techcup.core.model.Organizer;
 
-public class AdminMapper {
+public class OrganizerMapper {
 
-    private AdminMapper() {
+    private OrganizerMapper() {
     }
 
-    public static Administrator toModel(AdministratorEntity entity) {
+    public static Organizer toModel(OrganizerEntity entity) {
         if (entity == null) return null;
-        return new Administrator(
+        Organizer organizer = new Organizer(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,11 +18,15 @@ public class AdminMapper {
             entity.getGender(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            organizer.setRoles(entity.getRoles());
+        }
+        return organizer;
     }
 
-    public static AdministratorEntity toEntity(Administrator model) {
+    public static OrganizerEntity toEntity(Organizer model) {
         if (model == null) return null;
-        AdministratorEntity entity = new AdministratorEntity();
+        OrganizerEntity entity = new OrganizerEntity();
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setMail(model.getMail());

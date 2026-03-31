@@ -1,4 +1,4 @@
-package com.escuela.techcup.handler;
+package com.escuela.techcup.controller.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

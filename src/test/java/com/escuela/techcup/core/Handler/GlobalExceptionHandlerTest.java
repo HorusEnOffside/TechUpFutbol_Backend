@@ -1,7 +1,7 @@
 package com.escuela.techcup.core.handler;
 
-import com.escuela.techcup.handler.ErrorResponse;
-import com.escuela.techcup.handler.GlobalExceptionHandler;
+import com.escuela.techcup.controller.handler.ErrorResponse;
+import com.escuela.techcup.controller.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.exception.TechcupException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

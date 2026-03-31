@@ -23,7 +23,7 @@ import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.core.validator.PlayerValidator;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
-import com.escuela.techcup.persistence.mapper.PlayerMapper;
+import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.UserPlayerRepository;
 
