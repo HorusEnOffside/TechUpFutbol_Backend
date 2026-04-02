@@ -47,8 +47,6 @@ public class AdminServiceImpl implements AdminService {
 
         entity.setPrimaryRole(role);
         userRepository.save(entity);
-
-        userRepository.save(entity);
         log.info("Role assigned successfully. userId={}, role={}", userId, role);
 
         return UserMapper.toModel(entity);

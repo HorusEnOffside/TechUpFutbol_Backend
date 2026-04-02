@@ -53,7 +53,7 @@ class AdminServiceImplTest {
         User result = adminService.assignRole("user-001", UserRole.ADMIN);
 
         assertNotNull(result);
-        verify(userRepository).save(mockUserEntity);
+        verify(userRepository, times(1)).save(mockUserEntity);
     }
 
     @Test
