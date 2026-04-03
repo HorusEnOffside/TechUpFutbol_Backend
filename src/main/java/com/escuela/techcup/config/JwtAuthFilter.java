@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.filter;
+package com.escuela.techcup.config;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

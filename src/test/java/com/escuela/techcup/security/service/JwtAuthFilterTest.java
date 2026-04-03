@@ -1,7 +1,7 @@
 package com.escuela.techcup.security.service;
 
 import com.escuela.techcup.core.service.JwtService;
-import com.escuela.techcup.security.filter.JwtAuthFilter;
+import com.escuela.techcup.config.JwtAuthFilter;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
@@ -19,7 +19,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
