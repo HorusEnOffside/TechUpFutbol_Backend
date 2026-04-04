@@ -143,3 +143,67 @@ En este repositorio no sólo se encontrará los artefactos básicos, sino tambi�
 | ![asignReferee](./docs/UML/secuencia/m7/asignReferee.png)               | Asignar árbitro |
 | ![mostrarInfoPartidos](./docs/UML/secuencia/m7/mostrarInfoPartidos.png) | Mostrar información de partidos |
 | ![registerMatch](./docs/UML/secuencia/m7/registerMatch.png)             | Registrar partido |
+
+## Despliegue con Docker
+
+### Prerrequisitos
+
+- [Docker](https://www.docker.com/get-started) instalado
+- [Docker Compose](https://docs.docker.com/compose/install/) instalado
+- Archivo `.env` configurado (ver `.env.example`)
+
+### Configuración inicial
+
+
+1. Crea tu archivo `.env` a partir del ejemplo:
+```bash
+cp .env.example .env
+```
+
+2. Edita el `.env` con tus valores reales (credenciales, secretos, etc.).
+
+### Levantar el entorno local
+
+```bash
+docker-compose up --build
+```
+
+Esto levanta dos servicios:
+- **db** — PostgreSQL 16 en el puerto `5432`
+- **backend** — Spring Boot en el puerto `8443` (HTTPS)
+
+### Verificar que está corriendo
+
+```bash
+docker-compose ps
+```
+
+Accede a la API en: `https://localhost:8443`
+
+### Detener el entorno
+
+```bash
+docker-compose down
+```
+
+Para eliminar también los datos de la base de datos:
+```bash
+docker-compose down -v
+```
+
+### Estructura de archivos Docker
+
+```
+TechUpFutbol_Backend/
+├── Dockerfile          # Imagen del backend
+├── docker-compose.yml  # Orquestación de servicios
+├── .dockerignore       # Archivos excluidos de la imagen
+├── .env                # Variables de entorno reales (no subir al repo)
+└── .env.example        # Plantilla de variables de entorno
+```
+
+### Notas importantes
+
+- El archivo `.env` **nunca debe subirse al repositorio**. Está incluido en `.gitignore` y `.dockerignore`.
+- El backend espera que la base de datos esté disponible antes de arrancar (healthcheck configurado).
+- Los logs se guardan en la carpeta `logs/` del proyecto.
