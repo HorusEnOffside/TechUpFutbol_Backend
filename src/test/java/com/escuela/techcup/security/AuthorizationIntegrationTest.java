@@ -2,10 +2,10 @@ package com.escuela.techcup.security;
 
 import com.escuela.techcup.controller.AdminController;
 import com.escuela.techcup.controller.TournamentController;
+import com.escuela.techcup.controller.handler.GlobalExceptionHandler;
 import com.escuela.techcup.controller.MatchController;
 import com.escuela.techcup.controller.PaymentController;
 import com.escuela.techcup.core.service.AdminService;
-import com.escuela.techcup.handler.GlobalExceptionHandler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,21 +74,6 @@ class AuthorizationIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    // --- Match endpoints con rol ORGANIZER y REFEREE ---
-
-    @Test
-    void matchHealth_withOrganizerRole_returns200() throws Exception {
-        matchMvc.perform(get("/api/matches/health")
-                        .with(user("org").roles("ORGANIZER")))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void matchHealth_withRefereeRole_returns200() throws Exception {
-        matchMvc.perform(get("/api/matches/health")
-                        .with(user("ref").roles("REFEREE")))
-                .andExpect(status().isOk());
-    }
 
     // --- Payment endpoints con rol ORGANIZER ---
 

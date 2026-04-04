@@ -7,6 +7,8 @@ import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
+import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

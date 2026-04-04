@@ -1,5 +1,6 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.handler.GlobalExceptionHandler;
 import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.Organizer;
@@ -7,7 +8,7 @@ import com.escuela.techcup.core.model.Referee;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.UserService;
-import com.escuela.techcup.handler.GlobalExceptionHandler;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 import java.time.LocalDate;

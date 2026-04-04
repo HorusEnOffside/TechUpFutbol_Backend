@@ -1,16 +1,16 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
-import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
-import com.escuela.techcup.core.model.Organizer;
+import com.escuela.techcup.persistence.entity.users.TeacherEntity;
+import com.escuela.techcup.core.model.Teacher;
 
-public class OrganizerMapper {
+public class TeacherMapper {
 
-    private OrganizerMapper() {
+    private TeacherMapper() {
     }
 
-    public static Organizer toModel(OrganizerEntity entity) {
+    public static Teacher toModel(TeacherEntity entity) {
         if (entity == null) return null;
-        return new Organizer(
+        Teacher teacher = new Teacher(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,11 +18,15 @@ public class OrganizerMapper {
             entity.getGender(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            teacher.setRoles(entity.getRoles());
+        }
+        return teacher;
     }
 
-    public static OrganizerEntity toEntity(Organizer model) {
+    public static TeacherEntity toEntity(Teacher model) {
         if (model == null) return null;
-        OrganizerEntity entity = new OrganizerEntity();
+        TeacherEntity entity = new TeacherEntity();
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setMail(model.getMail());

@@ -3,6 +3,8 @@ package com.escuela.techcup.persistence.mapper;
 import com.escuela.techcup.core.model.Organizer;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
+import com.escuela.techcup.persistence.mapper.users.OrganizerMapper;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

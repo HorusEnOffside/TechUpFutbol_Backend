@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.FamiliarEntity;
 import com.escuela.techcup.core.model.Familiar;
@@ -10,7 +10,7 @@ public class FamiliarMapper {
 
     public static Familiar toModel(FamiliarEntity entity) {
         if (entity == null) return null;
-        return new Familiar(
+        Familiar familiar = new Familiar(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,6 +18,10 @@ public class FamiliarMapper {
             entity.getGender(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            familiar.setRoles(entity.getRoles());
+        }
+        return familiar;
     }
 
     public static FamiliarEntity toEntity(Familiar model) {

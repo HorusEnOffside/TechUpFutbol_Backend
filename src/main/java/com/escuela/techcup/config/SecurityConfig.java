@@ -24,6 +24,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    //http://localhost:8080/swagger-ui.html
+    //https://localhost:8443/swagger-ui.html
+
     private final HttpsEnforcementFilter httpsEnforcementFilter;
     private final JwtAuthFilter jwtAuthFilter;
 

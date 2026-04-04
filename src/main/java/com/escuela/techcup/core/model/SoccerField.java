@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class SoccerField {
-    private String id;
-    private String name;
-    private String location;
+    private final String id;
+    private final String name;
+    private final String location;
 }

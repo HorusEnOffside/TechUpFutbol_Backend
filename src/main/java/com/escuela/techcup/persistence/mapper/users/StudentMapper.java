@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.core.model.Student;
 import com.escuela.techcup.persistence.entity.users.StudentEntity;
@@ -9,7 +9,7 @@ public class StudentMapper {
 
     public static Student toModel(StudentEntity entity) {
         if (entity == null) return null;
-        return new Student(
+        Student student = new Student(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,6 +18,10 @@ public class StudentMapper {
             entity.getSemester(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            student.setRoles(entity.getRoles());
+        }
+        return student;
     }
 
     public static StudentEntity toEntity(Student model) {
