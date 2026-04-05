@@ -1,6 +1,5 @@
 package com.escuela.techcup.core.model;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -12,23 +11,18 @@ public class Team {
     private String id;
     private String name;
     private BufferedImage logo;
-    private Color uniformColor;
+    private String uniformColor;
     private Formation formation;
-
     private Captain captain;
-
     private Payment payment;
-
     private Tournament tournament;
-
     private List<Player> players;
 
-    public Team(String id, String name, BufferedImage logo, Color uniformColor, Formation formation) {
+    public Team(String id, String name, String uniformColor, BufferedImage logo, Formation formation) {
         this.id = id;
         this.name = name;
-        this.logo = logo;
         this.uniformColor = uniformColor;
+        this.logo = logo;
         this.formation = formation;
-
     }
 }

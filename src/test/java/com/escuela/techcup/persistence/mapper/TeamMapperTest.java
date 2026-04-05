@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper.tournament;
+package com.escuela.techcup.persistence.mapper;
 
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.Team;
@@ -15,18 +15,12 @@ import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.awt.Color;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TeamMapperTest {
-
-
-    // -------------------------------------------------------------------------
-    // toEntity
-    // -------------------------------------------------------------------------
 
     @Nested
     class ToEntity {
@@ -49,13 +43,13 @@ class TeamMapperTest {
         }
 
         @Test
-        void whenModelHasColor_thenMapsColorToHex() {
-            Team team = new Team("team-1", "Los Tigres", null, Color.RED, Formation.FORMATION_BASIC);
+        void whenModelHasColor_thenMapsColorCorrectly() {
+            Team team = new Team("team-1", "Los Tigres", "Rojo", null, Formation.FORMATION_BASIC);
 
             TeamEntity result = TeamMapper.toEntity(team);
 
             assertNotNull(result.getUniformColor());
-            assertTrue(result.getUniformColor().startsWith("#"));
+            assertEquals("Rojo", result.getUniformColor());
         }
 
         @Test
@@ -109,11 +103,6 @@ class TeamMapperTest {
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // toModel
-    // -------------------------------------------------------------------------
-
     @Nested
     class ToModel {
 
@@ -135,16 +124,14 @@ class TeamMapperTest {
         }
 
         @Test
-        void whenEntityHasHexColor_thenMapsColorToObject() {
+        void whenEntityHasColor_thenMapsColorToString() {
             TeamEntity entity = buildTeamEntity("team-1", "Los Tigres");
-            entity.setUniformColor("#ff0000");
+            entity.setUniformColor("Rojo");
 
             Team result = TeamMapper.toModel(entity);
 
             assertNotNull(result.getUniformColor());
-            assertEquals(255, result.getUniformColor().getRed());
-            assertEquals(0, result.getUniformColor().getGreen());
-            assertEquals(0, result.getUniformColor().getBlue());
+            assertEquals("Rojo", result.getUniformColor());
         }
 
         @Test
@@ -217,17 +204,12 @@ class TeamMapperTest {
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // roundtrip
-    // -------------------------------------------------------------------------
-
     @Nested
     class Roundtrip {
 
         @Test
         void modelToEntityToModel_preservesBaseFields() {
-            Team original = new Team("team-1", "Los Tigres", null, Color.BLUE, Formation.FORMATION_4_4_2);
+            Team original = new Team("team-1", "Los Tigres", "Azul", null, Formation.FORMATION_4_4_2);
             original.setCaptain(null);
             original.setPlayers(null);
 
@@ -239,11 +221,6 @@ class TeamMapperTest {
             assertNotNull(result.getUniformColor());
         }
     }
-
-
-    // -------------------------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------------------------
 
     private TeamEntity buildTeamEntity(String id, String name) {
         TeamEntity entity = new TeamEntity();

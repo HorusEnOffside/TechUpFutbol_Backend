@@ -18,7 +18,7 @@ spring:
       password: ${SPRING_SECURITY_USER_PASSWORD:123}
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup?stringtype=unspecified}
     username: techcup_owner
     password: techcup123
 
