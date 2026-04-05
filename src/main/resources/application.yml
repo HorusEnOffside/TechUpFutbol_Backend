@@ -2,10 +2,10 @@ server:
   port: ${HTTPS_PORT:8443}
   ssl:
     enabled: ${SSL_ENABLED:true}
-    key-store: ${SSL_KEY_STORE:classpath:keystore.p12}
-    key-store-password: ${SSL_KEY_STORE_PASSWORD:password123}
+    key-store: ${SSL_KEY_STORE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
     key-store-type: PKCS12
-    key-alias: ${SSL_KEY_ALIAS:TechcupFutbol}
+    key-alias: ${SSL_KEY_ALIAS}
 
 spring:
   config:
@@ -14,8 +14,8 @@ spring:
     name: techcup-futbol
   security:
     user:
-      name: ${SPRING_SECURITY_USER_NAME:admin}
-      password: ${SPRING_SECURITY_USER_PASSWORD:123}
+      name: ${SPRING_SECURITY_USER_NAME}
+      password: ${SPRING_SECURITY_USER_PASSWORD}
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup}
@@ -39,5 +39,5 @@ logging:
     name: logs/api.log
 
 jwt:
-  secret: ${JWT_SECRET:Qw8vZ!2pLk#7sTn@4rXc9eBz1YhGfUjM}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:3600000}
