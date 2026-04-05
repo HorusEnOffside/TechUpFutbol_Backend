@@ -104,3 +104,104 @@ En este repositorio no sólo se encontrará los artefactos básicos, sino tambi�
 - Cada requerimiento fue discutido y agrupado según las necesidades de bajo acoplamiento, alta cohesión y escalabilidad del sistema.
 - Los módulos y funcionalidades fueron definidos tras analizar los flujos críticos del torneo estudiantil.
 - El diseño visual y la lógica de roles se fundamentaron en principios de seguridad, usabilidad y la experiencia previa en sistemas similares.
+
+---
+
+## Diagramas de Secuencia
+
+### Módulo 1 (Usuarios y perfiles deportivos)
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![createAdminUser](./docs/UML/secuencia/m1/createAdminUser.png) | Crear usuario administrador |
+| ![createFamiliarUser](./docs/UML/secuencia/m1/createFamiliarUser.png) | Crear usuario familiar |
+| ![createGraduateUser](./docs/UML/secuencia/m1/createGraduateUser.png) | Crear usuario egresado |
+| ![createOrganizerUser](./docs/UML/secuencia/m1/createOrganizerUser.png) | Crear usuario organizador |
+| ![createRefereeUser](./docs/UML/secuencia/m1/createRefereeUser.png) | Crear usuario árbitro |
+| ![createSportsProfileFamiliar](./docs/UML/secuencia/m1/createSportsProfileFamiliar.png) | Crear perfil deportivo - Familiar |
+| ![createSportsProfileGraduate](./docs/UML/secuencia/m1/createSportsProfileGraduate.png) | Crear perfil deportivo - Egresado |
+| ![createSportsProfileStudent](./docs/UML/secuencia/m1/createSportsProfileStudent.png) | Crear perfil deportivo - Estudiante |
+| ![createSportsProfileTeacher](./docs/UML/secuencia/m1/createSportsProfileTeacher.png) | Crear perfil deportivo - Profesor |
+| ![createStudentUser](./docs/UML/secuencia/m1/createStudentUser.png) | Crear usuario estudiante |
+| ![createTeacherUser](./docs/UML/secuencia/m1/createTeacherUser.png) | Crear usuario profesor |
+| ![hashPassword](./docs/UML/secuencia/m1/hashPassword.png) | Hash de contraseña |
+| ![idGenerator](./docs/UML/secuencia/m1/idGenerator.png) | Generador de ID |
+
+### Módulo 3 (Equipos e invitaciones)
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![createTeam](./docs/UML/secuencia/m3/createTeam.png) | Crear equipo |
+| ![handleInvitation](./docs/UML/secuencia/m3/handleInvitation.png) | Manejar invitación |
+
+### Módulo 7 (Partidos y árbitros)
+
+| Diagrama                                                                | Descripción |
+|-------------------------------------------------------------------------|-------------|
+| ![asignReferee](./docs/UML/secuencia/m7/asignReferee.png)               | Asignar árbitro |
+| ![mostrarInfoPartidos](./docs/UML/secuencia/m7/mostrarInfoPartidos.png) | Mostrar información de partidos |
+| ![registerMatch](./docs/UML/secuencia/m7/registerMatch.png)             | Registrar partido |
+
+## Despliegue con Docker
+
+### Prerrequisitos
+
+- [Docker](https://www.docker.com/get-started) instalado
+- [Docker Compose](https://docs.docker.com/compose/install/) instalado
+- Archivo `.env` configurado (ver `.env.example`)
+
+### Configuración inicial
+
+
+1. Crea tu archivo `.env` a partir del ejemplo:
+```bash
+cp .env.example .env
+```
+
+2. Edita el `.env` con tus valores reales (credenciales, secretos, etc.).
+
+### Levantar el entorno local
+
+```bash
+docker-compose up --build
+```
+
+Esto levanta dos servicios:
+- **db** — PostgreSQL 16 en el puerto `5432`
+- **backend** — Spring Boot en el puerto `8443` (HTTPS)
+
+### Verificar que está corriendo
+
+```bash
+docker-compose ps
+```
+
+Accede a la API en: `https://localhost:8443`
+
+### Detener el entorno
+
+```bash
+docker-compose down
+```
+
+Para eliminar también los datos de la base de datos:
+```bash
+docker-compose down -v
+```
+
+### Estructura de archivos Docker
+
+```
+TechUpFutbol_Backend/
+├── Dockerfile          # Imagen del backend
+├── docker-compose.yml  # Orquestación de servicios
+├── .dockerignore       # Archivos excluidos de la imagen
+├── .env                # Variables de entorno reales (no subir al repo)
+└── .env.example        # Plantilla de variables de entorno
+```
+
+### Notas importantes
+
+- El archivo `.env` **nunca debe subirse al repositorio**. Está incluido en `.gitignore` y `.dockerignore`.
+- El backend espera que la base de datos esté disponible antes de arrancar (healthcheck configurado).
+- Los logs se guardan en la carpeta `logs/` del proyecto.
