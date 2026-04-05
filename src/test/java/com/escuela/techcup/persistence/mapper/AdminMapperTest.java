@@ -4,6 +4,8 @@ import com.escuela.techcup.core.model.Administrator;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.persistence.entity.users.AdministratorEntity;
+import com.escuela.techcup.persistence.mapper.users.AdminMapper;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

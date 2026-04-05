@@ -19,7 +19,7 @@ import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
-import com.escuela.techcup.persistence.repository.users.TeamRepository;
+import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class TeamServiceImpl implements TeamService {
         }
 
         String teamId = IdGeneratorUtil.generateId();
-        Team team = new Team(teamId, name, uniformColors, logo);
+        Team team = new Team(teamId, name, uniformColors, logo, null);
 
         TeamEntity entity = TeamMapper.toEntity(team);
         teamRepository.save(entity);

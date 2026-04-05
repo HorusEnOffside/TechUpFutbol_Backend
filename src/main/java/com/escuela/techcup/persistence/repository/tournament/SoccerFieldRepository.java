@@ -9,4 +9,5 @@ import java.util.List;
 public interface SoccerFieldRepository extends JpaRepository<SoccerFieldEntity, String> {
 
     List<SoccerFieldEntity> findByNameContainingIgnoreCase(String name);
+    boolean existsByNameIgnoreCase(String name);
 }

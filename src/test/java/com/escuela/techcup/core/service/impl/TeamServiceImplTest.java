@@ -15,7 +15,7 @@ import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
-import com.escuela.techcup.persistence.repository.users.TeamRepository;
+import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

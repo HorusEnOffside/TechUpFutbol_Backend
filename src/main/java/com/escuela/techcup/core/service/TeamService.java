@@ -3,7 +3,6 @@ package com.escuela.techcup.core.service;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 
-import java.awt.*;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
@@ -20,10 +19,8 @@ public interface TeamService {
     boolean validatePlayerUniquePerTournament(String playerId, String tournamentId);
 
     Team getTeamById(String teamId);
+
     List<Team> getAllTeams();
 
     boolean validateEngineeringMajority(String teamId);
-
-
-
 }

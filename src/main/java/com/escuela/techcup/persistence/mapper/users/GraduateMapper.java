@@ -1,16 +1,16 @@
-package com.escuela.techcup.persistence.mapper;
+package com.escuela.techcup.persistence.mapper.users;
 
-import com.escuela.techcup.persistence.entity.users.TeacherEntity;
-import com.escuela.techcup.core.model.Teacher;
+import com.escuela.techcup.persistence.entity.users.GraduateEntity;
+import com.escuela.techcup.core.model.Graduate;
 
-public class TeacherMapper {
+public class GraduateMapper {
 
-    private TeacherMapper() {
+    private GraduateMapper() {
     }
 
-    public static Teacher toModel(TeacherEntity entity) {
+    public static Graduate toModel(GraduateEntity entity) {
         if (entity == null) return null;
-        return new Teacher(
+        Graduate graduate = new Graduate(
             entity.getId(),
             entity.getName(),
             entity.getMail(),
@@ -18,11 +18,15 @@ public class TeacherMapper {
             entity.getGender(),
             entity.getPasswordHash()
         );
+        if (entity.getRoles() != null) {
+            graduate.setRoles(entity.getRoles());
+        }
+        return graduate;
     }
 
-    public static TeacherEntity toEntity(Teacher model) {
+    public static GraduateEntity toEntity(Graduate model) {
         if (model == null) return null;
-        TeacherEntity entity = new TeacherEntity();
+        GraduateEntity entity = new GraduateEntity();
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setMail(model.getMail());

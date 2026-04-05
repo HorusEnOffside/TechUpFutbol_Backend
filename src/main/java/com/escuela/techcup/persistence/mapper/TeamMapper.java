@@ -13,7 +13,8 @@ public class TeamMapper {
                 entity.getId(),
                 entity.getName(),
                 entity.getUniformColor(),
-                null
+                null,
+                entity.getFormation()
         );
         return team;
     }
@@ -24,6 +25,7 @@ public class TeamMapper {
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setUniformColor(model.getUniformColor());
+        entity.setFormation(model.getFormation());
         return entity;
     }
 }

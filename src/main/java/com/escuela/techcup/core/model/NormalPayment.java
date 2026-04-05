@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class NormalPayment implements Payment {
+    private String id;
     private PaymentStatus status;
     private BufferedImage voucher;
     private String description;

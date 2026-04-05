@@ -50,5 +50,5 @@ public class TeamEntity {
     private TournamentEntity tournament;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PlayerEntity> players;
+    private List<TeamPlayerEntity> players;
 }

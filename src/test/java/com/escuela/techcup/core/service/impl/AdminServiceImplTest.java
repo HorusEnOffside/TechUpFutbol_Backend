@@ -3,7 +3,6 @@ package com.escuela.techcup.core.service.impl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.escuela.techcup.persistence.entity.users.AdministratorEntity;

@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
+import com.escuela.techcup.core.service.impl.JwtServiceImpl;
+import java.util.Set;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -30,20 +32,26 @@ class ApiIntegrityTest {
     @Autowired
     private WebApplicationContext context;
 
+    @Autowired
+    private JwtServiceImpl jwtService;
+
     private MockMvc mockMvc;
+
+    private String adminToken;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
+        adminToken = jwtService.generateToken("test-admin-id", "admin@test.com", Set.of("ADMIN"));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /api/users responde 200 con JSON válido")
     void testDataIntegrity_UsersListStructure() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.CONTENT_TYPE))
@@ -52,83 +60,83 @@ class ApiIntegrityTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /api/players retorna lista íntegra sin corruptelas")
     void testDataIntegrity_PlayersList() throws Exception {
         mockMvc.perform(get("/api/players")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, containsString("application/json")));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /api/users no devuelve passwords en respuesta")
     void testDataIntegrity_PasswordsNotExposed() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].password").doesNotExist());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Respuestas no contienen secretos o datos privados")
     void testDataIntegrity_NoSecretsInResponse() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].encodedPassword").doesNotExist());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Response incluye Content-Type")
     void testSecurityHeaders_ContentType() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, containsString("application/json")));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Response incluye Content-Length")
     void testSecurityHeaders_ContentLength() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.CONTENT_TYPE));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("CORS: GET desde origen permitido (localhost:3000) funciona")
     void testCORS_AllowedOriginLocalhost3000() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .header("Origin", "http://localhost:3000")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("CORS: GET desde origen permitido (https://localhost:3000) funciona")
     void testCORS_AllowedOriginSecureLocalhost() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .header("Origin", "https://localhost:3000")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("CORS: GET desde origen NO permitido es respondido por servidor")
     void testCORS_UnallowedOriginHandled() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .header("Origin", "https://attacker.malicious.com")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden()); // ← aquí, cambiar isOk() por isForbidden()
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -142,28 +150,19 @@ class ApiIntegrityTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("CORS configurado con orígenes permitidos")
     void testCORS_ConfigurationPresent() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    @DisplayName("API responde en puerto HTTPS configurado")
-    void testHTTPS_ConfiguredInApplication() throws Exception {
-        mockMvc.perform(get("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("JSON response es válido UTF-8")
     void testDataIntegrity_ValidJsonEncoding() throws Exception {
         mockMvc.perform(get("/api/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -171,14 +170,15 @@ class ApiIntegrityTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /api/players retorna respuesta consistente")
     void testDataIntegrity_ConsistentResponses() throws Exception {
         mockMvc.perform(get("/api/players")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/players")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
