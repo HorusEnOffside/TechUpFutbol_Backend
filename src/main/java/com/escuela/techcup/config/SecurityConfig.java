@@ -2,7 +2,6 @@ package com.escuela.techcup.config;
 
 import java.util.Arrays;
 
-import com.escuela.techcup.security.filter.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +65,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/api/auth/**",
-                                "/api/players/**"
+                                "/api/players/**",
+                                "/api/users/admin"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -3,16 +3,12 @@ package com.escuela.techcup.persistence.mapper.tournament;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
-import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
-import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
 import com.escuela.techcup.persistence.mapper.tournament.TournamentMapper;
 import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.Captain;
 import com.escuela.techcup.core.model.Player;
-import com.escuela.techcup.core.model.ComponentPlayer;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,14 +22,13 @@ public class TeamMapper {
     private TeamMapper() {
     }
 
-
     public static TeamEntity toEntity(Team team) {
         if (team == null) return null;
         TeamEntity teamEntity = new TeamEntity();
         teamEntity.setId(team.getId());
         teamEntity.setName(team.getName());
         teamEntity.setLogo(toPngBytes(team.getLogo()));
-        teamEntity.setUniformColor(colorToHex(team.getUniformColor()));
+        teamEntity.setUniformColor(team.getUniformColor());
         teamEntity.setFormation(team.getFormation());
         if (team.getCaptain() != null) {
             teamEntity.setCaptainPlayer(PlayerMapper.toEntity(team.getCaptain()));
@@ -70,8 +65,8 @@ public class TeamMapper {
         Team team = new Team(
                 teamEntity.getId(),
                 teamEntity.getName(),
+                teamEntity.getUniformColor(),
                 toBufferedImage(teamEntity.getLogo()),
-                hexToColor(teamEntity.getUniformColor()),
                 teamEntity.getFormation()
         );
         if (teamEntity.getCaptainPlayer() != null) {
@@ -105,9 +100,7 @@ public class TeamMapper {
     }
 
     private static byte[] toPngBytes(BufferedImage image) {
-        if (image == null) {
-            return new byte[0];
-        }
+        if (image == null) return new byte[0];
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
@@ -118,23 +111,11 @@ public class TeamMapper {
     }
 
     private static BufferedImage toBufferedImage(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
-            return null;
-        }
+        if (bytes == null || bytes.length == 0) return null;
         try {
             return ImageIO.read(new ByteArrayInputStream(bytes));
         } catch (IOException e) {
             return null;
         }
-    }
-
-    private static String colorToHex(Color color) {
-        if (color == null) return null;
-        return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-    }
-
-    private static Color hexToColor(String hex) {
-        if (hex == null) return null;
-        return Color.decode(hex);
     }
 }

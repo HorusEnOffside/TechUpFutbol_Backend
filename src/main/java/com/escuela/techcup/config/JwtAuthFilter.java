@@ -1,4 +1,4 @@
-package com.escuela.techcup.security.filter;
+package com.escuela.techcup.config;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,9 +35,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    public void doFilterInternal(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");

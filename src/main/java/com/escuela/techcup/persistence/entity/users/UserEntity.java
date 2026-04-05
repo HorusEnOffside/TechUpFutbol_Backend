@@ -23,7 +23,7 @@ import java.util.Set;
 public abstract class UserEntity {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "id", columnDefinition = "uuid")
     private String id;
 
     @Column(name = "name", nullable = false, length = 120)
@@ -50,7 +50,11 @@ public abstract class UserEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_user_roles_user"))
+            joinColumns = @JoinColumn(
+                    name = "user_id",
+                    columnDefinition = "uuid",
+                    foreignKey = @ForeignKey(name = "fk_user_roles_user")
+            )
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 30)

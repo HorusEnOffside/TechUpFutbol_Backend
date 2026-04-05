@@ -7,7 +7,7 @@ class InvitationStatusTest {
 
     @Test
     void testCantidadDeValores() {
-        assertEquals(2, InvitationStatus.values().length);
+        assertEquals(3, InvitationStatus.values().length);
     }
 
     @Test
