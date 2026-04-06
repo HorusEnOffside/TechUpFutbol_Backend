@@ -4,27 +4,40 @@ import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 
 public class TournamentMapper {
+
     private TournamentMapper() {}
 
-    public static TournamentEntity toEntity(Tournament tournament) {
-        TournamentEntity entity = new TournamentEntity();
-        entity.setId(tournament.getId());
-        entity.setStartDate(tournament.getStartDate());
-        entity.setEndDate(tournament.getEndDate());
-        entity.setTeamsMaxAmount(tournament.getTeamsMaxAmount());
-        entity.setTeamCost(tournament.getTeamCost());
-        entity.setStatus(tournament.getStatus());
-        return entity;
+    public static Tournament toModel(TournamentEntity entity) {
+        if (entity == null) return null;
+        Tournament tournament = new Tournament();
+        tournament.setId(entity.getId());
+        tournament.setStartDate(entity.getStartDate());
+        tournament.setEndDate(entity.getEndDate());
+        tournament.setClosingDate(entity.getClosingDate());
+        tournament.setTeamsMaxAmount(entity.getTeamsMaxAmount());
+        tournament.setTeamCost(entity.getTeamCost());
+        tournament.setStatus(entity.getStatus());
+        tournament.setReglamento(entity.getReglamento());
+        tournament.setCanchas(entity.getCanchas());
+        tournament.setHorarios(entity.getHorarios());
+        tournament.setSanciones(entity.getSanciones());
+        return tournament;
     }
 
-    public static Tournament toModel(TournamentEntity entity) {
-        Tournament model = new Tournament();
-        model.setId(entity.getId());
-        model.setStartDate(entity.getStartDate());
-        model.setEndDate(entity.getEndDate());
-        model.setTeamsMaxAmount(entity.getTeamsMaxAmount());
-        model.setTeamCost(entity.getTeamCost());
-        model.setStatus(entity.getStatus());
-        return model;
+    public static TournamentEntity toEntity(Tournament model) {
+        if (model == null) return null;
+        TournamentEntity entity = new TournamentEntity();
+        entity.setId(model.getId());
+        entity.setStartDate(model.getStartDate());
+        entity.setEndDate(model.getEndDate());
+        entity.setClosingDate(model.getClosingDate());
+        entity.setTeamsMaxAmount(model.getTeamsMaxAmount());
+        entity.setTeamCost(model.getTeamCost());
+        entity.setStatus(model.getStatus());
+        entity.setReglamento(model.getReglamento());
+        entity.setCanchas(model.getCanchas());
+        entity.setHorarios(model.getHorarios());
+        entity.setSanciones(model.getSanciones());
+        return entity;
     }
 }

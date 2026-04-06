@@ -5,7 +5,6 @@ import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
 
 import java.util.List;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +27,9 @@ public class TournamentEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
+    @Column(name = "closing_date")
+    private LocalDateTime closingDate;
+
     @Column(name = "teams_max_amount", nullable = false)
     private int teamsMaxAmount;
 
@@ -37,6 +39,19 @@ public class TournamentEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private TournamentStatus status;
+
+    // RF-07: Configuración
+    @Column(name = "reglamento", length = 2000)
+    private String reglamento;
+
+    @Column(name = "canchas", length = 500)
+    private String canchas;
+
+    @Column(name = "horarios", length = 500)
+    private String horarios;
+
+    @Column(name = "sanciones", length = 500)
+    private String sanciones;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(

@@ -1,8 +1,7 @@
 package com.escuela.techcup.persistence.entity.users;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.escuela.techcup.core.model.enums.Career;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,4 +13,8 @@ public class StudentEntity extends UserPlayerEntity {
 
     @Column(name = "semester", nullable = false)
     private Integer semester;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "career", nullable = false, length = 50)
+    private Career career;
 }

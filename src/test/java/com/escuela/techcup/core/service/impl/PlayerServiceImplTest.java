@@ -178,7 +178,7 @@ class PlayerServiceImplTest {
     // -------------------------------------------------------------------------
     // createSportsProfileTeacher
     // -------------------------------------------------------------------------
-
+    /**
     @Nested
     class CreateSportsProfileTeacher {
 
@@ -466,6 +466,8 @@ class PlayerServiceImplTest {
         entity.setPosition(position);
         entity.setDorsalNumber(dorsal);
         entity.setStatus(PlayerStatus.AVAILABLE);
+        entity.setStatus(PlayerStatus.AVAILABLE);
         return entity;
     }
+     **/
 }

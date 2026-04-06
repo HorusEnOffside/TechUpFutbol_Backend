@@ -5,22 +5,20 @@ import com.escuela.techcup.core.model.Teacher;
 
 public class TeacherMapper {
 
-    private TeacherMapper() {
-    }
+    private TeacherMapper() {}
 
     public static Teacher toModel(TeacherEntity entity) {
         if (entity == null) return null;
         Teacher teacher = new Teacher(
-            entity.getId(),
-            entity.getName(),
-            entity.getMail(),
-            entity.getDateOfBirth(),
-            entity.getGender(),
-            entity.getPasswordHash()
+                entity.getId(),
+                entity.getName(),
+                entity.getMail(),
+                entity.getDateOfBirth(),
+                entity.getGender(),
+                entity.getPasswordHash(),
+                entity.getCareer()
         );
-        if (entity.getRoles() != null) {
-            teacher.setRoles(entity.getRoles());
-        }
+        if (entity.getRoles() != null) teacher.setRoles(entity.getRoles());
         return teacher;
     }
 
@@ -33,6 +31,7 @@ public class TeacherMapper {
         entity.setDateOfBirth(model.getDateOfBirth());
         entity.setGender(model.getGender());
         entity.setPasswordHash(model.getPassword());
+        entity.setCareer(model.getCareer());
         entity.setRoles(model.getRoles());
         return entity;
     }

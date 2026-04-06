@@ -4,16 +4,19 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Optional;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
+import com.escuela.techcup.controller.dto.GraduateUserDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.dto.StudentUserDTO;
+import com.escuela.techcup.controller.dto.TeacherPlayerDTO;
+import com.escuela.techcup.controller.dto.TeacherUserDTO;
 import com.escuela.techcup.controller.dto.UserPlayerDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Player;
@@ -47,117 +50,71 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public Player createSportsProfileStudent(StudentPlayerDTO studentPlayerDTO, BufferedImage profilePicture) {
-        validateStudent(studentPlayerDTO);
-        log.debug("Starting player sports profile creation. mail={}, dorsal={}, position={}, photo={}",
-            studentPlayerDTO.getMail(), studentPlayerDTO.getDorsalNumber(), studentPlayerDTO.getPosition(), profilePicture != null);
-
+        if (studentPlayerDTO == null) throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
+        PlayerValidator.validateInput(studentPlayerDTO.getDorsalNumber());
         validatePlayerMailUnique(studentPlayerDTO.getMail());
-        log.trace("Player DTO validation completed for mail={}", studentPlayerDTO.getMail());
 
-        StudentUserDTO studentUserDTO = new StudentUserDTO(studentPlayerDTO.getName(), studentPlayerDTO.getMail(), studentPlayerDTO.getDateOfBirth(), studentPlayerDTO.getGender(), studentPlayerDTO.getPassword(), studentPlayerDTO.getSemester());
+        log.debug("Starting student player sports profile creation. mail={}", studentPlayerDTO.getMail());
+
+        StudentUserDTO studentUserDTO = new StudentUserDTO(
+                studentPlayerDTO.getName(), studentPlayerDTO.getMail(),
+                studentPlayerDTO.getDateOfBirth(), studentPlayerDTO.getGender(),
+                studentPlayerDTO.getPassword(), studentPlayerDTO.getSemester(),
+                studentPlayerDTO.getCareer());
 
         UserPlayer createdUser = userService.createStudentUser(studentUserDTO, profilePicture);
-
-
-        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
-                .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
-
-        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
-            throw new InvalidInputException("A sports profile already exists for that user");
-        }
-
-        Player player = new Player(createdUser, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
-
-        PlayerEntity entity = PlayerMapper.toEntity(player);
-
-        playerRepository.save(entity);
-        return player;
+        return savePlayerProfile(createdUser, studentPlayerDTO.getPosition(), studentPlayerDTO.getDorsalNumber());
     }
-
-
 
     @Override
     @Transactional
-    public Player createSportsProfileTeacher(PlayerDTO playerDTO, BufferedImage profilePicture) {
-        validatePlayerPayload(playerDTO);
-        log.debug("Starting teacher player sports profile creation. mail={}, dorsal={}, position={}, photo={}",
-            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition(), profilePicture != null);
+    public Player createSportsProfileTeacher(TeacherPlayerDTO teacherPlayerDTO, BufferedImage profilePicture) {
+        if (teacherPlayerDTO == null) throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
+        validatePlayerMailUnique(teacherPlayerDTO.getMail());
 
-        validatePlayerMailUnique(playerDTO.getMail());
-        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+        log.debug("Starting teacher player sports profile creation. mail={}", teacherPlayerDTO.getMail());
 
+        TeacherUserDTO teacherUserDTO = new TeacherUserDTO(
+                teacherPlayerDTO.getName(), teacherPlayerDTO.getMail(),
+                teacherPlayerDTO.getDateOfBirth(), teacherPlayerDTO.getGender(),
+                teacherPlayerDTO.getPassword(), teacherPlayerDTO.getCareer());
 
-        UserPlayer createdUser = createUserPlayer(playerDTO, profilePicture);
-
-
-        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
-                .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
-
-        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
-            throw new InvalidInputException("A sports profile already exists for that user");
-        }
-        log.debug("Creating player entity for userId={}", createdUser.getId());
-        Player player = new Player(createdUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
-
-        PlayerEntity entity = PlayerMapper.toEntity(player);
-
-        playerRepository.save(entity);
-        return player;
+        UserPlayer createdUser = userService.createTeacherUser(teacherUserDTO, profilePicture);
+        return savePlayerProfile(createdUser, teacherPlayerDTO.getPosition(), teacherPlayerDTO.getDorsalNumber());
     }
 
     @Override
     @Transactional
     public Player createSportsProfileFamiliar(PlayerDTO playerDTO, BufferedImage profilePicture) {
-        validatePlayerPayload(playerDTO);
-        log.debug("Starting familiar player sports profile creation. mail={}, dorsal={}, position={}, photo={}",
-            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition(), profilePicture != null);
-
+        if (playerDTO == null) throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
         validatePlayerMailUnique(playerDTO.getMail());
-        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
 
-        UserPlayer createdUser = createUserPlayer(playerDTO, profilePicture);
+        log.debug("Starting familiar player sports profile creation. mail={}", playerDTO.getMail());
 
+        UserPlayerDTO userPlayerDTO = new UserPlayerDTO(
+                playerDTO.getName(), playerDTO.getMail(),
+                playerDTO.getDateOfBirth(), playerDTO.getGender(),
+                playerDTO.getPassword());
 
-        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
-                .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
-
-        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
-            throw new InvalidInputException("A sports profile already exists for that user");
-        }
-        log.debug("Creating player entity for userId={}", createdUser.getId());
-        Player player = new Player(createdUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
-
-        PlayerEntity entity = PlayerMapper.toEntity(player);
-
-        playerRepository.save(entity);
-        return player;
+        UserPlayer createdUser = userService.createFamiliarUser(userPlayerDTO, profilePicture);
+        return savePlayerProfile(createdUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
     }
 
     @Override
     @Transactional
-    public Player createSportsProfileGraduate(PlayerDTO playerDTO, BufferedImage profilePicture) {
-        validatePlayerPayload(playerDTO);
-        log.debug("Starting graduate player sports profile creation. mail={}, dorsal={}, position={}, photo={}",
-            playerDTO.getMail(), playerDTO.getDorsalNumber(), playerDTO.getPosition(), profilePicture != null);
+    public Player createSportsProfileGraduate(GraduatePlayerDTO graduatePlayerDTO, BufferedImage profilePicture) {
+        if (graduatePlayerDTO == null) throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
+        validatePlayerMailUnique(graduatePlayerDTO.getMail());
 
-        validatePlayerMailUnique(playerDTO.getMail());
-        log.trace("Player DTO validation completed for mail={}", playerDTO.getMail());
+        log.debug("Starting graduate player sports profile creation. mail={}", graduatePlayerDTO.getMail());
 
-        UserPlayer createdUser = createUserPlayer(playerDTO, profilePicture);
+        GraduateUserDTO graduateUserDTO = new GraduateUserDTO(
+                graduatePlayerDTO.getName(), graduatePlayerDTO.getMail(),
+                graduatePlayerDTO.getDateOfBirth(), graduatePlayerDTO.getGender(),
+                graduatePlayerDTO.getPassword(), graduatePlayerDTO.getCareer());
 
-        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
-                .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
-
-        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
-            throw new InvalidInputException("A sports profile already exists for that user");
-        }
-        log.debug("Creating player entity for userId={}", createdUser.getId());
-        Player player = new Player(createdUser, playerDTO.getPosition(), playerDTO.getDorsalNumber());
-
-        PlayerEntity entity = PlayerMapper.toEntity(player);
-
-        playerRepository.save(entity);
-        return player;
+        UserPlayer createdUser = userService.createGraduateUser(graduateUserDTO, profilePicture);
+        return savePlayerProfile(createdUser, graduatePlayerDTO.getPosition(), graduatePlayerDTO.getDorsalNumber());
     }
 
     @Override
@@ -171,48 +128,28 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Player> getPlayerByUserId(String userId) {
-        if (userId == null || userId.isBlank()) {
-            throw new InvalidInputException(USER_ID_IS_REQUIRED);
-        }
-        return playerRepository.findByUserId(userId)
-                .map(PlayerMapper::toModel);
+        if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
+        return playerRepository.findByUserId(userId).map(PlayerMapper::toModel);
     }
 
+    private Player savePlayerProfile(UserPlayer createdUser, com.escuela.techcup.core.model.enums.Position position, int dorsalNumber) {
+        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
+                .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
 
-    //--------------------------------
-    //helper methods
+        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
+            throw new InvalidInputException("A sports profile already exists for that user");
+        }
 
-    private UserPlayer createUserPlayer(PlayerDTO playerDTO, BufferedImage profilePicture) {
-        UserPlayerDTO userPlayerDTO = new UserPlayerDTO(playerDTO.getName(), playerDTO.getMail(), playerDTO.getDateOfBirth(), playerDTO.getGender(), playerDTO.getPassword());
-        return userService.createTeacherUser(userPlayerDTO, profilePicture);
+        Player player = new Player(createdUser, position, dorsalNumber);
+        PlayerEntity entity = PlayerMapper.toEntity(player);
+        playerRepository.save(entity);
+        return player;
     }
 
     private void validatePlayerMailUnique(String mail) {
-        if (mail == null || mail.isBlank()) {
-            log.warn("Cannot validate player uniqueness with empty mail");
-            throw new InvalidInputException("mail is required");
-        }
-
-        boolean exists = userPlayerRepository.existsByMailIgnoreCase(mail);
-        if (exists) {
-            log.warn("Sports profile already exists for mail={}", mail);
+        if (mail == null || mail.isBlank()) throw new InvalidInputException("mail is required");
+        if (userPlayerRepository.existsByMailIgnoreCase(mail)) {
             throw new InvalidInputException("A sports profile already exists for that email");
-        }
-    }
-
-    private void validateStudent(StudentPlayerDTO dto) {
-        if (dto == null) {
-            log.warn("Student sports profile creation rejected: payload is null");
-            throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
-        }
-
-        PlayerValidator.validateInput(dto.getDorsalNumber());
-    }
-
-    private void validatePlayerPayload(PlayerDTO dto) {
-        if (dto == null) {
-            log.warn("Player sports profile creation rejected: payload is null");
-            throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
         }
     }
 }
