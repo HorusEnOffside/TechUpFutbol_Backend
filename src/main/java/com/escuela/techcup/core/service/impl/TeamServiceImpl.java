@@ -267,4 +267,13 @@ public class TeamServiceImpl implements TeamService {
         return Arrays.stream(Formation.values())
                 .toList();
     }
+
+    @Override
+    public Formation getEnemyFormation(String teamId) {
+
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        return team.getFormation();
+    }
 }

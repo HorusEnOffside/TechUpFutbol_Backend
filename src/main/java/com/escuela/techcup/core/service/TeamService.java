@@ -28,4 +28,6 @@ public interface TeamService {
     void changeFormation(Formation formation, String teamId,String matchId);
 
     List<Formation> getAllFormations();
+
+    Formation getEnemyFormation(String teamId);
 }

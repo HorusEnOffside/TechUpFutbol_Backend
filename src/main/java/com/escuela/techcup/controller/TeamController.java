@@ -134,4 +134,11 @@ public class TeamController {
         log.info("Request to get all formations");
         return ResponseEntity.ok(teamService.getAllFormations());
     }
+
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN','PLAYER')")
+    @GetMapping("/{teamId}/formation")
+    public ResponseEntity<Formation> getEnemyFormation(@PathVariable String teamId) {
+        Formation formation = teamService.getEnemyFormation(teamId);
+        return ResponseEntity.ok(formation);
+    }
 }

@@ -1,8 +1,6 @@
 package com.escuela.techcup.core.model.enums;
 
-import lombok.Getter;
 
-@Getter
 public enum Formation {
     FORMATION_4_4_2,
     FORMATION_4_3_3,
