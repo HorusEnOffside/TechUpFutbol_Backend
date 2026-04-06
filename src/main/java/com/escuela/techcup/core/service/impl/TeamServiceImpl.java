@@ -227,20 +227,15 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void changeFormation(Formation formation, String teamId){
-        if (teamId == null || teamId.isBlank()) {
-            throw new InvalidInputException("teamId is required");
-        }
+    public void changeFormation(Formation formation, String teamId,String matchId){
         TeamEntity team  = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
-
-        validateSchedule(team);
+        validateSchedule(matchId);
         team.setFormation(formation);
         teamRepository.save(team);
-
     }
 
-    private void validateSchedule(TeamEntity team) {
+    private void validateSchedule(String matchId) {
 //        LocalDateTime nextMatch = team.getNextMatchDateTime();
 //        if (nextMatch == null) return;
 //        long hoursUntilMatch = ChronoUnit.HOURS.between(LocalDateTime.now(), nextMatch);
