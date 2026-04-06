@@ -127,4 +127,11 @@ public class TeamController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
+    @GetMapping("/formations")
+    public ResponseEntity<List<Formation>> getAllFormations() {
+        log.info("Request to get all formations");
+        return ResponseEntity.ok(teamService.getAllFormations());
+    }
 }

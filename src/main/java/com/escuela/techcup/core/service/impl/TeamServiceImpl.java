@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -258,5 +259,12 @@ public class TeamServiceImpl implements TeamService {
                             DateUtil.minutesUntil(match.getDateTime()))
             );
         }
+    }
+
+    @Override
+    public List<Formation> getAllFormations() {
+        log.info("Fetching all formations from enum");
+        return Arrays.stream(Formation.values())
+                .toList();
     }
 }
