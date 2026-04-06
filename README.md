@@ -107,41 +107,6 @@ En este repositorio no sólo se encontrará los artefactos básicos, sino tambi�
 
 ---
 
-## Diagramas de Secuencia
-
-### Módulo 1 (Usuarios y perfiles deportivos)
-
-| Diagrama | Descripción |
-|----------|-------------|
-| ![createAdminUser](./docs/UML/secuencia/m1/createAdminUser.png) | Crear usuario administrador |
-| ![createFamiliarUser](./docs/UML/secuencia/m1/createFamiliarUser.png) | Crear usuario familiar |
-| ![createGraduateUser](./docs/UML/secuencia/m1/createGraduateUser.png) | Crear usuario egresado |
-| ![createOrganizerUser](./docs/UML/secuencia/m1/createOrganizerUser.png) | Crear usuario organizador |
-| ![createRefereeUser](./docs/UML/secuencia/m1/createRefereeUser.png) | Crear usuario árbitro |
-| ![createSportsProfileFamiliar](./docs/UML/secuencia/m1/createSportsProfileFamiliar.png) | Crear perfil deportivo - Familiar |
-| ![createSportsProfileGraduate](./docs/UML/secuencia/m1/createSportsProfileGraduate.png) | Crear perfil deportivo - Egresado |
-| ![createSportsProfileStudent](./docs/UML/secuencia/m1/createSportsProfileStudent.png) | Crear perfil deportivo - Estudiante |
-| ![createSportsProfileTeacher](./docs/UML/secuencia/m1/createSportsProfileTeacher.png) | Crear perfil deportivo - Profesor |
-| ![createStudentUser](./docs/UML/secuencia/m1/createStudentUser.png) | Crear usuario estudiante |
-| ![createTeacherUser](./docs/UML/secuencia/m1/createTeacherUser.png) | Crear usuario profesor |
-| ![hashPassword](./docs/UML/secuencia/m1/hashPassword.png) | Hash de contraseña |
-| ![idGenerator](./docs/UML/secuencia/m1/idGenerator.png) | Generador de ID |
-
-### Módulo 3 (Equipos e invitaciones)
-
-| Diagrama | Descripción |
-|----------|-------------|
-| ![createTeam](./docs/UML/secuencia/m3/createTeam.png) | Crear equipo |
-| ![handleInvitation](./docs/UML/secuencia/m3/handleInvitation.png) | Manejar invitación |
-
-### Módulo 7 (Partidos y árbitros)
-
-| Diagrama                                                                | Descripción |
-|-------------------------------------------------------------------------|-------------|
-| ![asignReferee](./docs/UML/secuencia/m7/asignReferee.png)               | Asignar árbitro |
-| ![mostrarInfoPartidos](./docs/UML/secuencia/m7/mostrarInfoPartidos.png) | Mostrar información de partidos |
-| ![registerMatch](./docs/UML/secuencia/m7/registerMatch.png)             | Registrar partido |
-
 ## Despliegue con Docker
 
 ### Prerrequisitos
