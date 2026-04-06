@@ -1,9 +1,12 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.dto.FormationDTO;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -107,4 +110,21 @@ public class TeamController {
 		log.info("Request to validate player unique per tournament. playerId={}, tournamentId={}", playerId, tournamentId);
 		return ResponseEntity.ok(teamService.validatePlayerUniquePerTournament(playerId, tournamentId));
 	}
+
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
+    @PatchMapping("/{teamId}/formation")
+    public ResponseEntity<Void> changeFormation(
+            @PathVariable String teamId,
+            @Valid @RequestBody FormationDTO dto) {
+
+        log.info("Request to change formation. teamId={}, matchId={}, formation={}",
+                teamId, dto.getMatchId(), dto.getFormation());
+
+        teamService.changeFormation(dto.getFormation(), teamId, dto.getMatchId());
+
+        log.info("Formation change request processed. teamId={}, matchId={}",
+                teamId, dto.getMatchId());
+
+        return ResponseEntity.noContent().build();
+    }
 }
