@@ -1,49 +1,65 @@
-# Diagramas de secuencia
+## Diagramas de Secuencia
 
-Este documento agrupa los diagramas de secuencia del proyecto TechCup Fútbol, organizados por módulo funcional. Cada flujo muestra cómo interactúan los actores con el sistema durante procesos clave como el registro de usuarios, la gestión de equipos y la administración de partidos.
+A continuación se presentan los diagramas de secuencia organizados por módulo:
 
----
-
-## Módulo 1 (Usuarios y perfiles deportivos)
-
-Estos diagramas describen el flujo de creación de usuarios por rol, la construcción del perfil deportivo y los pasos de seguridad asociados al registro.
+### Módulo 1 - Gestión de Usuarios y Perfiles Deportivos
 
 | Diagrama | Descripción |
 |----------|-------------|
-| ![createAdminUser](./m1/createAdminUser.png) | Crear usuario administrador | Flujo de registro con privilegios elevados para la gestión total de la plataforma. |
-| ![createFamiliarUser](./m1/createFamiliarUser.png) | Crear usuario familiar | Registro de un usuario externo con correo Gmail y acceso a funciones permitidas por su rol. |
-| ![createGraduateUser](./m1/createGraduateUser.png) | Crear usuario egresado | Alta de un egresado con validación de correo institucional y asignación de rol correspondiente. |
-| ![createOrganizerUser](./m1/createOrganizerUser.png) | Crear usuario organizador | Creación de la cuenta encargada de administrar torneos, pagos y resultados. |
-| ![createRefereeUser](./m1/createRefereeUser.png) | Crear usuario árbitro | Registro del árbitro con acceso exclusivo a partidos asignados y su programación. |
-| ![createSportsProfileFamiliar](./m1/createSportsProfileFamiliar.png) | Crear perfil deportivo - Familiar | Asociación de datos deportivos al usuario, como posición, dorsal y foto, cuando aplica. |
-| ![createSportsProfileGraduate](./m1/createSportsProfileGraduate.png) | Crear perfil deportivo - Egresado | Configuración del perfil deportivo para un egresado dentro del sistema. |
-| ![createSportsProfileStudent](./m1/createSportsProfileStudent.png) | Crear perfil deportivo - Estudiante | Registro del perfil deportivo del estudiante para su participación en el torneo. |
-| ![createSportsProfileTeacher](./m1/createSportsProfileTeacher.png) | Crear perfil deportivo - Profesor | Flujo de creación del perfil deportivo para un profesor participante. |
-| ![createStudentUser](./m1/createStudentUser.png) | Crear usuario estudiante | Registro de un estudiante con credenciales institucionales y rol de jugador. |
-| ![createTeacherUser](./m1/createTeacherUser.png) | Crear usuario profesor | Alta de un profesor en la plataforma con su respectiva validación de acceso. |
-| ![hashPassword](./m1/hashPassword.png) | Hash de contraseña | Proceso de seguridad para almacenar contraseñas de forma cifrada. |
-| ![idGenerator](./m1/idGenerator.png) | Generador de ID | Creación automática de identificadores únicos para usuarios y entidades relacionadas. |
+| ![createAdminUser](./m1/createAdminUser.png) | Creación de usuario administrador |
+| ![createFamiliarUser](./m1/createFamiliarUser.png) | Creación de usuario familiar |
+| ![createGraduateUser](./m1/createGraduateUser.png) | Creación de usuario graduado |
+| ![createOrganizerUser](./m1/createOrganizerUser.png) | Creación de usuario organizador |
+| ![createRefereeUser](./m1/createRefereeUser.png) | Creación de usuario árbitro |
+| ![createSportProfileFamiliar](./m1/createSportProfileFamiliar.png) | Creación de perfil deportivo (familiar) |
+| ![createSportProfileGraduate](./m1/createSportProfileGraduate.png) | Creación de perfil deportivo (graduado) |
+| ![createSportProfileStudent](./m1/createSportProfileStudent.png) | Creación de perfil deportivo (estudiante) |
+| ![createSportProfileTeacher](./m1/createSportProfileTeacher.png) | Creación de perfil deportivo (profesor) |
+| ![createStudentUser](./m1/createStudentUser.png) | Creación de usuario estudiante |
+| ![createTeacherUser](./m1/createTeacherUser.png) | Creación de usuario profesor |
 
----
-
-## Módulo 3 (Equipos e invitaciones)
-
-Estos diagramas muestran cómo el capitán crea su equipo y cómo se gestionan las invitaciones para incorporar jugadores al plantel.
+### Módulo 2 - Gestión de Torneos
 
 | Diagrama | Descripción |
 |----------|-------------|
-| ![createTeam](./m3/createTeam.png) | Crear equipo | Flujo en el que el capitán registra nombre, escudo, colores y valida condiciones básicas del equipo. |
-| ![handleInvitation](./m3/handleInvitation.png) | Manejar invitación | Proceso de envío, aceptación o rechazo de invitaciones para unir jugadores al equipo. |
+| ![createTournament](./m2/createTournament.png) | Creación de torneo |
+| ![finishTournament](./m2/finishTournament.png) | Finalización de torneo |
+| ![getTournament](./m2/getTournament.png) | Obtención de torneo |
+| ![updateTournament](./m2/updateTournament.png) | Actualización de torneo |
 
----
-
-## Módulo 7 (Partidos y árbitros)
-
-Estos diagramas reflejan la operación del partido desde la asignación del árbitro hasta el registro final de la información del encuentro.
+### Módulo 3 - Gestión de Equipos e Invitaciones
 
 | Diagrama | Descripción |
 |----------|-------------|
-| ![asignReferee](./m7/asignReferee.png) | Asignar árbitro | El organizador asigna un árbitro a un partido según disponibilidad y programación. |
-| ![mostrarInfoPartidos](./m7/mostrarInfoPartidos.png) | Mostrar información de partidos | Vista del árbitro para consultar fecha, hora y cancha de sus partidos asignados. |
-| ![registerMatch](./m7/registerMatch.png) | Registrar partido | Registro del marcador, goleadores, tarjetas y demás eventos del encuentro. |
+| ![createTeam](./m3/createTeam.png) | Creación de equipo |
+| ![handleInvitation](./m3/handleInvitation.png) | Gestión de invitaciones |
+| ![sendInvitation](./m3/sendInvitation.png) | Envío de invitación |
 
+### Módulo 4 - Filtros
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![filter](./m4/filter.png) | Filtrado de información |
+
+### Módulo 5 - Gestión de Pagos
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![managePayment](./m5/managePayment.png) | Administración de pagos |
+| ![uploadPayment](./m5/uploadPayment.png) | Subida de comprobante de pago |
+
+### Módulo 6 - Formaciones
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![changeFormation](./m6/changeFormation.png) | Cambio de formación táctica |
+| ![getAllFormations](./m6/getAllFormations.png) | Obtención de todas las formaciones |
+| ![getEnemyFormation](./m6/getEnemyFormation.png) | Visualización de formación del rival |
+
+### Módulo 7 - Gestión de Partidos y Árbitros
+
+| Diagrama | Descripción |
+|----------|-------------|
+| ![assignReferee](./m7/assignReferee.png) | Asignación de árbitro a partido |
+| ![finishMatch](./m7/finishMatch.png) | Finalización de partido |
+| ![viewMatch](./m7/viewMatch.png) | Visualización de detalles del partido |
