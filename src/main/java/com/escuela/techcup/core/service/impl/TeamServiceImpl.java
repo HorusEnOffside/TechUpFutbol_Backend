@@ -1,14 +1,11 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.core.exception.InvalidInputException;
-import com.escuela.techcup.core.exception.TeamAlreadyExistsException;
-import com.escuela.techcup.core.exception.TeamNotFoundException;
-import com.escuela.techcup.core.exception.InvitationNotFoundException;
-import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
+import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
+import com.escuela.techcup.core.util.DateUtil;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
@@ -229,33 +226,37 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public void changeFormation(Formation formation, String teamId,String matchId){
+        log.info("Starting formation change. teamId={}, matchId={}, formation={}",
+                teamId, matchId, formation);
+
+        validateSchedule(matchId, teamId);
+
         TeamEntity team  = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
-        validateSchedule(matchId, teamId);
+
         team.setFormation(formation);
         teamRepository.save(team);
+
+        log.info("Formation changed successfully. teamId={}, matchId={}, formation={}",
+                teamId, matchId, formation);
+
     }
 
     private void validateSchedule(String matchId, String teamId) {
+        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
 
-//        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Match not found or team is not part of this match"
-//                ));
-//
-//        LocalDateTime now = LocalDateTime.now();
-//
-//        if (match.getDateTime().isBefore(now)) {
-//            throw new ScheduleConflictException(
-//                    "Cannot change formation, match has already started"
-//            );
-//        }
-//
-//        long minutesUntilMatch = ChronoUnit.MINUTES.between(now, match.getDateTime());
-//        if (minutesUntilMatch < 60) {
-//            throw new ScheduleConflictException(
-//                    String.format("Cannot change formation, match starts in %d minutes", minutesUntilMatch)
-//            );
-//        }
+        if (DateUtil.isInThePast(match.getDateTime())) {
+            throw new ScheduleConflictException(
+                    "Cannot change formation, match has already started"
+            );
+        }
+
+        if (DateUtil.isWithinOneHour(match.getDateTime())) {
+            throw new ScheduleConflictException(
+                    String.format("Cannot change formation, match starts in %d minutes",
+                            DateUtil.minutesUntil(match.getDateTime()))
+            );
+        }
     }
 }
