@@ -22,12 +22,16 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
     - [Funcionales](#requerimientos-funcionales)
     - [No funcionales](#requerimientos-no-funcionales)
 3. [Análisis de requerimientos](#análisis-de-requerimientos)
-4. [Manual de identidad](#manual-de-identidad)
-5. [Jira: Gestión de tareas y funcionalidades](#jira)
-6. [Diagramas de secuencia](#diagramas-de-secuencia)
-7. [Diagrama de componentes general](#diagrama-de-componentes-general)
-8. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
-9. [Diagrama de clases](#diagrama-de-clases)
+4. [Arquitectura](#arquitectura)
+5. [Manual de identidad](#manual-de-identidad)
+6. [Jira: Gestión de tareas y funcionalidades](#jira)
+7. [Diagramas de secuencia](#diagramas-de-secuencia)
+8. [Diagrama de componentes general](#diagrama-de-componentes-general)
+9. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
+10. [Diagrama de despliegue](#diagrama-de-despliegue)
+11. [Diagrama de clases](#diagrama-de-clases)
+12. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
+13. [Despliegue con Docker](#despliegue-con-docker)
 ---
 
 ## Diagrama de contexto del sistema
@@ -43,7 +47,9 @@ También evidencia la integración con procesos externos como el pago y la carga
 
 ## Definición de requerimientos
 
-### Requerimientos funcionales y Requerimientos no funcionales
+### Requerimientos funcionales
+
+### Requerimientos no funcionales
 
 #### Documento de definición de requerimientos del sistema, donde se consolidan los requerimientos funcionales y no funcionales que delimitan el alcance del proyecto:
 #### https://drive.google.com/file/d/1AOBtzUp4Ludo7ZzYN-Zx059rskGi4_KU/view?usp=sharing
@@ -52,6 +58,14 @@ También evidencia la integración con procesos externos como el pago y la carga
 
 #### Documento de análisis de requerimientos del sistema, donde se desarrollan y justifican las necesidades identificadas para el proyecto:  
 #### https://1drv.ms/w/c/7d34c3acd28e130c/IQA1grpq8wYKT5Vyg6x0otSSAUKBbCGLtZLGRaYhcGPXc7Q?e=e3IsW9
+
+---
+
+
+## Arquitectura
+
+#### Documento de arquitectura del sistema, donde se describe la estructura general de la solución, la organización de capas, los componentes principales y las decisiones técnicas adoptadas:
+#### https://1drv.ms/w/c/7d34c3acd28e130c/IQAfWj_AG5bKT4UZDSs10honAU8gFO3hMa6E1Nb1qo87wek?e=cGd2Ee
 
 ---
 
@@ -82,6 +96,12 @@ Además, muestra la base estructural sobre la que se implementan los procesos de
 **Explicación:** Este diagrama detalla la interacción entre los componentes internos del sistema y sus dependencias directas. Se enfoca en cómo los módulos concretos colaboran para ejecutar los casos de uso del dominio deportivo.
 
 Aquí se aprecia mejor la relación entre servicios de negocio, controladores, repositorios y entidades, lo que facilita mantener bajo acoplamiento y alta cohesión dentro de la aplicación.
+
+## Diagrama de despliegue
+
+**Explicación:** Este diagrama representa la distribución física de la solución y cómo se despliegan sus componentes principales en tiempo de ejecución.
+
+En el caso de TECHCUP FÚTBOL, permite visualizar la interacción entre el contenedor del backend Spring Boot, la base de datos PostgreSQL y el entorno Docker que orquesta ambos servicios.
 
 ## Diagrama de clases
 ![Diagrama de clases](docs/images/DiagramaClases.png)
