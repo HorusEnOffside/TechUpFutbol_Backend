@@ -1,6 +1,7 @@
 package com.escuela.techcup.core.service;
 
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface TeamService {
     List<Team> getAllTeams();
 
     boolean validateEngineeringMajority(String teamId);
+
+    void changeFormation(Formation formation, String teamId);
 }

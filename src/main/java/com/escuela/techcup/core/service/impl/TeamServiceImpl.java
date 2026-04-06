@@ -6,6 +6,7 @@ import com.escuela.techcup.core.exception.TeamNotFoundException;
 import com.escuela.techcup.core.exception.InvitationNotFoundException;
 import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
@@ -18,6 +19,7 @@ import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
+import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
@@ -28,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -39,16 +43,19 @@ public class TeamServiceImpl implements TeamService {
     private final TeamPlayerRepository teamPlayerRepository;
     private final PlayerRepository playerRepository;
     private final InvitationRepository invitationRepository;
+    private final MatchRepository matchRepository;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
             TeamPlayerRepository teamPlayerRepository,
             PlayerRepository playerRepository,
-            InvitationRepository invitationRepository) {
+            InvitationRepository invitationRepository,
+            MatchRepository matchRepository) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
         this.invitationRepository = invitationRepository;
+        this.matchRepository = matchRepository;
     }
 
     @Override
@@ -216,5 +223,31 @@ public class TeamServiceImpl implements TeamService {
                 teamId, total, engineeringCount, valid);
 
         return valid;
+    }
+
+    @Override
+    @Transactional
+    public void changeFormation(Formation formation, String teamId){
+        if (teamId == null || teamId.isBlank()) {
+            throw new InvalidInputException("teamId is required");
+        }
+        TeamEntity team  = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        validateSchedule(team);
+        team.setFormation(formation);
+        teamRepository.save(team);
+
+    }
+
+    private void validateSchedule(TeamEntity team) {
+//        LocalDateTime nextMatch = team.getNextMatchDateTime();
+//        if (nextMatch == null) return;
+//        long hoursUntilMatch = ChronoUnit.HOURS.between(LocalDateTime.now(), nextMatch);
+//        if (hoursUntilMatch < 1) {
+//            throw new ScheduleConflictException(
+//                    "Formation cannot be changed less than 1 hour before the match"
+//            );
+//        }
     }
 }
