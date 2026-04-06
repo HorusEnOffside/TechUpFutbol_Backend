@@ -97,11 +97,56 @@ Además, muestra la base estructural sobre la que se implementan los procesos de
 
 Aquí se aprecia mejor la relación entre servicios de negocio, controladores, repositorios y entidades, lo que facilita mantener bajo acoplamiento y alta cohesión dentro de la aplicación.
 
-## Diagrama de despliegue
+## Diagrama de despliegue (Azure + CI/CD) — QA & PROD
 
-**Explicación:** Este diagrama representa la distribución física de la solución y cómo se despliegan sus componentes principales en tiempo de ejecución.
+![diagramaDespliegue.png](docs/UML/arquitectura/diagramaDespliegue.png)
 
-En el caso de TECHCUP FÚTBOL, permite visualizar la interacción entre el contenedor del backend Spring Boot, la base de datos PostgreSQL y el entorno Docker que orquesta ambos servicios.
+
+El siguiente **diagrama de despliegue UML** muestra la arquitectura de ejecución del sistema **TechCup Fútbol** en Azure, incluyendo los **nodos/dispositivos**, los **enlaces de comunicación** entre ellos y la **colocación de los artefactos de software** en cada entorno.
+
+### Componentes principales (según notación UML)
+
+- **Node: GitHub Actions Runner (CI/CD)**  
+  Representa el entorno donde se ejecuta el pipeline de integración y despliegue continuo.  
+  Dentro de este nodo se encuentran las **Deployment Specifications**:
+    - `.github/workflows/ci-cd.yml`: define el flujo de CI/CD (triggers, jobs y pasos) para **QA** y **PROD**.
+    - `docker-compose.yml`: se utiliza para **orquestar/validar** servicios durante pruebas locales o validaciones en CI (por ejemplo, pruebas de integración).
+
+- **Node: Azure Container Registry (ACR)**  
+  Registro donde se almacena el **Artifact** principal del despliegue:
+    - **Docker Image** `techcup-backend:<tag>`.
+
+- **Node: Azure App Service (QA) / Azure App Service (PROD)**  
+  Son los entornos de ejecución (Web App for Containers) donde corre el backend como contenedor.  
+  En cada App Service se incluyen:
+    - **Artifact**: la imagen Docker `techcup-backend:<tag>` que se ejecuta en el servicio.
+    - **Deployment Specification**: configuración del App Service por ambiente (App Settings / variables de entorno), usada para parametrizar credenciales y valores (por ejemplo, variables `DB_*`, secrets, etc.).
+
+- **Device: Azure Database for PostgreSQL (QA) / (PROD)**  
+  Bases de datos administradas en Azure, separadas por ambiente, a las cuales se conecta la aplicación.
+
+- **Desktop client (Browser/Postman)**  
+  Representa al consumidor del sistema (usuario o cliente) que realiza solicitudes HTTP hacia la API.
+
+### Interacción y flujo (comunicación)
+
+1. **CI/CD: build y publicación del artefacto**
+    - GitHub Actions ejecuta el pipeline y realiza `docker build + push` hacia **ACR**.
+    - La imagen resultante queda almacenada como `techcup-backend:<tag>` en el registro.
+
+2. **Despliegue a QA y PROD**
+    - El pipeline realiza `deploy/update` para cada ambiente (QA y PROD), actualizando la versión/tag del contenedor a usar.
+    - Cada **App Service** obtiene la imagen desde ACR mediante `pull image (run container)` y ejecuta el contenedor.
+
+3. **Acceso del cliente**
+    - El cliente se comunica con la aplicación en cada ambiente a través de **HTTPS 443** (QA URL y PROD URL).
+
+4. **Conexión a base de datos**
+    - La aplicación en **QA** se conecta a **PostgreSQL (QA)** mediante **JDBC/TLS 5432**.
+    - La aplicación en **PROD** se conecta a **PostgreSQL (PROD)** mediante **JDBC/TLS 5432**.
+
+### Control de despliegue en producción
+Para el ambiente **PROD** se contempla una política de aprobación manual antes de desplegar (GitHub Environments), requiriendo la aprobación de al menos **3 miembros** del equipo.
 
 ## Diagrama de clases
 ![Diagrama de clases](docs/images/DiagramaClases.png)
