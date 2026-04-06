@@ -1,6 +1,5 @@
 package com.escuela.techcup.persistence.repository.tournament;
 
-import com.escuela.techcup.core.model.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;

@@ -11,6 +11,7 @@ import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
+import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 import com.escuela.techcup.persistence.entity.users.GraduateEntity;
@@ -230,18 +231,30 @@ public class TeamServiceImpl implements TeamService {
     public void changeFormation(Formation formation, String teamId,String matchId){
         TeamEntity team  = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
-        validateSchedule(matchId);
+        validateSchedule(matchId, teamId);
         team.setFormation(formation);
         teamRepository.save(team);
     }
 
-    private void validateSchedule(String matchId) {
-//        LocalDateTime nextMatch = team.getNextMatchDateTime();
-//        if (nextMatch == null) return;
-//        long hoursUntilMatch = ChronoUnit.HOURS.between(LocalDateTime.now(), nextMatch);
-//        if (hoursUntilMatch < 1) {
+    private void validateSchedule(String matchId, String teamId) {
+
+//        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
+//                .orElseThrow(() -> new ResourceNotFoundException(
+//                        "Match not found or team is not part of this match"
+//                ));
+//
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        if (match.getDateTime().isBefore(now)) {
 //            throw new ScheduleConflictException(
-//                    "Formation cannot be changed less than 1 hour before the match"
+//                    "Cannot change formation, match has already started"
+//            );
+//        }
+//
+//        long minutesUntilMatch = ChronoUnit.MINUTES.between(now, match.getDateTime());
+//        if (minutesUntilMatch < 60) {
+//            throw new ScheduleConflictException(
+//                    String.format("Cannot change formation, match starts in %d minutes", minutesUntilMatch)
 //            );
 //        }
     }
