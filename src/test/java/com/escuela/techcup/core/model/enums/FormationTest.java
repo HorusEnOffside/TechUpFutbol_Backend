@@ -7,6 +7,6 @@ class FormationTest {
 
     @Test
     void testCantidadDeValores() {
-        assertEquals(2, Formation.values().length);
+        assertEquals(5, Formation.values().length);
     }
 }
