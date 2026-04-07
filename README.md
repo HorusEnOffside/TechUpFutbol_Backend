@@ -90,11 +90,11 @@ El Front-End concentra toda la interacción con el usuario: vistas, formularios 
 
 **Explicación:** Se detalla la estructura interna del Back-End, mostrando cómo se organiza cada módulo del sistema. Se identifican seis módulos principales: autenticación, partidos, pagos, jugadores, equipos, torneos y usuarios. Cada módulo sigue el mismo patrón de cuatro capas: un Controller que recibe las solicitudes del usuario, un Mapper que transforma los datos entre capas, un Service que ejecuta la lógica de negocio, y un Repository que se comunica directamente con la base de datos. Adicionalmente, cada módulo cuenta con un Validator independiente que verifica que los datos cumplan las reglas del negocio antes de ser procesados. Esta arquitectura aplica el principio de separación de responsabilidades: ninguna capa hace más de lo que le corresponde, lo que reduce el acoplamiento entre módulos y facilita el mantenimiento o reemplazo de cualquier parte sin afectar las demás. El uso de Mappers en ambos extremos del Service garantiza que los datos que entran y salen de la lógica de negocio estén siempre en el formato correcto, desacoplando la representación interna de la externa.
 
-## Diagrama de despliegue (Azure + CI/CD) — QA & PROD
+## Diagrama de despliegue
 
 ![dDespliegue.png](docs/UML/arquitectura/dDespliegue.png)
 
-Este **diagrama de despliegue UML** describe dónde se ejecuta el sistema **TechCup Fútbol** en Azure, qué **artefactos** se despliegan en cada nodo y cómo se conectan los componentes en los ambientes **QA** y **PROD**. El diagrama está dividido en dos zonas: **CI/CD** (entrega) y **Runtime (Azure)** (ejecución).
+Este **diagrama de despliegue UML** describe dónde se ejecuta el sistema **TechCup Fútbol** en Azure, qué **artefactos** se despliegan en cada nodo y cómo se conectan los componentes en los ambientes **QA** y **PROD** (Azure + CI/CD). El diagrama está dividido en dos zonas: **CI/CD** (entrega) y **Runtime (Azure)** (ejecución).
 
 ---
 
@@ -192,7 +192,7 @@ Su objetivo es dejar claras las cardinalidades, herencias y asociaciones que sop
 
 ---
 
-## Diagrama entidad relación 
+## Diagrama entidad relación
 ![Diagrama entidad relacion](docs/images/Diagramaentidadrelacion.png)
 
 **Explicación:** El diagrama entidad-relación de TECHCUP FÚTBOL define cómo se estructura y persiste la información del sistema en PostgreSQL. Se identifican las siguientes entidades principales: usuarios, jugadores, equipos, árbitros, organizadores, administradores, torneos, partidos, canchas, goles y pagos.
