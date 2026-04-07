@@ -23,16 +23,15 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
     - [No funcionales](#requerimientos-no-funcionales)
 3. [Análisis de requerimientos](#análisis-de-requerimientos)
 4. [Arquitectura](#arquitectura)
-5. [Manual de identidad](#manual-de-identidad)
-6. [Jira: Gestión de tareas y funcionalidades](#jira)
-7. [Diagramas de secuencia](#diagramas-de-secuencia)
-8. [Diagrama de componentes general](#diagrama-de-componentes-general)
-9. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
-10. [Diagrama de despliegue](#diagrama-de-despliegue)
-11. [Diagrama de clases](#diagrama-de-clases)
-12. [Diagrama entidad relación](#diagrama-entidad-relación)
-13. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
-14. [Despliegue con Docker](#despliegue-con-docker)
+5. [Jira: Gestión de tareas y funcionalidades](#jira)
+6. [Diagramas de secuencia](#diagramas-de-secuencia)
+7. [Diagrama de componentes general](#diagrama-de-componentes-general)
+8. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
+9. [Diagrama de despliegue](#diagrama-de-despliegue)
+10. [Diagrama de clases](#diagrama-de-clases)
+11. [Diagrama entidad relación](#diagrama-entidad-relación)
+12. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
+13. [Despliegue con Docker](#despliegue-con-docker)
 ---
 
 ## Diagrama de contexto del sistema
@@ -71,11 +70,6 @@ También evidencia la integración con procesos externos como el pago y la carga
 ---
 
 
-## Manual de identidad
-https://pruebacorreoescuelaingeduco.sharepoint.com/:p:/s/DOSW-2026-1/IQA1oPTMzFDaSpldO_fjkOzEAQrW69M2W3Ogkj8GeMJL3mQ?e=SzFiPT
-Documento de manual de identidad visual, donde se definen los lineamientos de marca, colores, uso visual y presentación del proyecto.
-
----
 
 ## Jira
 
@@ -94,7 +88,7 @@ El Front-End concentra toda la interacción con el usuario: vistas, formularios 
 ## Diagrama de componentes especificos
 ![Diagrama componentes especificos](docs/images/Diagramacomponentesespecificos.drawio.png)
 
-**Explicación:**Se detalla la estructura interna del Back-End, mostrando cómo se organiza cada módulo del sistema. Se identifican seis módulos principales: autenticación, partidos, pagos, jugadores, equipos, torneos y usuarios. Cada módulo sigue el mismo patrón de cuatro capas: un Controller que recibe las solicitudes del usuario, un Mapper que transforma los datos entre capas, un Service que ejecuta la lógica de negocio, y un Repository que se comunica directamente con la base de datos. Adicionalmente, cada módulo cuenta con un Validator independiente que verifica que los datos cumplan las reglas del negocio antes de ser procesados. Esta arquitectura aplica el principio de separación de responsabilidades: ninguna capa hace más de lo que le corresponde, lo que reduce el acoplamiento entre módulos y facilita el mantenimiento o reemplazo de cualquier parte sin afectar las demás. El uso de Mappers en ambos extremos del Service garantiza que los datos que entran y salen de la lógica de negocio estén siempre en el formato correcto, desacoplando la representación interna de la externa.
+**Explicación:** Se detalla la estructura interna del Back-End, mostrando cómo se organiza cada módulo del sistema. Se identifican seis módulos principales: autenticación, partidos, pagos, jugadores, equipos, torneos y usuarios. Cada módulo sigue el mismo patrón de cuatro capas: un Controller que recibe las solicitudes del usuario, un Mapper que transforma los datos entre capas, un Service que ejecuta la lógica de negocio, y un Repository que se comunica directamente con la base de datos. Adicionalmente, cada módulo cuenta con un Validator independiente que verifica que los datos cumplan las reglas del negocio antes de ser procesados. Esta arquitectura aplica el principio de separación de responsabilidades: ninguna capa hace más de lo que le corresponde, lo que reduce el acoplamiento entre módulos y facilita el mantenimiento o reemplazo de cualquier parte sin afectar las demás. El uso de Mappers en ambos extremos del Service garantiza que los datos que entran y salen de la lógica de negocio estén siempre en el formato correcto, desacoplando la representación interna de la externa.
 
 ## Diagrama de despliegue (Azure + CI/CD) — QA & PROD
 
