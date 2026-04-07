@@ -30,8 +30,9 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
 9. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
 10. [Diagrama de despliegue](#diagrama-de-despliegue)
 11. [Diagrama de clases](#diagrama-de-clases)
-12. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
-13. [Despliegue con Docker](#despliegue-con-docker)
+12. [Diagrama entidad relación](#diagrama-entidad-relación)
+13. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
+14. [Despliegue con Docker](#despliegue-con-docker)
 ---
 
 ## Diagrama de contexto del sistema
@@ -86,16 +87,14 @@ https://dosw-2026-01.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 ## Diagrama de componentes general
 ![Diagrama componentes especificos](docs/images/DiagramaComponentesGeneral.drawio.png)
 
-**Explicación:** Este diagrama presenta la arquitectura general del backend y cómo se organizan sus capas y módulos principales. Permite entender la separación entre responsabilidades de negocio, exposición de servicios, persistencia e integración con componentes externos.
+**Explicación:** El diagrama de componentes general de TECHCUP FÚTBOL describe la arquitectura técnica del sistema en tres capas. El Front-End se comunica con el Back-End, luego se conecta directamente a la base de datos.
 
-Además, muestra la base estructural sobre la que se implementan los procesos del sistema: autenticación, gestión de usuarios, equipos, partidos, pagos y estadísticas.
+El Front-End concentra toda la interacción con el usuario: vistas, formularios y navegación. El Back-End centraliza la lógica de negocio, el procesamiento de datos y las reglas del torneo. La base de datos, implementada en PostgreSQL, persiste toda la información del sistema siguiendo el modelo relacional.
 
 ## Diagrama de componentes especificos
 ![Diagrama componentes especificos](docs/images/Diagramacomponentesespecificos.drawio.png)
 
-**Explicación:** Este diagrama detalla la interacción entre los componentes internos del sistema y sus dependencias directas. Se enfoca en cómo los módulos concretos colaboran para ejecutar los casos de uso del dominio deportivo.
-
-Aquí se aprecia mejor la relación entre servicios de negocio, controladores, repositorios y entidades, lo que facilita mantener bajo acoplamiento y alta cohesión dentro de la aplicación.
+**Explicación:**Se detalla la estructura interna del Back-End, mostrando cómo se organiza cada módulo del sistema. Se identifican seis módulos principales: autenticación, partidos, pagos, jugadores, equipos, torneos y usuarios. Cada módulo sigue el mismo patrón de cuatro capas: un Controller que recibe las solicitudes del usuario, un Mapper que transforma los datos entre capas, un Service que ejecuta la lógica de negocio, y un Repository que se comunica directamente con la base de datos. Adicionalmente, cada módulo cuenta con un Validator independiente que verifica que los datos cumplan las reglas del negocio antes de ser procesados. Esta arquitectura aplica el principio de separación de responsabilidades: ninguna capa hace más de lo que le corresponde, lo que reduce el acoplamiento entre módulos y facilita el mantenimiento o reemplazo de cualquier parte sin afectar las demás. El uso de Mappers en ambos extremos del Service garantiza que los datos que entran y salen de la lógica de negocio estén siempre en el formato correcto, desacoplando la representación interna de la externa.
 
 ## Diagrama de despliegue (Azure + CI/CD) — QA & PROD
 
@@ -156,6 +155,15 @@ Para el ambiente **PROD** se contempla una política de aprobación manual antes
 Su objetivo es dejar claras las cardinalidades, herencias y asociaciones que soportan las reglas de negocio del sistema, especialmente las restricciones de roles, pertenencia a equipos y seguimiento de resultados.
 
 ---
+
+## Diagrama entidad relación 
+![Diagrama entidad relacion](docs/images/Diagramaentidadrelacion.png)
+
+**Explicación:** El diagrama entidad-relación de TECHCUP FÚTBOL define cómo se estructura y persiste la información del sistema en PostgreSQL. Se identifican las siguientes entidades principales: usuarios, jugadores, equipos, árbitros, organizadores, administradores, torneos, partidos, canchas, goles y pagos.
+
+El diseño aplica 3FN, eliminando redundancias y dependencias transitivas entre atributos. Esto se refleja en decisiones como centralizar los datos personales en una única tabla de usuarios y derivar los roles desde ella, o separar la relación entre jugadores y equipos en una tabla puente independiente. Cada entidad almacena únicamente la información que le corresponde, lo que garantiza consistencia, menor duplicación de datos y mayor facilidad de mantenimiento a medida que el sistema escala.
+
+Entidades principales: users, players, teams, referees, organizers, tournaments, matches, soccer_fields, goals, payments. Relaciones clave: un organizador crea uno o varios torneos, los equipos se inscriben a través de team_players, cada partido ocurre en una cancha con un árbitro asignado, y los goles quedan registrados con el minuto exacto dentro de su partido correspondiente.
 
 ## Diagramas de secuencia
 
