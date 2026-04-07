@@ -6,10 +6,12 @@ import com.escuela.techcup.core.exception.TeamNotFoundException;
 import com.escuela.techcup.core.exception.InvitationNotFoundException;
 import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
 import com.escuela.techcup.core.exception.TournamentNotActiveException;
+import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
+import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
@@ -20,12 +22,14 @@ import com.escuela.techcup.persistence.entity.users.GraduateEntity;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.TeacherEntity;
+import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.tournament.TournamentRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
+import com.escuela.techcup.persistence.repository.users.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,35 +49,31 @@ public class TeamServiceImpl implements TeamService {
     private final PlayerRepository playerRepository;
     private final InvitationRepository invitationRepository;
     private final TournamentRepository tournamentRepository;
+    private final UserRepository userRepository;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
             TeamPlayerRepository teamPlayerRepository,
             PlayerRepository playerRepository,
             InvitationRepository invitationRepository,
-            TournamentRepository tournamentRepository) {
+            TournamentRepository tournamentRepository,
+            UserRepository userRepository) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
         this.invitationRepository = invitationRepository;
         this.tournamentRepository = tournamentRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
     public Team createTeam(String name, String uniformColors, BufferedImage logo, String captainUserId) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidInputException("Team name is required");
-        }
-        if (name.length() < 5) {
-            throw new InvalidInputException("Team name must have at least 5 characters");
-        }
-        if (uniformColors == null || uniformColors.isBlank()) {
-            throw new InvalidInputException("Uniform colors are required");
-        }
-        if (teamRepository.existsByNameIgnoreCase(name)) {
-            throw new TeamAlreadyExistsException(name);
-        }
+        if (name == null || name.isBlank()) throw new InvalidInputException("Team name is required");
+        if (name.length() < 5) throw new InvalidInputException("Team name must have at least 5 characters");
+        if (uniformColors == null || uniformColors.isBlank()) throw new InvalidInputException("Uniform colors are required");
+        if (captainUserId == null || captainUserId.isBlank()) throw new InvalidInputException("captainUserId is required");
+        if (teamRepository.existsByNameIgnoreCase(name)) throw new TeamAlreadyExistsException(name);
 
         // Solo se puede crear equipo si hay un torneo activo
         TournamentEntity activeTournament = tournamentRepository
@@ -81,27 +81,39 @@ public class TeamServiceImpl implements TeamService {
                 .stream().findFirst()
                 .orElseThrow(TournamentNotActiveException::new);
 
+        // Buscar el player del capitán
+        PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
+                .orElseThrow(() -> new InvalidInputException("Captain player profile not found for userId: " + captainUserId));
+
+        // Asignar rol CAPTAIN al usuario
+        UserEntity captainUser = captainPlayer.getUser();
+        captainUser.addRole(UserRole.CAPTAIN);
+        userRepository.save(captainUser);
+
         String teamId = IdGeneratorUtil.generateId();
         Team team = new Team(teamId, name, uniformColors, logo, null);
 
         TeamEntity entity = TeamMapper.toEntity(team);
         entity.setTournament(activeTournament);
+        entity.setCaptainPlayer(captainPlayer);
         teamRepository.save(entity);
 
-        log.info("Team created successfully. teamId={}, name={}, tournamentId={}",
-                teamId, name, activeTournament.getId());
+        // Agregar capitán como jugador del equipo
+        TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
+        teamPlayer.setId(IdGeneratorUtil.generateId());
+        teamPlayer.setTeam(entity);
+        teamPlayer.setPlayer(captainPlayer);
+        teamPlayerRepository.save(teamPlayer);
+
+        log.info("Team created. teamId={}, captainUserId={}, tournamentId={}", teamId, captainUserId, activeTournament.getId());
         return team;
     }
 
     @Override
     @Transactional
     public void invitePlayer(String teamId, String playerId, String message) {
-        if (teamId == null || teamId.isBlank()) {
-            throw new InvalidInputException("teamId is required");
-        }
-        if (playerId == null || playerId.isBlank()) {
-            throw new InvalidInputException("playerId is required");
-        }
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
 
         TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
@@ -109,28 +121,24 @@ public class TeamServiceImpl implements TeamService {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new InvalidInputException("Player not found"));
 
-        if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId)) {
+        if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId))
             throw new PlayerAlreadyInvitedException(playerId);
-        }
 
-        // RF-12: Validar que el equipo no supere el máximo de 12 jugadores
+        // RF-12: máximo 12 jugadores
         List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(teamId);
-        if (currentPlayers.size() >= 12) {
+        if (currentPlayers.size() >= 12)
             throw new InvalidInputException("Team already has the maximum of 12 players");
-        }
 
-        // RF-13: Validar que el jugador no esté en otro equipo del mismo torneo
+        // RF-13: jugador único por torneo
         if (team.getTournament() != null) {
             String tournamentId = team.getTournament().getId();
-            if (!validatePlayerUniquePerTournament(playerId, tournamentId)) {
+            if (!validatePlayerUniquePerTournament(playerId, tournamentId))
                 throw new InvalidInputException("Player is already registered in another team for this tournament");
-            }
         }
 
-        // RF-14: Validar mayoría de Ingeniería o Ciencias de Datos
-        if (!currentPlayers.isEmpty() && !validateEngineeringMajority(teamId)) {
+        // RF-14: mayoría ingeniería (solo si ya hay jugadores)
+        if (!currentPlayers.isEmpty() && !validateEngineeringMajority(teamId))
             throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
-        }
 
         InvitationEntity invitation = new InvitationEntity();
         invitation.setId(IdGeneratorUtil.generateId());
@@ -146,12 +154,8 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public void respondInvitation(String invitationId, InvitationStatus action) {
-        if (invitationId == null || invitationId.isBlank()) {
-            throw new InvalidInputException("invitationId is required");
-        }
-        if (action == null) {
-            throw new InvalidInputException("action is required");
-        }
+        if (invitationId == null || invitationId.isBlank()) throw new InvalidInputException("invitationId is required");
+        if (action == null) throw new InvalidInputException("action is required");
 
         InvitationEntity invitation = invitationRepository
                 .findByIdAndStatus(invitationId, InvitationStatus.PENDING)
@@ -161,6 +165,11 @@ public class TeamServiceImpl implements TeamService {
         invitationRepository.save(invitation);
 
         if (action == InvitationStatus.ACCEPTED) {
+            // Asignar rol PLAYER al usuario
+            UserEntity user = invitation.getPlayer().getUser();
+            user.addRole(UserRole.PLAYER);
+            userRepository.save(user);
+
             TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
             teamPlayer.setId(IdGeneratorUtil.generateId());
             teamPlayer.setTeam(invitation.getTeam());
@@ -174,10 +183,30 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Invitation> getInvitationsByPlayer(String playerId) {
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
+
+        playerRepository.findById(playerId)
+                .orElseThrow(() -> new InvalidInputException("Player not found"));
+
+        return invitationRepository.findByPlayerId(playerId).stream()
+                .map(entity -> {
+                    Invitation inv = new Invitation();
+                    inv.setId(entity.getId());
+                    inv.setTeamId(entity.getTeam().getId());
+                    inv.setTeamName(entity.getTeam().getName());
+                    inv.setPlayerId(entity.getPlayer().getId());
+                    inv.setMessage(entity.getMessage());
+                    inv.setStatus(entity.getStatus());
+                    return inv;
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean validateTeamComposition(String teamId) {
-        if (teamId == null || teamId.isBlank()) {
-            throw new InvalidInputException("teamId is required");
-        }
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
         List<TeamPlayerEntity> players = teamPlayerRepository.findByTeamId(teamId);
         int count = players.size();
         boolean valid = count >= 7 && count <= 12;
@@ -188,12 +217,8 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional(readOnly = true)
     public boolean validatePlayerUniquePerTournament(String playerId, String tournamentId) {
-        if (playerId == null || playerId.isBlank()) {
-            throw new InvalidInputException("playerId is required");
-        }
-        if (tournamentId == null || tournamentId.isBlank()) {
-            throw new InvalidInputException("tournamentId is required");
-        }
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
+        if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
         boolean exists = teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId);
         log.info("Player unique validation. playerId={}, tournamentId={}, exists={}", playerId, tournamentId, exists);
         return !exists;
@@ -202,9 +227,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional(readOnly = true)
     public Team getTeamById(String teamId) {
-        if (teamId == null || teamId.isBlank()) {
-            throw new InvalidInputException("teamId is required");
-        }
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
         return teamRepository.findById(teamId)
                 .map(TeamMapper::toModel)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
@@ -225,13 +248,10 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional(readOnly = true)
     public boolean validateEngineeringMajority(String teamId) {
-        if (teamId == null || teamId.isBlank()) {
-            throw new InvalidInputException("teamId is required");
-        }
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
         List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(teamId);
-        if (teamPlayers.isEmpty()) {
-            throw new InvalidInputException("Team has no players");
-        }
+        if (teamPlayers.isEmpty()) throw new InvalidInputException("Team has no players");
+
         long engineeringCount = teamPlayers.stream()
                 .map(TeamPlayerEntity::getPlayer)
                 .map(PlayerEntity::getUser)
@@ -242,10 +262,10 @@ public class TeamServiceImpl implements TeamService {
                     return false;
                 })
                 .count();
+
         int total = teamPlayers.size();
         boolean valid = engineeringCount > total / 2.0;
-        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}",
-                teamId, total, engineeringCount, valid);
+        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}", teamId, total, engineeringCount, valid);
         return valid;
     }
 }

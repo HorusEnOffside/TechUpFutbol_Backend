@@ -1,5 +1,7 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.dto.InvitationResponseDTO;
+import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
@@ -30,7 +32,7 @@ public class TeamController {
 		this.teamService = teamService;
 	}
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
+	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Team> createTeam(
 			@RequestParam String name,
@@ -38,7 +40,7 @@ public class TeamController {
 			@RequestParam String captainUserId,
 			@RequestPart(value = "logo", required = false) MultipartFile logo
 	) throws IOException {
-		log.info("Request to create team. name={}", name);
+		log.info("Request to create team. name={}, captainUserId={}", name, captainUserId);
 		BufferedImage logoImage = null;
 		if (logo != null && !logo.isEmpty()) {
 			logoImage = ImageIO.read(logo.getInputStream());
@@ -82,6 +84,22 @@ public class TeamController {
 		log.info("Request to respond invitation. invitationId={}, action={}", invitationId, action);
 		teamService.respondInvitation(invitationId, action);
 		return ResponseEntity.ok().build();
+	}
+
+	// Consultar invitaciones de un jugador
+	@PreAuthorize("hasAnyRole('PLAYER', 'CAPTAIN', 'BASEUSER')")
+	@GetMapping("/invitations/player/{playerId}")
+	public ResponseEntity<List<InvitationResponseDTO>> getInvitationsByPlayer(@PathVariable String playerId) {
+		log.info("Request to get invitations for playerId={}", playerId);
+		List<InvitationResponseDTO> invitations = teamService.getInvitationsByPlayer(playerId).stream()
+				.map(inv -> new InvitationResponseDTO(
+						inv.getId(),
+						inv.getTeamId(),
+						inv.getTeamName(),
+						inv.getMessage(),
+						inv.getStatus()))
+				.toList();
+		return ResponseEntity.ok(invitations);
 	}
 
 	@PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
