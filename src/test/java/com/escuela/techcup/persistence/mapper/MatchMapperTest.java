@@ -291,8 +291,8 @@ class MatchMapperTest {
     // -------------------------------------------------------------------------
 
     private Match buildMinimalMatch() {
-        Team teamA = new Team("team-a", "Alpha", null, null, Formation.FORMATION_BASIC);
-        Team teamB = new Team("team-b", "Beta", null, null, Formation.FORMATION_BASIC);
+        Team teamA = new Team("team-a", "Alpha", null, null, Formation.FORMATION_4_4_2);
+        Team teamB = new Team("team-b", "Beta", null, null, Formation.FORMATION_4_4_2);
         return new Match("match-1", DATE_TIME, teamA, teamB);
     }
 
@@ -300,12 +300,12 @@ class MatchMapperTest {
         TeamEntity teamA = new TeamEntity();
         teamA.setId("team-a");
         teamA.setName("Alpha");
-        teamA.setFormation(Formation.FORMATION_BASIC);
+        teamA.setFormation(Formation.FORMATION_4_4_2);
 
         TeamEntity teamB = new TeamEntity();
         teamB.setId("team-b");
         teamB.setName("Beta");
-        teamB.setFormation(Formation.FORMATION_BASIC);
+        teamB.setFormation(Formation.FORMATION_4_4_2);
 
         MatchEntity entity = new MatchEntity();
         entity.setId("match-1");

@@ -306,7 +306,7 @@ class MatchServiceImplTest {
         TeamEntity entity = new TeamEntity();
         entity.setId(id);
         entity.setName(name);
-        entity.setFormation(Formation.FORMATION_BASIC);
+        entity.setFormation(Formation.FORMATION_4_4_2);
         return entity;
     }
 

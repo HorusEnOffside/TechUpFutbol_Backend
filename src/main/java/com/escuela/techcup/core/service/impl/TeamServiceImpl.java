@@ -1,15 +1,14 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.core.exception.InvalidInputException;
-import com.escuela.techcup.core.exception.TeamAlreadyExistsException;
-import com.escuela.techcup.core.exception.TeamNotFoundException;
-import com.escuela.techcup.core.exception.InvitationNotFoundException;
-import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
+import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamService;
+import com.escuela.techcup.core.util.DateUtil;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
+import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 import com.escuela.techcup.persistence.entity.users.GraduateEntity;
@@ -18,6 +17,7 @@ import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
+import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -39,16 +42,19 @@ public class TeamServiceImpl implements TeamService {
     private final TeamPlayerRepository teamPlayerRepository;
     private final PlayerRepository playerRepository;
     private final InvitationRepository invitationRepository;
+    private final MatchRepository matchRepository;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
             TeamPlayerRepository teamPlayerRepository,
             PlayerRepository playerRepository,
-            InvitationRepository invitationRepository) {
+            InvitationRepository invitationRepository,
+            MatchRepository matchRepository) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
         this.invitationRepository = invitationRepository;
+        this.matchRepository = matchRepository;
     }
 
     @Override
@@ -216,5 +222,58 @@ public class TeamServiceImpl implements TeamService {
                 teamId, total, engineeringCount, valid);
 
         return valid;
+    }
+
+    @Override
+    @Transactional
+    public void changeFormation(Formation formation, String teamId,String matchId){
+        log.info("Starting formation change. teamId={}, matchId={}, formation={}",
+                teamId, matchId, formation);
+
+        validateSchedule(matchId, teamId);
+
+        TeamEntity team  = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        team.setFormation(formation);
+        teamRepository.save(team);
+
+        log.info("Formation changed successfully. teamId={}, matchId={}, formation={}",
+                teamId, matchId, formation);
+
+    }
+
+    private void validateSchedule(String matchId, String teamId) {
+        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+
+        if (DateUtil.isInThePast(match.getDateTime())) {
+            throw new ScheduleConflictException(
+                    "Cannot change formation, match has already started"
+            );
+        }
+
+        if (DateUtil.isWithinOneHour(match.getDateTime())) {
+            throw new ScheduleConflictException(
+                    String.format("Cannot change formation, match starts in %d minutes",
+                            DateUtil.minutesUntil(match.getDateTime()))
+            );
+        }
+    }
+
+    @Override
+    public List<Formation> getAllFormations() {
+        log.info("Fetching all formations from enum");
+        return Arrays.stream(Formation.values())
+                .toList();
+    }
+
+    @Override
+    public Formation getEnemyFormation(String teamId) {
+
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        return team.getFormation();
     }
 }
