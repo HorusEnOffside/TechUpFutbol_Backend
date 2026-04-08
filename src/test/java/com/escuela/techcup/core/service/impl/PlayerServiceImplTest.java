@@ -64,9 +64,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // createSportsProfileStudent
-    // -------------------------------------------------------------------------
 
     @Nested
     class CreateSportsProfileStudent {
@@ -175,9 +172,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // createSportsProfileTeacher
-    // -------------------------------------------------------------------------
 
     @Nested
     class CreateSportsProfileTeacher {
@@ -252,9 +246,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // createSportsProfileFamiliar
-    // -------------------------------------------------------------------------
 
     @Nested
     class CreateSportsProfileFamiliar {
@@ -312,9 +303,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // createSportsProfileGraduate
-    // -------------------------------------------------------------------------
 
     @Nested
     class CreateSportsProfileGraduate {
@@ -372,9 +360,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // getAllPlayers
-    // -------------------------------------------------------------------------
 
     @Nested
     class GetAllPlayers {
@@ -403,9 +388,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // getPlayerByUserId
-    // -------------------------------------------------------------------------
 
     @Nested
     class GetPlayerByUserId {
@@ -447,9 +429,6 @@ class PlayerServiceImplTest {
     }
 
 
-    // -------------------------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------------------------
 
     private PlayerEntity buildPlayerEntity(String userId, Position position, int dorsal) {
         UserPlayerEntity userPlayerEntity = new UserPlayerEntity();

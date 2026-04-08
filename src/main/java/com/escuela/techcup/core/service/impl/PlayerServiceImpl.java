@@ -179,8 +179,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
 
-    //--------------------------------
-    //helper methods
 
     private UserPlayer createUserPlayer(PlayerDTO playerDTO, BufferedImage profilePicture) {
         UserPlayerDTO userPlayerDTO = new UserPlayerDTO(playerDTO.getName(), playerDTO.getMail(), playerDTO.getDateOfBirth(), playerDTO.getGender(), playerDTO.getPassword());

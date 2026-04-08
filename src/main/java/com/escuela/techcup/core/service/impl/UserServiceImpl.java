@@ -256,9 +256,7 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
     }
 
     
-    
-    //--------------------------------
-    //helper methods
+
 
     private String idGenerator() {
         return IdGeneratorUtil.generateId();
