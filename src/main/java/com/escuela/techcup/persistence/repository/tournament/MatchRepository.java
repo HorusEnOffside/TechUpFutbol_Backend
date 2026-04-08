@@ -15,4 +15,5 @@ public interface MatchRepository extends JpaRepository<MatchEntity, String> {
 
     List<MatchEntity> findBySoccerFieldId(String soccerFieldId);
 
+    List<MatchEntity> findByTeamAIdOrTeamBId(String teamAId, String teamBId);
 }

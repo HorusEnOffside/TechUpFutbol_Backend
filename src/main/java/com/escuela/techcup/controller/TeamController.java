@@ -1,9 +1,11 @@
 package com.escuela.techcup.controller;
 
 import com.escuela.techcup.controller.dto.InvitationResponseDTO;
+import com.escuela.techcup.controller.dto.TeamFullInfoDTO;
 import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import com.escuela.techcup.core.service.TeamFullInfoService;
 import com.escuela.techcup.core.service.TeamService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -27,9 +29,11 @@ public class TeamController {
 
 	private static final Logger log = LoggerFactory.getLogger(TeamController.class);
 	private final TeamService teamService;
+	private final TeamFullInfoService teamFullInfoService;
 
-	public TeamController(TeamService teamService) {
+	public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService) {
 		this.teamService = teamService;
+		this.teamFullInfoService = teamFullInfoService;
 	}
 
 	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
@@ -42,9 +46,7 @@ public class TeamController {
 	) throws IOException {
 		log.info("Request to create team. name={}, captainUserId={}", name, captainUserId);
 		BufferedImage logoImage = null;
-		if (logo != null && !logo.isEmpty()) {
-			logoImage = ImageIO.read(logo.getInputStream());
-		}
+		if (logo != null && !logo.isEmpty()) logoImage = ImageIO.read(logo.getInputStream());
 		Team team = teamService.createTeam(name, uniformColors, logoImage, captainUserId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(team);
 	}
@@ -61,6 +63,22 @@ public class TeamController {
 	public ResponseEntity<Team> getTeamById(@PathVariable String teamId) {
 		log.info("Request to get team by id={}", teamId);
 		return ResponseEntity.ok(teamService.getTeamById(teamId));
+	}
+
+	// Vista completa de un equipo
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/{teamId}/full")
+	public ResponseEntity<TeamFullInfoDTO> getTeamFullInfo(@PathVariable String teamId) {
+		log.info("Request to get full info for teamId={}", teamId);
+		return ResponseEntity.ok(teamFullInfoService.getTeamFullInfo(teamId));
+	}
+
+	// Todos los equipos de un torneo con info completa
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/tournament/{tournamentId}/full")
+	public ResponseEntity<List<TeamFullInfoDTO>> getTeamsByTournament(@PathVariable String tournamentId) {
+		log.info("Request to get all teams full info for tournamentId={}", tournamentId);
+		return ResponseEntity.ok(teamFullInfoService.getTeamsByTournament(tournamentId));
 	}
 
 	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
@@ -86,18 +104,12 @@ public class TeamController {
 		return ResponseEntity.ok().build();
 	}
 
-	// Consultar invitaciones de un jugador
 	@PreAuthorize("hasAnyRole('PLAYER', 'CAPTAIN', 'BASEUSER')")
 	@GetMapping("/invitations/player/{playerId}")
 	public ResponseEntity<List<InvitationResponseDTO>> getInvitationsByPlayer(@PathVariable String playerId) {
 		log.info("Request to get invitations for playerId={}", playerId);
 		List<InvitationResponseDTO> invitations = teamService.getInvitationsByPlayer(playerId).stream()
-				.map(inv -> new InvitationResponseDTO(
-						inv.getId(),
-						inv.getTeamId(),
-						inv.getTeamName(),
-						inv.getMessage(),
-						inv.getStatus()))
+				.map(inv -> new InvitationResponseDTO(inv.getId(), inv.getTeamId(), inv.getTeamName(), inv.getMessage(), inv.getStatus()))
 				.toList();
 		return ResponseEntity.ok(invitations);
 	}
