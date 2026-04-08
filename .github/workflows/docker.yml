@@ -1,0 +1,29 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: ''
+
+      - name: Build JAR
+        run: mvn package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t myapp:${{ github.sha }} .
+
+      - name: Push to registry (opcional)
+        run: |
+          docker tag myapp:${{ github.sha }} myapp:latest
+          # docker push myapp:latest
