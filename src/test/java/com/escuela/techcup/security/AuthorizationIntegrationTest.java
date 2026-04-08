@@ -16,9 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.List;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,9 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class AuthorizationIntegrationTest {
 
-    private MockMvc adminMvc;
     private MockMvc tournamentMvc;
-    private MockMvc matchMvc;
     private MockMvc paymentMvc;
 
     @Mock
@@ -48,7 +43,7 @@ class AuthorizationIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        adminMvc = MockMvcBuilders.standaloneSetup(adminController)
+        MockMvc adminMvc = MockMvcBuilders.standaloneSetup(adminController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
@@ -56,7 +51,7 @@ class AuthorizationIntegrationTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 
-        matchMvc = MockMvcBuilders.standaloneSetup(matchController)
+        MockMvc matchMvc = MockMvcBuilders.standaloneSetup(matchController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
 

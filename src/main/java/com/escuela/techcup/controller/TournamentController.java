@@ -86,4 +86,10 @@ public class TournamentController {
 	public ResponseEntity<Tournament> getActiveTournament() {
 		return ResponseEntity.ok(tournamentService.getActiveTournament());
 	}
+
+	@PreAuthorize("hasRole('ORGANIZER')")
+	@GetMapping("/health")
+	public String health() {
+		return "Tournament controller OK";
+	}
 }

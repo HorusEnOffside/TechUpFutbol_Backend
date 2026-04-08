@@ -103,16 +103,6 @@ class AuthenticationServiceTest {
         verify(jwtService, times(1)).generateToken(any(), any(), any());
     }
 
-    //@Test
-    //void login_doesNotCallJwtServiceWhenUserNotFound() {
-        //when(userService.getUserByMail("noexiste@test.com")).thenReturn(Optional.empty());
-
-        //assertThrows(TechcupException.class,
-                //() -> authenticationService.login(new LoginRequest("noexiste@test.com", "Password1")));
-
-        //verify(jwtService, never()).generateToken(any(), any(), any());
-    //}
-
     @Test
     void login_doesNotCallJwtServiceWhenUserNotFound() {
         String email = "noexiste@test.com";

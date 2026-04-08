@@ -2,7 +2,6 @@ package com.escuela.techcup.controller;
 
 import com.escuela.techcup.controller.dto.InvitationResponseDTO;
 import com.escuela.techcup.controller.dto.TeamFullInfoDTO;
-import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamFullInfoService;

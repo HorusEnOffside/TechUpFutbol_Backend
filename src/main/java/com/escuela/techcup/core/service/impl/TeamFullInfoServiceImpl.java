@@ -49,10 +49,8 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     @Transactional(readOnly = true)
     public TeamFullInfoDTO getTeamFullInfo(String teamId) {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-
         TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
-
         return buildTeamFullInfo(team);
     }
 
@@ -60,94 +58,30 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     @Transactional(readOnly = true)
     public List<TeamFullInfoDTO> getTeamsByTournament(String tournamentId) {
         if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
-
         tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new InvalidInputException("Tournament not found: " + tournamentId));
-
         return teamRepository.findAll().stream()
                 .filter(t -> t.getTournament() != null && t.getTournament().getId().equals(tournamentId))
                 .map(this::buildTeamFullInfo)
                 .toList();
     }
 
+    // ── Método principal dividido en submétodos para reducir complejidad cognitiva ──
+
     private TeamFullInfoDTO buildTeamFullInfo(TeamEntity team) {
-        // Jugadores
         List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(team.getId());
-        String captainPlayerId = team.getCaptainPlayer() != null ? team.getCaptainPlayer().getId() : null;
+        String captainPlayerId = resolveCaptainId(team);
 
-        List<TeamPlayerInfoDTO> playerDTOs = teamPlayers.stream()
-                .map(tp -> {
-                    PlayerEntity p = tp.getPlayer();
-                    return new TeamPlayerInfoDTO(
-                            p.getId(),
-                            p.getUser().getName(),
-                            p.getUser().getMail(),
-                            p.getPosition(),
-                            p.getDorsalNumber(),
-                            p.getId().equals(captainPlayerId)
-                    );
-                }).toList();
+        List<TeamPlayerInfoDTO> playerDTOs = buildPlayerDTOs(teamPlayers, captainPlayerId);
+        List<TeamMatchInfoDTO> matchDTOs = buildMatchDTOs(team);
+        TeamStatsDTO stats = buildStats(matchDTOs);
 
-        // Partidos
-        List<MatchEntity> matches = matchRepository.findByTeamAIdOrTeamBId(team.getId(), team.getId());
-        LocalDateTime now = LocalDateTime.now();
+        String tournamentId = resolveTournamentId(team);
+        String tournamentName = resolveTournamentName(team);
+        String captainName = resolveCaptainName(team);
 
-        List<TeamMatchInfoDTO> matchDTOs = matches.stream().map(match -> {
-            boolean isTeamA = match.getTeamA().getId().equals(team.getId());
-            String opponentName = isTeamA ? match.getTeamB().getName() : match.getTeamA().getName();
-
-            // Calcular goles desde GoalEntity
-            List<GoalEntity> goals = goalRepository.findByMatchId(match.getId());
-
-            int goalsFor = 0;
-            int goalsAgainst = 0;
-
-            for (GoalEntity goal : goals) {
-                String scorerTeamId = goal.getPlayer().getTeam() != null
-                        ? goal.getPlayer().getTeam().getId() : null;
-                if (team.getId().equals(scorerTeamId)) goalsFor++;
-                else goalsAgainst++;
-            }
-
-            String result = "PENDING";
-            if (match.getDateTime().isBefore(now)) {
-                if (goalsFor > goalsAgainst) result = "WIN";
-                else if (goalsFor < goalsAgainst) result = "LOSS";
-                else result = "DRAW";
-            }
-
-            return new TeamMatchInfoDTO(
-                    match.getId(),
-                    match.getDateTime(),
-                    opponentName,
-                    goalsFor,
-                    goalsAgainst,
-                    result
-            );
-        }).toList();
-
-        // Estadísticas
-        int played = (int) matchDTOs.stream().filter(m -> !m.getResult().equals("PENDING")).count();
-        int wins = (int) matchDTOs.stream().filter(m -> m.getResult().equals("WIN")).count();
-        int losses = (int) matchDTOs.stream().filter(m -> m.getResult().equals("LOSS")).count();
-        int draws = (int) matchDTOs.stream().filter(m -> m.getResult().equals("DRAW")).count();
-        int goalsFor = matchDTOs.stream().mapToInt(TeamMatchInfoDTO::getGoalsFor).sum();
-        int goalsAgainst = matchDTOs.stream().mapToInt(TeamMatchInfoDTO::getGoalsAgainst).sum();
-
-        TeamStatsDTO stats = new TeamStatsDTO(played, wins, losses, draws, goalsFor, goalsAgainst);
-
-        // Torneo
-        String tournamentId = team.getTournament() != null ? team.getTournament().getId() : null;
-        String tournamentName = null;
-        if (team.getTournament() != null) {
-            tournamentName = "Torneo " + team.getTournament().getId().substring(0, 8);
-        }
-
-        // Capitán
-        String captainName = team.getCaptainPlayer() != null
-                ? team.getCaptainPlayer().getUser().getName() : null;
-
-        log.info("Team full info built. teamId={}, players={}, matches={}", team.getId(), playerDTOs.size(), matchDTOs.size());
+        log.info("Team full info built. teamId={}, players={}, matches={}",
+                team.getId(), playerDTOs.size(), matchDTOs.size());
 
         return new TeamFullInfoDTO(
                 team.getId(),
@@ -160,5 +94,91 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
                 matchDTOs,
                 stats
         );
+    }
+
+    private String resolveCaptainId(TeamEntity team) {
+        return team.getCaptainPlayer() != null ? team.getCaptainPlayer().getId() : null;
+    }
+
+    private String resolveCaptainName(TeamEntity team) {
+        return team.getCaptainPlayer() != null ? team.getCaptainPlayer().getUser().getName() : null;
+    }
+
+    private String resolveTournamentId(TeamEntity team) {
+        return team.getTournament() != null ? team.getTournament().getId() : null;
+    }
+
+    private String resolveTournamentName(TeamEntity team) {
+        if (team.getTournament() == null) return null;
+        String tourId = team.getTournament().getId();
+        return "Torneo " + tourId.substring(0, Math.min(8, tourId.length()));
+    }
+
+    private List<TeamPlayerInfoDTO> buildPlayerDTOs(List<TeamPlayerEntity> teamPlayers, String captainPlayerId) {
+        return teamPlayers.stream()
+                .map(tp -> toPlayerInfoDTO(tp.getPlayer(), captainPlayerId))
+                .toList();
+    }
+
+    private TeamPlayerInfoDTO toPlayerInfoDTO(PlayerEntity p, String captainPlayerId) {
+        return new TeamPlayerInfoDTO(
+                p.getId(),
+                p.getUser().getName(),
+                p.getUser().getMail(),
+                p.getPosition(),
+                p.getDorsalNumber(),
+                p.getId().equals(captainPlayerId)
+        );
+    }
+
+    private List<TeamMatchInfoDTO> buildMatchDTOs(TeamEntity team) {
+        List<MatchEntity> matches = matchRepository.findByTeamAIdOrTeamBId(team.getId(), team.getId());
+        LocalDateTime now = LocalDateTime.now();
+        return matches.stream()
+                .map(match -> toMatchInfoDTO(match, team.getId(), now))
+                .toList();
+    }
+
+    private TeamMatchInfoDTO toMatchInfoDTO(MatchEntity match, String teamId, LocalDateTime now) {
+        boolean isTeamA = match.getTeamA().getId().equals(teamId);
+        String opponentName = isTeamA ? match.getTeamB().getName() : match.getTeamA().getName();
+
+        int[] goals = countGoals(match, teamId);
+        int goalsFor = goals[0];
+        int goalsAgainst = goals[1];
+
+        String result = resolveMatchResult(match.getDateTime(), now, goalsFor, goalsAgainst);
+
+        return new TeamMatchInfoDTO(match.getId(), match.getDateTime(), opponentName, goalsFor, goalsAgainst, result);
+    }
+
+    private int[] countGoals(MatchEntity match, String teamId) {
+        List<GoalEntity> goals = goalRepository.findByMatchId(match.getId());
+        int goalsFor = 0;
+        int goalsAgainst = 0;
+        for (GoalEntity goal : goals) {
+            String scorerTeamId = goal.getPlayer().getTeam() != null
+                    ? goal.getPlayer().getTeam().getId() : null;
+            if (teamId.equals(scorerTeamId)) goalsFor++;
+            else goalsAgainst++;
+        }
+        return new int[]{goalsFor, goalsAgainst};
+    }
+
+    private String resolveMatchResult(LocalDateTime matchTime, LocalDateTime now, int goalsFor, int goalsAgainst) {
+        if (matchTime.isAfter(now)) return "PENDING";
+        if (goalsFor > goalsAgainst) return "WIN";
+        if (goalsFor < goalsAgainst) return "LOSS";
+        return "DRAW";
+    }
+
+    private TeamStatsDTO buildStats(List<TeamMatchInfoDTO> matchDTOs) {
+        int played   = (int) matchDTOs.stream().filter(m -> !m.getResult().equals("PENDING")).count();
+        int wins     = (int) matchDTOs.stream().filter(m -> m.getResult().equals("WIN")).count();
+        int losses   = (int) matchDTOs.stream().filter(m -> m.getResult().equals("LOSS")).count();
+        int draws    = (int) matchDTOs.stream().filter(m -> m.getResult().equals("DRAW")).count();
+        int goalsFor     = matchDTOs.stream().mapToInt(TeamMatchInfoDTO::getGoalsFor).sum();
+        int goalsAgainst = matchDTOs.stream().mapToInt(TeamMatchInfoDTO::getGoalsAgainst).sum();
+        return new TeamStatsDTO(played, wins, losses, draws, goalsFor, goalsAgainst);
     }
 }

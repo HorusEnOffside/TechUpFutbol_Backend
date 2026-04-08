@@ -132,12 +132,12 @@ public class TeamServiceImpl implements TeamService {
         // RF-13: jugador único por torneo
         if (team.getTournament() != null) {
             String tournamentId = team.getTournament().getId();
-            if (!validatePlayerUniquePerTournament(playerId, tournamentId))
+            if (teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId))
                 throw new InvalidInputException("Player is already registered in another team for this tournament");
         }
 
         // RF-14: mayoría ingeniería (solo si ya hay jugadores)
-        if (!currentPlayers.isEmpty() && !validateEngineeringMajority(teamId))
+        if (!currentPlayers.isEmpty() && !isMajorityEngineering(currentPlayers))
             throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
 
         InvitationEntity invitation = new InvitationEntity();
@@ -243,6 +243,20 @@ public class TeamServiceImpl implements TeamService {
 
     private boolean isEngineeringCareer(Career career) {
         return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
+    }
+
+    private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
+        long engineeringCount = teamPlayers.stream()
+                .map(TeamPlayerEntity::getPlayer)
+                .map(PlayerEntity::getUser)
+                .filter(user -> {
+                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
+                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
+                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
+                    return false;
+                })
+                .count();
+        return engineeringCount > teamPlayers.size() / 2.0;
     }
 
     @Override
