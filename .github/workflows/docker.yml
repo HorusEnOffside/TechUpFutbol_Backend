@@ -14,8 +14,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '211'
-          distribution: ''
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: Build JAR
         run: mvn package -DskipTests
