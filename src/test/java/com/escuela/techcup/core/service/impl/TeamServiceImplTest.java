@@ -37,7 +37,7 @@ class TeamServiceImplTest {
     private TeamServiceImpl teamService;
 
 
-    // ── createTeam ───────────────────────────────────────────────────────
+
 
     @Nested
     class CreateTeam {
@@ -98,7 +98,6 @@ class TeamServiceImplTest {
     }
 
 
-    // ── invitePlayer ─────────────────────────────────────────────────────
 
     @Nested
     class InvitePlayer {
@@ -172,7 +171,6 @@ class TeamServiceImplTest {
     }
 
 
-    // ── respondInvitation ────────────────────────────────────────────────
 
     @Nested
     class RespondInvitation {
