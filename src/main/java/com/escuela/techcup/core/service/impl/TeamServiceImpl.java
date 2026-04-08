@@ -1,20 +1,18 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.core.exception.InvalidInputException;
-import com.escuela.techcup.core.exception.TeamAlreadyExistsException;
-import com.escuela.techcup.core.exception.TeamNotFoundException;
-import com.escuela.techcup.core.exception.InvitationNotFoundException;
-import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
-import com.escuela.techcup.core.exception.TournamentNotActiveException;
+import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.Career;
+import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.TeamService;
+import com.escuela.techcup.core.util.DateUtil;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
+import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
@@ -25,6 +23,7 @@ import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
+import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.tournament.TournamentRepository;
@@ -37,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -50,6 +50,7 @@ public class TeamServiceImpl implements TeamService {
     private final InvitationRepository invitationRepository;
     private final TournamentRepository tournamentRepository;
     private final UserRepository userRepository;
+    private final MatchRepository matchRepository;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
@@ -57,13 +58,15 @@ public class TeamServiceImpl implements TeamService {
             PlayerRepository playerRepository,
             InvitationRepository invitationRepository,
             TournamentRepository tournamentRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            MatchRepository matchRepository) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
         this.invitationRepository = invitationRepository;
         this.tournamentRepository = tournamentRepository;
         this.userRepository = userRepository;
+        this.matchRepository = matchRepository;
     }
 
     @Override
@@ -75,17 +78,14 @@ public class TeamServiceImpl implements TeamService {
         if (captainUserId == null || captainUserId.isBlank()) throw new InvalidInputException("captainUserId is required");
         if (teamRepository.existsByNameIgnoreCase(name)) throw new TeamAlreadyExistsException(name);
 
-        // Solo se puede crear equipo si hay un torneo activo
         TournamentEntity activeTournament = tournamentRepository
                 .findByStatus(TournamentStatus.ACTIVE)
                 .stream().findFirst()
                 .orElseThrow(TournamentNotActiveException::new);
 
-        // Buscar el player del capitán
         PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
                 .orElseThrow(() -> new InvalidInputException("Captain player profile not found for userId: " + captainUserId));
 
-        // Asignar rol CAPTAIN al usuario
         UserEntity captainUser = captainPlayer.getUser();
         captainUser.addRole(UserRole.CAPTAIN);
         userRepository.save(captainUser);
@@ -98,7 +98,6 @@ public class TeamServiceImpl implements TeamService {
         entity.setCaptainPlayer(captainPlayer);
         teamRepository.save(entity);
 
-        // Agregar capitán como jugador del equipo
         TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
         teamPlayer.setId(IdGeneratorUtil.generateId());
         teamPlayer.setTeam(entity);
@@ -124,19 +123,16 @@ public class TeamServiceImpl implements TeamService {
         if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId))
             throw new PlayerAlreadyInvitedException(playerId);
 
-        // RF-12: máximo 12 jugadores
         List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(teamId);
         if (currentPlayers.size() >= 12)
             throw new InvalidInputException("Team already has the maximum of 12 players");
 
-        // RF-13: jugador único por torneo
         if (team.getTournament() != null) {
             String tournamentId = team.getTournament().getId();
             if (teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId))
                 throw new InvalidInputException("Player is already registered in another team for this tournament");
         }
 
-        // RF-14: mayoría ingeniería (solo si ya hay jugadores)
         if (!currentPlayers.isEmpty() && !isMajorityEngineering(currentPlayers))
             throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
 
@@ -165,7 +161,6 @@ public class TeamServiceImpl implements TeamService {
         invitationRepository.save(invitation);
 
         if (action == InvitationStatus.ACCEPTED) {
-            // Asignar rol PLAYER al usuario
             UserEntity user = invitation.getPlayer().getUser();
             user.addRole(UserRole.PLAYER);
             userRepository.save(user);
@@ -241,24 +236,6 @@ public class TeamServiceImpl implements TeamService {
                 .toList();
     }
 
-    private boolean isEngineeringCareer(Career career) {
-        return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
-    }
-
-    private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
-        long engineeringCount = teamPlayers.stream()
-                .map(TeamPlayerEntity::getPlayer)
-                .map(PlayerEntity::getUser)
-                .filter(user -> {
-                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
-                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
-                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
-                    return false;
-                })
-                .count();
-        return engineeringCount > teamPlayers.size() / 2.0;
-    }
-
     @Override
     @Transactional(readOnly = true)
     public boolean validateEngineeringMajority(String teamId) {
@@ -279,7 +256,72 @@ public class TeamServiceImpl implements TeamService {
 
         int total = teamPlayers.size();
         boolean valid = engineeringCount > total / 2.0;
-        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}", teamId, total, engineeringCount, valid);
+        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}",
+                teamId, total, engineeringCount, valid);
         return valid;
+    }
+
+    @Override
+    @Transactional
+    public void changeFormation(Formation formation, String teamId, String matchId) {
+        log.info("Starting formation change. teamId={}, matchId={}, formation={}", teamId, matchId, formation);
+
+        validateSchedule(matchId, teamId);
+
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        team.setFormation(formation);
+        teamRepository.save(team);
+
+        log.info("Formation changed successfully. teamId={}, matchId={}, formation={}", teamId, matchId, formation);
+    }
+
+    private void validateSchedule(String matchId, String teamId) {
+        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
+                .orElseThrow(() -> new MatchNotFoundException(matchId));
+
+        if (DateUtil.isInThePast(match.getDateTime())) {
+            throw new ScheduleConflictException("Cannot change formation, match has already started");
+        }
+
+        if (DateUtil.isWithinOneHour(match.getDateTime())) {
+            throw new ScheduleConflictException(
+                    String.format("Cannot change formation, match starts in %d minutes",
+                            DateUtil.minutesUntil(match.getDateTime())));
+        }
+    }
+
+    @Override
+    public List<Formation> getAllFormations() {
+        log.info("Fetching all formations from enum");
+        return Arrays.stream(Formation.values()).toList();
+    }
+
+    @Override
+    public Formation getEnemyFormation(String teamId) {
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+        return team.getFormation();
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    private boolean isEngineeringCareer(Career career) {
+        return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
+    }
+
+    private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
+        long engineeringCount = teamPlayers.stream()
+                .map(TeamPlayerEntity::getPlayer)
+                .map(PlayerEntity::getUser)
+                .filter(user -> {
+                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
+                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
+                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
+                    return false;
+                })
+                .count();
+        return engineeringCount > teamPlayers.size() / 2.0;
     }
 }

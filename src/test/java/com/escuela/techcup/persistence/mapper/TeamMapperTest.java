@@ -32,19 +32,19 @@ class TeamMapperTest {
 
         @Test
         void whenMinimalModel_thenMapsBaseFields() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
 
             TeamEntity result = TeamMapper.toEntity(team);
 
             assertNotNull(result);
             assertEquals("team-1", result.getId());
             assertEquals("Los Tigres", result.getName());
-            assertEquals(Formation.FORMATION_BASIC, result.getFormation());
+            assertEquals(Formation.FORMATION_4_4_2, result.getFormation());
         }
 
         @Test
         void whenModelHasColor_thenMapsColorCorrectly() {
-            Team team = new Team("team-1", "Los Tigres", "Rojo", null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", "Rojo", null, Formation.FORMATION_4_4_2);
 
             TeamEntity result = TeamMapper.toEntity(team);
 
@@ -54,7 +54,7 @@ class TeamMapperTest {
 
         @Test
         void whenModelHasNullColor_thenEntityColorIsNull() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
 
             TeamEntity result = TeamMapper.toEntity(team);
 
@@ -63,7 +63,7 @@ class TeamMapperTest {
 
         @Test
         void whenModelHasNullLogo_thenEntityLogoIsEmptyBytes() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
 
             TeamEntity result = TeamMapper.toEntity(team);
 
@@ -73,7 +73,7 @@ class TeamMapperTest {
 
         @Test
         void whenModelHasNullCaptain_thenEntityCaptainIsNull() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
             team.setCaptain(null);
 
             TeamEntity result = TeamMapper.toEntity(team);
@@ -83,7 +83,7 @@ class TeamMapperTest {
 
         @Test
         void whenModelHasNullPlayers_thenEntityPlayersIsNull() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
             team.setPlayers(null);
 
             TeamEntity result = TeamMapper.toEntity(team);
@@ -93,7 +93,7 @@ class TeamMapperTest {
 
         @Test
         void whenModelHasPlayers_thenEntityPlayersAreMapped() {
-            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_BASIC);
+            Team team = new Team("team-1", "Los Tigres", null, null, Formation.FORMATION_4_4_2);
             team.setPlayers(List.of(buildPlayer("p-1", Position.FORWARD, 9)));
 
             TeamEntity result = TeamMapper.toEntity(team);
@@ -120,7 +120,7 @@ class TeamMapperTest {
             assertNotNull(result);
             assertEquals("team-1", result.getId());
             assertEquals("Los Tigres", result.getName());
-            assertEquals(Formation.FORMATION_BASIC, result.getFormation());
+            assertEquals(Formation.FORMATION_4_4_2, result.getFormation());
         }
 
         @Test
@@ -226,7 +226,7 @@ class TeamMapperTest {
         TeamEntity entity = new TeamEntity();
         entity.setId(id);
         entity.setName(name);
-        entity.setFormation(Formation.FORMATION_BASIC);
+        entity.setFormation(Formation.FORMATION_4_4_2);
         return entity;
     }
 

@@ -1,139 +1,285 @@
-package com.escuela.techcup.controller;
+package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.controller.dto.InvitationResponseDTO;
-import com.escuela.techcup.controller.dto.TeamFullInfoDTO;
+import com.escuela.techcup.core.exception.InvalidInputException;
+import com.escuela.techcup.core.exception.TeamAlreadyExistsException;
+import com.escuela.techcup.core.exception.TeamNotFoundException;
+import com.escuela.techcup.core.exception.InvitationNotFoundException;
+import com.escuela.techcup.core.exception.PlayerAlreadyInvitedException;
+import com.escuela.techcup.core.exception.TournamentNotActiveException;
+import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
-import com.escuela.techcup.core.service.TeamFullInfoService;
+import com.escuela.techcup.core.model.enums.TournamentStatus;
+import com.escuela.techcup.core.model.enums.UserRole;
 import com.escuela.techcup.core.service.TeamService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.escuela.techcup.core.util.IdGeneratorUtil;
+import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
+import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
+import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
+import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
+import com.escuela.techcup.persistence.entity.users.GraduateEntity;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+import com.escuela.techcup.persistence.entity.users.StudentEntity;
+import com.escuela.techcup.persistence.entity.users.TeacherEntity;
+import com.escuela.techcup.persistence.entity.users.UserEntity;
+import com.escuela.techcup.persistence.mapper.TeamMapper;
+import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
+import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
+import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
+import com.escuela.techcup.persistence.repository.tournament.TournamentRepository;
+import com.escuela.techcup.persistence.repository.users.PlayerRepository;
+import com.escuela.techcup.persistence.repository.users.UserRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/teams")
-@Tag(name = "Gestion de equipos", description = "Operaciones de equipos")
-public class TeamController {
+@Service
+public class TeamServiceImpl implements TeamService {
 
-	private static final Logger log = LoggerFactory.getLogger(TeamController.class);
-	private final TeamService teamService;
-	private final TeamFullInfoService teamFullInfoService;
+    private static final Logger log = LoggerFactory.getLogger(TeamServiceImpl.class);
 
-	public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService) {
-		this.teamService = teamService;
-		this.teamFullInfoService = teamFullInfoService;
-	}
+    private final TeamRepository teamRepository;
+    private final TeamPlayerRepository teamPlayerRepository;
+    private final PlayerRepository playerRepository;
+    private final InvitationRepository invitationRepository;
+    private final TournamentRepository tournamentRepository;
+    private final UserRepository userRepository;
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Team> createTeam(
-			@RequestParam String name,
-			@RequestParam String uniformColors,
-			@RequestParam String captainUserId,
-			@RequestPart(value = "logo", required = false) MultipartFile logo
-	) throws IOException {
-		log.info("Request to create team. name={}, captainUserId={}", name, captainUserId);
-		BufferedImage logoImage = null;
-		if (logo != null && !logo.isEmpty()) logoImage = ImageIO.read(logo.getInputStream());
-		Team team = teamService.createTeam(name, uniformColors, logoImage, captainUserId);
-		return ResponseEntity.status(HttpStatus.CREATED).body(team);
-	}
+    public TeamServiceImpl(
+            TeamRepository teamRepository,
+            TeamPlayerRepository teamPlayerRepository,
+            PlayerRepository playerRepository,
+            InvitationRepository invitationRepository,
+            TournamentRepository tournamentRepository,
+            UserRepository userRepository) {
+        this.teamRepository = teamRepository;
+        this.teamPlayerRepository = teamPlayerRepository;
+        this.playerRepository = playerRepository;
+        this.invitationRepository = invitationRepository;
+        this.tournamentRepository = tournamentRepository;
+        this.userRepository = userRepository;
+    }
 
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping
-	public ResponseEntity<List<Team>> getAllTeams() {
-		log.info("Request to get all teams");
-		return ResponseEntity.ok(teamService.getAllTeams());
-	}
+    @Override
+    @Transactional
+    public Team createTeam(String name, String uniformColors, BufferedImage logo, String captainUserId) {
+        if (name == null || name.isBlank()) throw new InvalidInputException("Team name is required");
+        if (name.length() < 5) throw new InvalidInputException("Team name must have at least 5 characters");
+        if (uniformColors == null || uniformColors.isBlank()) throw new InvalidInputException("Uniform colors are required");
+        if (captainUserId == null || captainUserId.isBlank()) throw new InvalidInputException("captainUserId is required");
+        if (teamRepository.existsByNameIgnoreCase(name)) throw new TeamAlreadyExistsException(name);
 
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/{teamId}")
-	public ResponseEntity<Team> getTeamById(@PathVariable String teamId) {
-		log.info("Request to get team by id={}", teamId);
-		return ResponseEntity.ok(teamService.getTeamById(teamId));
-	}
+        // Solo se puede crear equipo si hay un torneo activo
+        TournamentEntity activeTournament = tournamentRepository
+                .findByStatus(TournamentStatus.ACTIVE)
+                .stream().findFirst()
+                .orElseThrow(TournamentNotActiveException::new);
 
-	// Vista completa de un equipo
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/{teamId}/full")
-	public ResponseEntity<TeamFullInfoDTO> getTeamFullInfo(@PathVariable String teamId) {
-		log.info("Request to get full info for teamId={}", teamId);
-		return ResponseEntity.ok(teamFullInfoService.getTeamFullInfo(teamId));
-	}
+        // Buscar el player del capitán
+        PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
+                .orElseThrow(() -> new InvalidInputException("Captain player profile not found for userId: " + captainUserId));
 
-	// Todos los equipos de un torneo con info completa
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/tournament/{tournamentId}/full")
-	public ResponseEntity<List<TeamFullInfoDTO>> getTeamsByTournament(@PathVariable String tournamentId) {
-		log.info("Request to get all teams full info for tournamentId={}", tournamentId);
-		return ResponseEntity.ok(teamFullInfoService.getTeamsByTournament(tournamentId));
-	}
+        // Asignar rol CAPTAIN al usuario
+        UserEntity captainUser = captainPlayer.getUser();
+        captainUser.addRole(UserRole.CAPTAIN);
+        userRepository.save(captainUser);
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
-	@PostMapping("/{teamId}/invite/{playerId}")
-	public ResponseEntity<Void> invitePlayer(
-			@PathVariable String teamId,
-			@PathVariable String playerId,
-			@RequestParam(required = false) String message
-	) {
-		log.info("Request to invite player. teamId={}, playerId={}", teamId, playerId);
-		teamService.invitePlayer(teamId, playerId, message);
-		return ResponseEntity.ok().build();
-	}
+        String teamId = IdGeneratorUtil.generateId();
+        Team team = new Team(teamId, name, uniformColors, logo, null);
 
-	@PreAuthorize("hasAnyRole('PLAYER', 'CAPTAIN', 'BASEUSER')")
-	@PutMapping("/invitations/{invitationId}")
-	public ResponseEntity<Void> respondInvitation(
-			@PathVariable String invitationId,
-			@RequestParam InvitationStatus action
-	) {
-		log.info("Request to respond invitation. invitationId={}, action={}", invitationId, action);
-		teamService.respondInvitation(invitationId, action);
-		return ResponseEntity.ok().build();
-	}
+        TeamEntity entity = TeamMapper.toEntity(team);
+        entity.setTournament(activeTournament);
+        entity.setCaptainPlayer(captainPlayer);
+        teamRepository.save(entity);
 
-	@PreAuthorize("hasAnyRole('PLAYER', 'CAPTAIN', 'BASEUSER')")
-	@GetMapping("/invitations/player/{playerId}")
-	public ResponseEntity<List<InvitationResponseDTO>> getInvitationsByPlayer(@PathVariable String playerId) {
-		log.info("Request to get invitations for playerId={}", playerId);
-		List<InvitationResponseDTO> invitations = teamService.getInvitationsByPlayer(playerId).stream()
-				.map(inv -> new InvitationResponseDTO(inv.getId(), inv.getTeamId(), inv.getTeamName(), inv.getMessage(), inv.getStatus()))
-				.toList();
-		return ResponseEntity.ok(invitations);
-	}
+        // Agregar capitán como jugador del equipo
+        TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
+        teamPlayer.setId(IdGeneratorUtil.generateId());
+        teamPlayer.setTeam(entity);
+        teamPlayer.setPlayer(captainPlayer);
+        teamPlayerRepository.save(teamPlayer);
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
-	@GetMapping("/{teamId}/validate/composition")
-	public ResponseEntity<Boolean> validateTeamComposition(@PathVariable String teamId) {
-		log.info("Request to validate team composition. teamId={}", teamId);
-		return ResponseEntity.ok(teamService.validateTeamComposition(teamId));
-	}
+        log.info("Team created. teamId={}, captainUserId={}, tournamentId={}", teamId, captainUserId, activeTournament.getId());
+        return team;
+    }
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
-	@GetMapping("/{teamId}/validate/engineering")
-	public ResponseEntity<Boolean> validateEngineeringMajority(@PathVariable String teamId) {
-		log.info("Request to validate engineering majority. teamId={}", teamId);
-		return ResponseEntity.ok(teamService.validateEngineeringMajority(teamId));
-	}
+    @Override
+    @Transactional
+    public void invitePlayer(String teamId, String playerId, String message) {
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
 
-	@PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
-	@GetMapping("/validate/player/{playerId}/tournament/{tournamentId}")
-	public ResponseEntity<Boolean> validatePlayerUniquePerTournament(
-			@PathVariable String playerId,
-			@PathVariable String tournamentId
-	) {
-		log.info("Request to validate player unique per tournament. playerId={}, tournamentId={}", playerId, tournamentId);
-		return ResponseEntity.ok(teamService.validatePlayerUniquePerTournament(playerId, tournamentId));
-	}
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+
+        PlayerEntity player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new InvalidInputException("Player not found"));
+
+        if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId))
+            throw new PlayerAlreadyInvitedException(playerId);
+
+        // RF-12: máximo 12 jugadores
+        List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(teamId);
+        if (currentPlayers.size() >= 12)
+            throw new InvalidInputException("Team already has the maximum of 12 players");
+
+        // RF-13: jugador único por torneo
+        if (team.getTournament() != null) {
+            String tournamentId = team.getTournament().getId();
+            if (teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId))
+                throw new InvalidInputException("Player is already registered in another team for this tournament");
+        }
+
+        // RF-14: mayoría ingeniería (solo si ya hay jugadores)
+        if (!currentPlayers.isEmpty() && !isMajorityEngineering(currentPlayers))
+            throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
+
+        InvitationEntity invitation = new InvitationEntity();
+        invitation.setId(IdGeneratorUtil.generateId());
+        invitation.setTeam(team);
+        invitation.setPlayer(player);
+        invitation.setMessage(message);
+        invitation.setStatus(InvitationStatus.PENDING);
+
+        invitationRepository.save(invitation);
+        log.info("Invitation sent. teamId={}, playerId={}", teamId, playerId);
+    }
+
+    @Override
+    @Transactional
+    public void respondInvitation(String invitationId, InvitationStatus action) {
+        if (invitationId == null || invitationId.isBlank()) throw new InvalidInputException("invitationId is required");
+        if (action == null) throw new InvalidInputException("action is required");
+
+        InvitationEntity invitation = invitationRepository
+                .findByIdAndStatus(invitationId, InvitationStatus.PENDING)
+                .orElseThrow(() -> new InvitationNotFoundException(invitationId));
+
+        invitation.setStatus(action);
+        invitationRepository.save(invitation);
+
+        if (action == InvitationStatus.ACCEPTED) {
+            // Asignar rol PLAYER al usuario
+            UserEntity user = invitation.getPlayer().getUser();
+            user.addRole(UserRole.PLAYER);
+            userRepository.save(user);
+
+            TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
+            teamPlayer.setId(IdGeneratorUtil.generateId());
+            teamPlayer.setTeam(invitation.getTeam());
+            teamPlayer.setPlayer(invitation.getPlayer());
+            teamPlayerRepository.save(teamPlayer);
+            log.info("Player accepted invitation. invitationId={}", invitationId);
+        } else {
+            log.info("Player rejected invitation. invitationId={}", invitationId);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Invitation> getInvitationsByPlayer(String playerId) {
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
+
+        playerRepository.findById(playerId)
+                .orElseThrow(() -> new InvalidInputException("Player not found"));
+
+        return invitationRepository.findByPlayerId(playerId).stream()
+                .map(entity -> {
+                    Invitation inv = new Invitation();
+                    inv.setId(entity.getId());
+                    inv.setTeamId(entity.getTeam().getId());
+                    inv.setTeamName(entity.getTeam().getName());
+                    inv.setPlayerId(entity.getPlayer().getId());
+                    inv.setMessage(entity.getMessage());
+                    inv.setStatus(entity.getStatus());
+                    return inv;
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean validateTeamComposition(String teamId) {
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
+        List<TeamPlayerEntity> players = teamPlayerRepository.findByTeamId(teamId);
+        int count = players.size();
+        boolean valid = count >= 7 && count <= 12;
+        log.info("Team composition validation. teamId={}, players={}, valid={}", teamId, count, valid);
+        return valid;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean validatePlayerUniquePerTournament(String playerId, String tournamentId) {
+        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
+        if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
+        boolean exists = teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId);
+        log.info("Player unique validation. playerId={}, tournamentId={}, exists={}", playerId, tournamentId, exists);
+        return !exists;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Team getTeamById(String teamId) {
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
+        return teamRepository.findById(teamId)
+                .map(TeamMapper::toModel)
+                .orElseThrow(() -> new TeamNotFoundException(teamId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Team> getAllTeams() {
+        return teamRepository.findAll().stream()
+                .map(TeamMapper::toModel)
+                .toList();
+    }
+
+    private boolean isEngineeringCareer(Career career) {
+        return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
+    }
+
+    private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
+        long engineeringCount = teamPlayers.stream()
+                .map(TeamPlayerEntity::getPlayer)
+                .map(PlayerEntity::getUser)
+                .filter(user -> {
+                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
+                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
+                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
+                    return false;
+                })
+                .count();
+        return engineeringCount > teamPlayers.size() / 2.0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean validateEngineeringMajority(String teamId) {
+        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
+        List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(teamId);
+        if (teamPlayers.isEmpty()) throw new InvalidInputException("Team has no players");
+
+        long engineeringCount = teamPlayers.stream()
+                .map(TeamPlayerEntity::getPlayer)
+                .map(PlayerEntity::getUser)
+                .filter(user -> {
+                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
+                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
+                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
+                    return false;
+                })
+                .count();
+
+        int total = teamPlayers.size();
+        boolean valid = engineeringCount > total / 2.0;
+        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}", teamId, total, engineeringCount, valid);
+        return valid;
+    }
 }

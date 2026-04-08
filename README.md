@@ -23,13 +23,13 @@ Actualmente, la organización de torneos estudiantiles de fútbol en la Escuela 
     - [No funcionales](#requerimientos-no-funcionales)
 3. [Análisis de requerimientos](#análisis-de-requerimientos)
 4. [Arquitectura](#arquitectura)
-5. [Manual de identidad](#manual-de-identidad)
-6. [Jira: Gestión de tareas y funcionalidades](#jira)
-7. [Diagramas de secuencia](#diagramas-de-secuencia)
-8. [Diagrama de componentes general](#diagrama-de-componentes-general)
-9. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
-10. [Diagrama de despliegue](#diagrama-de-despliegue)
-11. [Diagrama de clases](#diagrama-de-clases)
+5. [Jira: Gestión de tareas y funcionalidades](#jira)
+6. [Diagramas de secuencia](#diagramas-de-secuencia)
+7. [Diagrama de componentes general](#diagrama-de-componentes-general)
+8. [Diagrama de componentes especificos](#diagrama-de-componentes-especificos)
+9. [Diagrama de despliegue](#diagrama-de-despliegue)
+10. [Diagrama de clases](#diagrama-de-clases)
+11. [Diagrama entidad relación](#diagrama-entidad-relación)
 12. [Sustento y justificación técnica](#sustento-y-justificación-técnica)
 13. [Despliegue con Docker](#despliegue-con-docker)
 ---
@@ -70,11 +70,6 @@ También evidencia la integración con procesos externos como el pago y la carga
 ---
 
 
-## Manual de identidad
-https://pruebacorreoescuelaingeduco.sharepoint.com/:p:/s/DOSW-2026-1/IQA1oPTMzFDaSpldO_fjkOzEAQrW69M2W3Ogkj8GeMJL3mQ?e=SzFiPT
-Documento de manual de identidad visual, donde se definen los lineamientos de marca, colores, uso visual y presentación del proyecto.
-
----
 
 ## Jira
 
@@ -86,67 +81,107 @@ https://dosw-2026-01.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog
 ## Diagrama de componentes general
 ![Diagrama componentes especificos](docs/images/DiagramaComponentesGeneral.drawio.png)
 
-**Explicación:** Este diagrama presenta la arquitectura general del backend y cómo se organizan sus capas y módulos principales. Permite entender la separación entre responsabilidades de negocio, exposición de servicios, persistencia e integración con componentes externos.
+**Explicación:** El diagrama de componentes general de TECHCUP FÚTBOL describe la arquitectura técnica del sistema en tres capas. El Front-End se comunica con el Back-End, luego se conecta directamente a la base de datos.
 
-Además, muestra la base estructural sobre la que se implementan los procesos del sistema: autenticación, gestión de usuarios, equipos, partidos, pagos y estadísticas.
+El Front-End concentra toda la interacción con el usuario: vistas, formularios y navegación. El Back-End centraliza la lógica de negocio, el procesamiento de datos y las reglas del torneo. La base de datos, implementada en PostgreSQL, persiste toda la información del sistema siguiendo el modelo relacional.
 
 ## Diagrama de componentes especificos
 ![Diagrama componentes especificos](docs/images/Diagramacomponentesespecificos.drawio.png)
 
-**Explicación:** Este diagrama detalla la interacción entre los componentes internos del sistema y sus dependencias directas. Se enfoca en cómo los módulos concretos colaboran para ejecutar los casos de uso del dominio deportivo.
+**Explicación:** Se detalla la estructura interna del Back-End, mostrando cómo se organiza cada módulo del sistema. Se identifican seis módulos principales: autenticación, partidos, pagos, jugadores, equipos, torneos y usuarios. Cada módulo sigue el mismo patrón de cuatro capas: un Controller que recibe las solicitudes del usuario, un Mapper que transforma los datos entre capas, un Service que ejecuta la lógica de negocio, y un Repository que se comunica directamente con la base de datos. Adicionalmente, cada módulo cuenta con un Validator independiente que verifica que los datos cumplan las reglas del negocio antes de ser procesados. Esta arquitectura aplica el principio de separación de responsabilidades: ninguna capa hace más de lo que le corresponde, lo que reduce el acoplamiento entre módulos y facilita el mantenimiento o reemplazo de cualquier parte sin afectar las demás. El uso de Mappers en ambos extremos del Service garantiza que los datos que entran y salen de la lógica de negocio estén siempre en el formato correcto, desacoplando la representación interna de la externa.
 
-Aquí se aprecia mejor la relación entre servicios de negocio, controladores, repositorios y entidades, lo que facilita mantener bajo acoplamiento y alta cohesión dentro de la aplicación.
+## Diagrama de despliegue
 
-## Diagrama de despliegue (Azure + CI/CD) — QA & PROD
+![dDespliegue.png](docs/UML/arquitectura/dDespliegue.png)
 
-![diagramaDespliegue.png](docs/UML/arquitectura/diagramaDespliegue.png)
+Este **diagrama de despliegue UML** describe dónde se ejecuta el sistema **TechCup Fútbol** en Azure, qué **artefactos** se despliegan en cada nodo y cómo se conectan los componentes en los ambientes **QA** y **PROD** (Azure + CI/CD). El diagrama está dividido en dos zonas: **CI/CD** (entrega) y **Runtime (Azure)** (ejecución).
+
+---
+
+### 1) Componentes / Nodos / Artefactos
+
+#### CI/CD (GitHub Actions → ACR → App Service)
+- **GitHub Actions Runner (Node)**
+    - Es el entorno de ejecución del pipeline de automatización.
+    - Contiene dos **Deployment Specifications**:
+        - **`docker-compose.yml`**: especificación usada para orquestación/validación en entorno local y/o validaciones en CI (por ejemplo, levantar servicios para pruebas).
+        - **`.github/workflows/ci-cd.yml`**: especificación del flujo de CI/CD (build, push, y despliegue) para QA y PROD.
+    - Incluye una nota de control para producción:
+        - **PROD requiere aprobación manual** (mínimo 3 miembros) antes de ejecutar el despliegue usando **GitHub Environments**.
+
+- **Azure Container Registry (ACR) (Node)**
+    - Registro donde se almacena el **Artifact** principal:
+        - **Docker Image: `techcup-backend:<tag>`** (la imagen del backend que se publicará y luego será consumida por los App Services).
+
+#### Runtime (Azure)
+- **Desktop client (Browser / Postman)**
+    - Representa al usuario/cliente que consume la API (navegador o Postman).
+
+- **Azure App Service (QA) — Web App for Containers (Node)**
+    - Entorno de ejecución del backend en **QA**.
+    - Contiene:
+        - **Deployment Specification: App Service Configuration (QA)** (App Settings / variables de entorno, por ejemplo `DB_*`).
+        - **Artifact: Docker Image `techcup-backend:<tag>`**, que es la imagen que se ejecuta como contenedor en QA.
+
+- **Azure App Service (PROD) — Web App for Containers (Node)**
+    - Entorno de ejecución del backend en **PROD**.
+    - Contiene:
+        - **Deployment Specification: App Service Configuration (PROD)** (App Settings / variables de entorno).
+        - **Artifact: Docker Image `techcup-backend:<tag>`**, ejecutada como contenedor en producción.
+
+- **Azure Database for PostgreSQL (QA) (Device)**
+    - Base de datos administrada para el ambiente **QA**.
+
+- **Azure Database for PostgreSQL (PROD) (Device)**
+    - Base de datos administrada para el ambiente **PROD**.
+
+---
+
+### 2) Conexiones (enlaces de comunicación) y su significado
+
+#### Build & Push (CI/CD)
+- **GitHub Actions Runner → Azure Container Registry (ACR)**: `docker build + push`
+    - El pipeline construye la imagen Docker del backend y la publica en el registro ACR.
+
+#### Deploy/Update (automatización de despliegue)
+- **GitHub Actions Runner → Azure App Service (QA)**: `deploy/update (QA)` *(línea punteada)*
+    - Representa el paso de despliegue hacia QA, donde el pipeline actualiza la configuración del App Service para apuntar a la nueva versión/tag de la imagen.
+
+- **GitHub Actions Runner → Azure App Service (PROD)**: `deploy/update (PROD)` *(línea punteada)*
+    - Representa el despliegue hacia producción. Este paso está controlado por aprobaciones manuales (GitHub Environments).
 
 
-El siguiente **diagrama de despliegue UML** muestra la arquitectura de ejecución del sistema **TechCup Fútbol** en Azure, incluyendo los **nodos/dispositivos**, los **enlaces de comunicación** entre ellos y la **colocación de los artefactos de software** en cada entorno.
+#### Distribución del artefacto (imagen Docker)
+- **Azure Container Registry (ACR) → Azure App Service (QA)**: `pull image (run container)`
+    - El App Service de QA obtiene (pull) la imagen desde ACR y ejecuta el contenedor.
 
-### Componentes principales (según notación UML)
+- **Azure Container Registry (ACR) → Azure App Service (PROD)**: `pull image (run container)`
+    - El App Service de producción obtiene (pull) la imagen desde ACR y ejecuta el contenedor.
 
-- **Node: GitHub Actions Runner (CI/CD)**  
-  Representa el entorno donde se ejecuta el pipeline de integración y despliegue continuo.  
-  Dentro de este nodo se encuentran las **Deployment Specifications**:
-    - `.github/workflows/ci-cd.yml`: define el flujo de CI/CD (triggers, jobs y pasos) para **QA** y **PROD**.
-    - `docker-compose.yml`: se utiliza para **orquestar/validar** servicios durante pruebas locales o validaciones en CI (por ejemplo, pruebas de integración).
+#### Acceso del cliente a la API
+- **Desktop client → Azure App Service (QA)**: `HTTPS 443 (QA URL)`
+    - El cliente consume la API publicada en el App Service de QA vía HTTPS.
 
-- **Node: Azure Container Registry (ACR)**  
-  Registro donde se almacena el **Artifact** principal del despliegue:
-    - **Docker Image** `techcup-backend:<tag>`.
+- **Desktop client → Azure App Service (PROD)**: `HTTPS 443 (PROD URL)`
+    - El cliente consume la API en producción vía HTTPS.
 
-- **Node: Azure App Service (QA) / Azure App Service (PROD)**  
-  Son los entornos de ejecución (Web App for Containers) donde corre el backend como contenedor.  
-  En cada App Service se incluyen:
-    - **Artifact**: la imagen Docker `techcup-backend:<tag>` que se ejecuta en el servicio.
-    - **Deployment Specification**: configuración del App Service por ambiente (App Settings / variables de entorno), usada para parametrizar credenciales y valores (por ejemplo, variables `DB_*`, secrets, etc.).
+#### Conexión a base de datos
+- **Azure App Service (QA) → Azure Database for PostgreSQL (QA)**: `JDBC/TLS 5432`
+    - La aplicación en QA se conecta a su base de datos usando TLS sobre el puerto 5432.
 
-- **Device: Azure Database for PostgreSQL (QA) / (PROD)**  
-  Bases de datos administradas en Azure, separadas por ambiente, a las cuales se conecta la aplicación.
+- **Azure App Service (PROD) → Azure Database for PostgreSQL (PROD)**: `JDBC/TLS 5432`
+    - La aplicación en producción se conecta a su base de datos usando TLS sobre el puerto 5432.
 
-- **Desktop client (Browser/Postman)**  
-  Representa al consumidor del sistema (usuario o cliente) que realiza solicitudes HTTP hacia la API.
+---
 
-### Interacción y flujo (comunicación)
+### 3) Resumen del flujo extremo a extremo
 
-1. **CI/CD: build y publicación del artefacto**
-    - GitHub Actions ejecuta el pipeline y realiza `docker build + push` hacia **ACR**.
-    - La imagen resultante queda almacenada como `techcup-backend:<tag>` en el registro.
+1. Un cambio en el repositorio dispara el workflow de **GitHub Actions**.
+2. Actions construye y publica la imagen **`techcup-backend:<tag>`** en **ACR**.
+3. Actions ejecuta el paso de **deploy/update** hacia **QA** o **PROD** (en PROD con aprobación manual).
+4. Cada **App Service** hace **pull** de la imagen desde ACR y ejecuta el contenedor.
+5. Los usuarios consumen la API por **HTTPS 443** y la aplicación accede a PostgreSQL por **JDBC/TLS 5432** en el ambiente correspondiente.
 
-2. **Despliegue a QA y PROD**
-    - El pipeline realiza `deploy/update` para cada ambiente (QA y PROD), actualizando la versión/tag del contenedor a usar.
-    - Cada **App Service** obtiene la imagen desde ACR mediante `pull image (run container)` y ejecuta el contenedor.
-
-3. **Acceso del cliente**
-    - El cliente se comunica con la aplicación en cada ambiente a través de **HTTPS 443** (QA URL y PROD URL).
-
-4. **Conexión a base de datos**
-    - La aplicación en **QA** se conecta a **PostgreSQL (QA)** mediante **JDBC/TLS 5432**.
-    - La aplicación en **PROD** se conecta a **PostgreSQL (PROD)** mediante **JDBC/TLS 5432**.
-
-### Control de despliegue en producción
-Para el ambiente **PROD** se contempla una política de aprobación manual antes de desplegar (GitHub Environments), requiriendo la aprobación de al menos **3 miembros** del equipo.
 
 ## Diagrama de clases
 ![Diagrama de clases](docs/images/DiagramaClases.png)
@@ -156,6 +191,15 @@ Para el ambiente **PROD** se contempla una política de aprobación manual antes
 Su objetivo es dejar claras las cardinalidades, herencias y asociaciones que soportan las reglas de negocio del sistema, especialmente las restricciones de roles, pertenencia a equipos y seguimiento de resultados.
 
 ---
+
+## Diagrama entidad relación
+![Diagrama entidad relacion](docs/images/Diagramaentidadrelacion.png)
+
+**Explicación:** El diagrama entidad-relación de TECHCUP FÚTBOL define cómo se estructura y persiste la información del sistema en PostgreSQL. Se identifican las siguientes entidades principales: usuarios, jugadores, equipos, árbitros, organizadores, administradores, torneos, partidos, canchas, goles y pagos.
+
+El diseño aplica 3FN, eliminando redundancias y dependencias transitivas entre atributos. Esto se refleja en decisiones como centralizar los datos personales en una única tabla de usuarios y derivar los roles desde ella, o separar la relación entre jugadores y equipos en una tabla puente independiente. Cada entidad almacena únicamente la información que le corresponde, lo que garantiza consistencia, menor duplicación de datos y mayor facilidad de mantenimiento a medida que el sistema escala.
+
+Entidades principales: users, players, teams, referees, organizers, tournaments, matches, soccer_fields, goals, payments. Relaciones clave: un organizador crea uno o varios torneos, los equipos se inscriben a través de team_players, cada partido ocurre en una cancha con un árbitro asignado, y los goles quedan registrados con el minuto exacto dentro de su partido correspondiente.
 
 ## Diagramas de secuencia
 
