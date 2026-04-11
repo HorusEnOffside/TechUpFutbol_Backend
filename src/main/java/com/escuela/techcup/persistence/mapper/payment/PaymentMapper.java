@@ -69,7 +69,6 @@ public class PaymentMapper {
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
         } catch (IOException e) {
-            // Log or handle as needed
             return new byte[0];
         }
     }
@@ -81,7 +80,6 @@ public class PaymentMapper {
         try {
             return ImageIO.read(new ByteArrayInputStream(bytes));
         } catch (IOException e) {
-            // Log or handle as needed
             return null;
         }
     }

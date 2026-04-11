@@ -140,6 +140,7 @@ public class PlayerServiceImpl implements PlayerService {
             throw new InvalidInputException("A sports profile already exists for that user");
         }
 
+
         Player player = new Player(createdUser, position, dorsalNumber);
         PlayerEntity entity = PlayerMapper.toEntity(player);
         playerRepository.save(entity);

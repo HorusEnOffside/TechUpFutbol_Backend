@@ -184,7 +184,7 @@ Este **diagrama de despliegue UML** describe dónde se ejecuta el sistema **Tech
 
 
 ## Diagrama de clases
-![Diagrama de clases](docs/images/DiagramaClases.png)
+![diagramaDeClasesTech.png](docs/images/diagramaDeClasesTech.png)
 
 **Explicación:** Este diagrama representa el modelo de dominio del proyecto y las relaciones entre sus entidades principales. Muestra cómo se conectan usuarios, perfiles deportivos, equipos, invitaciones, torneos, partidos, pagos y sanciones.
 

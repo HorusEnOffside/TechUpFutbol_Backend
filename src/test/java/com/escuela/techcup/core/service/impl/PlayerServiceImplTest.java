@@ -1,12 +1,10 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.controller.dto.PlayerDTO;
-import com.escuela.techcup.controller.dto.StudentPlayerDTO;
-import com.escuela.techcup.controller.dto.StudentUserDTO;
-import com.escuela.techcup.controller.dto.UserPlayerDTO;
+import com.escuela.techcup.controller.dto.*;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
+import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
@@ -36,17 +34,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PlayerServiceImplTest {
 
-    @Mock
-    private PlayerRepository playerRepository;
+    @Mock private PlayerRepository playerRepository;
+    @Mock private UserPlayerRepository userPlayerRepository;
+    @Mock private UserService userService;
 
-    @Mock
-    private UserPlayerRepository userPlayerRepository;
-
-    @Mock
-    private UserService userService;
-
-    @InjectMocks
-    private PlayerServiceImpl playerService;
+    @InjectMocks private PlayerServiceImpl playerService;
 
     private UserPlayer mockUserPlayer;
     private UserPlayerEntity mockUserPlayerEntity;
@@ -63,10 +55,7 @@ class PlayerServiceImplTest {
         mockImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
     }
 
-
-    // -------------------------------------------------------------------------
-    // createSportsProfileStudent
-    // -------------------------------------------------------------------------
+    // ── CreateSportsProfileStudent ───────────────────────────────────────
 
     @Nested
     class CreateSportsProfileStudent {
@@ -79,6 +68,7 @@ class PlayerServiceImplTest {
             dto.setGender(Gender.MALE);
             dto.setPassword("Password1");
             dto.setSemester(3);
+            dto.setCareer(Career.ENGINEERING);
             dto.setDorsalNumber(10);
             dto.setPosition(Position.FORWARD);
             return dto;
@@ -87,12 +77,11 @@ class PlayerServiceImplTest {
         @Test
         void whenValidDTO_thenCreatesPlayerSuccessfully() {
             StudentPlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createStudentUser(any(StudentUserDTO.class), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(false);
-            when(playerRepository.save(any(PlayerEntity.class))).thenAnswer(i -> i.getArgument(0));
+            when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             Player result = playerService.createSportsProfileStudent(dto, mockImage);
 
@@ -114,7 +103,6 @@ class PlayerServiceImplTest {
         void whenDorsalNumberIsZero_thenThrowsValidationException() {
             StudentPlayerDTO dto = buildDTO();
             dto.setDorsalNumber(0);
-
             assertThrows(Exception.class,
                     () -> playerService.createSportsProfileStudent(dto, null));
             verifyNoInteractions(userService, playerRepository);
@@ -123,9 +111,7 @@ class PlayerServiceImplTest {
         @Test
         void whenMailAlreadyExists_thenThrowsInvalidInputException() {
             StudentPlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileStudent(dto, null));
             verifyNoInteractions(userService);
@@ -134,11 +120,9 @@ class PlayerServiceImplTest {
         @Test
         void whenUserNotFoundAfterCreation_thenThrowsInvalidInputException() {
             StudentPlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createStudentUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.empty());
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileStudent(dto, null));
             verify(playerRepository, never()).save(any());
@@ -147,12 +131,10 @@ class PlayerServiceImplTest {
         @Test
         void whenSportsProfileAlreadyExists_thenThrowsInvalidInputException() {
             StudentPlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createStudentUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileStudent(dto, null));
             verify(playerRepository, never()).save(any());
@@ -161,38 +143,38 @@ class PlayerServiceImplTest {
         @Test
         void whenNullProfilePicture_thenCreatesPlayerSuccessfully() {
             StudentPlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createStudentUser(any(), isNull())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(false);
             when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-
-            Player result = playerService.createSportsProfileStudent(dto, null);
-
-            assertNotNull(result);
+            assertNotNull(playerService.createSportsProfileStudent(dto, null));
         }
     }
 
+    // ── CreateSportsProfileTeacher ───────────────────────────────────────
 
-    // -------------------------------------------------------------------------
-    // createSportsProfileTeacher
-    // -------------------------------------------------------------------------
-    /**
     @Nested
     class CreateSportsProfileTeacher {
 
-        private PlayerDTO buildDTO() {
-            return new PlayerDTO("Ana Lopez", "ana@test.com",
-                    LocalDate.of(1990, 5, 15), Gender.FEMALE, "Password1", 7, Position.MIDFIELDER);
+        private TeacherPlayerDTO buildDTO() {
+            TeacherPlayerDTO dto = new TeacherPlayerDTO();
+            dto.setName("Ana Lopez");
+            dto.setMail("ana@test.com");
+            dto.setDateOfBirth(LocalDate.of(1990, 5, 15));
+            dto.setGender(Gender.FEMALE);
+            dto.setPassword("Password1");
+            dto.setCareer(Career.ENGINEERING);
+            dto.setDorsalNumber(7);
+            dto.setPosition(Position.MIDFIELDER);
+            return dto;
         }
 
         @Test
         void whenValidDTO_thenCreatesPlayerSuccessfully() {
-            PlayerDTO dto = buildDTO();
-
+            TeacherPlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
-            when(userService.createTeacherUser(any(UserPlayerDTO.class), any())).thenReturn(mockUserPlayer);
+            when(userService.createTeacherUser(any(TeacherUserDTO.class), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(false);
             when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -214,10 +196,8 @@ class PlayerServiceImplTest {
 
         @Test
         void whenMailAlreadyExists_thenThrowsInvalidInputException() {
-            PlayerDTO dto = buildDTO();
-
+            TeacherPlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileTeacher(dto, null));
             verifyNoInteractions(userService);
@@ -225,12 +205,10 @@ class PlayerServiceImplTest {
 
         @Test
         void whenUserNotFoundAfterCreation_thenThrowsInvalidInputException() {
-            PlayerDTO dto = buildDTO();
-
+            TeacherPlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.empty());
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileTeacher(dto, null));
             verify(playerRepository, never()).save(any());
@@ -238,23 +216,18 @@ class PlayerServiceImplTest {
 
         @Test
         void whenSportsProfileAlreadyExists_thenThrowsInvalidInputException() {
-            PlayerDTO dto = buildDTO();
-
+            TeacherPlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
             when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileTeacher(dto, null));
             verify(playerRepository, never()).save(any());
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // createSportsProfileFamiliar
-    // -------------------------------------------------------------------------
+    // ── CreateSportsProfileFamiliar ──────────────────────────────────────
 
     @Nested
     class CreateSportsProfileFamiliar {
@@ -267,9 +240,8 @@ class PlayerServiceImplTest {
         @Test
         void whenValidDTO_thenCreatesPlayerSuccessfully() {
             PlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
-            when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
+            when(userService.createFamiliarUser(any(UserPlayerDTO.class), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(false);
             when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -290,9 +262,7 @@ class PlayerServiceImplTest {
         @Test
         void whenMailAlreadyExists_thenThrowsInvalidInputException() {
             PlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileFamiliar(dto, null));
         }
@@ -300,36 +270,38 @@ class PlayerServiceImplTest {
         @Test
         void whenSportsProfileAlreadyExists_thenThrowsInvalidInputException() {
             PlayerDTO dto = buildDTO();
-
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
-            when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
+            when(userService.createFamiliarUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileFamiliar(dto, null));
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // createSportsProfileGraduate
-    // -------------------------------------------------------------------------
+    // ── CreateSportsProfileGraduate ──────────────────────────────────────
 
     @Nested
     class CreateSportsProfileGraduate {
 
-        private PlayerDTO buildDTO() {
-            return new PlayerDTO("Laura Mora", "laura@test.com",
-                    LocalDate.of(1995, 7, 10), Gender.FEMALE, "Password1", 3, Position.GOALKEEPER);
+        private GraduatePlayerDTO buildDTO() {
+            GraduatePlayerDTO dto = new GraduatePlayerDTO();
+            dto.setName("Laura Mora");
+            dto.setMail("laura@test.com");
+            dto.setDateOfBirth(LocalDate.of(1995, 7, 10));
+            dto.setGender(Gender.FEMALE);
+            dto.setPassword("Password1");
+            dto.setCareer(Career.DATA_SCIENCE);
+            dto.setDorsalNumber(3);
+            dto.setPosition(Position.GOALKEEPER);
+            return dto;
         }
 
         @Test
         void whenValidDTO_thenCreatesPlayerSuccessfully() {
-            PlayerDTO dto = buildDTO();
-
+            GraduatePlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
-            when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
+            when(userService.createGraduateUser(any(GraduateUserDTO.class), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(false);
             when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -349,42 +321,34 @@ class PlayerServiceImplTest {
 
         @Test
         void whenMailAlreadyExists_thenThrowsInvalidInputException() {
-            PlayerDTO dto = buildDTO();
-
+            GraduatePlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileGraduate(dto, null));
         }
 
         @Test
         void whenSportsProfileAlreadyExists_thenThrowsInvalidInputException() {
-            PlayerDTO dto = buildDTO();
-
+            GraduatePlayerDTO dto = buildDTO();
             when(userPlayerRepository.existsByMailIgnoreCase(dto.getMail())).thenReturn(false);
-            when(userService.createTeacherUser(any(), any())).thenReturn(mockUserPlayer);
+            when(userService.createGraduateUser(any(), any())).thenReturn(mockUserPlayer);
             when(userPlayerRepository.findById("user-1")).thenReturn(Optional.of(mockUserPlayerEntity));
             when(playerRepository.existsByUserId("user-1")).thenReturn(true);
-
             assertThrows(InvalidInputException.class,
                     () -> playerService.createSportsProfileGraduate(dto, null));
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // getAllPlayers
-    // -------------------------------------------------------------------------
+    // ── GetAllPlayers ────────────────────────────────────────────────────
 
     @Nested
     class GetAllPlayers {
 
         @Test
         void whenPlayersExist_thenReturnsAllPlayers() {
-            PlayerEntity entity1 = buildPlayerEntity("user-1", Position.FORWARD, 10);
-            PlayerEntity entity2 = buildPlayerEntity("user-2", Position.DEFENDER, 4);
-
-            when(playerRepository.findAll()).thenReturn(List.of(entity1, entity2));
+            when(playerRepository.findAll()).thenReturn(List.of(
+                    buildPlayerEntity("user-1", Position.FORWARD, 10),
+                    buildPlayerEntity("user-2", Position.DEFENDER, 4)));
 
             List<Player> result = playerService.getAllPlayers();
 
@@ -395,26 +359,19 @@ class PlayerServiceImplTest {
         @Test
         void whenNoPlayersExist_thenReturnsEmptyList() {
             when(playerRepository.findAll()).thenReturn(List.of());
-
-            List<Player> result = playerService.getAllPlayers();
-
-            assertTrue(result.isEmpty());
+            assertTrue(playerService.getAllPlayers().isEmpty());
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // getPlayerByUserId
-    // -------------------------------------------------------------------------
+    // ── GetPlayerByUserId ────────────────────────────────────────────────
 
     @Nested
     class GetPlayerByUserId {
 
         @Test
         void whenUserIdExists_thenReturnsPlayer() {
-            PlayerEntity entity = buildPlayerEntity("user-1", Position.MIDFIELDER, 8);
-
-            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.of(entity));
+            when(playerRepository.findByUserId("user-1"))
+                    .thenReturn(Optional.of(buildPlayerEntity("user-1", Position.MIDFIELDER, 8)));
 
             Optional<Player> result = playerService.getPlayerByUserId("user-1");
 
@@ -425,10 +382,7 @@ class PlayerServiceImplTest {
         @Test
         void whenUserIdDoesNotExist_thenReturnsEmpty() {
             when(playerRepository.findByUserId("unknown")).thenReturn(Optional.empty());
-
-            Optional<Player> result = playerService.getPlayerByUserId("unknown");
-
-            assertTrue(result.isEmpty());
+            assertTrue(playerService.getPlayerByUserId("unknown").isEmpty());
         }
 
         @Test
@@ -446,10 +400,7 @@ class PlayerServiceImplTest {
         }
     }
 
-
-    // -------------------------------------------------------------------------
-    // helpers
-    // -------------------------------------------------------------------------
+    // ── Helpers ──────────────────────────────────────────────────────────
 
     private PlayerEntity buildPlayerEntity(String userId, Position position, int dorsal) {
         UserPlayerEntity userPlayerEntity = new UserPlayerEntity();
@@ -466,8 +417,6 @@ class PlayerServiceImplTest {
         entity.setPosition(position);
         entity.setDorsalNumber(dorsal);
         entity.setStatus(PlayerStatus.AVAILABLE);
-        entity.setStatus(PlayerStatus.AVAILABLE);
         return entity;
     }
-     **/
 }

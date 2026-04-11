@@ -192,9 +192,14 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
         if (mail == null || mail.isBlank()) throw new InvalidInputException(USER_MAIL_IS_REQUIRED);
         return userRepository.findByMailIgnoreCase(mail).map(UserMapper::toModel);
     }
+   
 
-    private String idGenerator() { return IdGeneratorUtil.generateId(); }
-    private String hashPassword(String password) { return PasswordHashUtil.hashPassword(password); }
+    private String idGenerator() {
+        return IdGeneratorUtil.generateId();
+    }
+    private String hashPassword(String password) {
+        return PasswordHashUtil.hashPassword(password);
+    }
 
     private void verifyUser(UserDTO userDTO) {
         if (userDTO == null) throw new InvalidInputException(USER_DTO_IS_REQUIRED);

@@ -45,8 +45,16 @@ public class MatchEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<GoalEntity> goals = new ArrayList<>();
 
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CardEntity> cards = new ArrayList<>();
+
     public void addGoal(GoalEntity goal) {
         goals.add(goal);
         goal.setMatch(this);
+    }
+
+    public void addCard(CardEntity card) {
+        cards.add(card);
+        card.setMatch(this);
     }
 }
