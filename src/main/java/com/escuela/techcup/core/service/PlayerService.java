@@ -4,10 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Optional;
 
-import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
-import com.escuela.techcup.controller.dto.PlayerDTO;
-import com.escuela.techcup.controller.dto.StudentPlayerDTO;
-import com.escuela.techcup.controller.dto.TeacherPlayerDTO;
+import com.escuela.techcup.controller.dto.*;
 import com.escuela.techcup.core.model.Player;
 
 public interface PlayerService {
@@ -19,4 +16,6 @@ public interface PlayerService {
 
     List<Player> getAllPlayers();
     Optional<Player> getPlayerByUserId(String userId);
+
+    List<PlayerSearchResultDTO> searchPlayers(PlayerSearchDTO filters);
 }
