@@ -43,7 +43,7 @@ class TeamControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(teamController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
-        team = new Team("team-1", "Los Tigres", "Rojo", null, Formation.FORMATION_BASIC);
+        team = new Team("team-1", "Los Tigres", "Rojo", null, Formation.FORMATION_4_4_2);
     }
 
     // --- GET /api/teams ---

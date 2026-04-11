@@ -7,321 +7,693 @@ import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
-import com.escuela.techcup.core.model.enums.UserRole;
-import com.escuela.techcup.core.service.TeamService;
-import com.escuela.techcup.core.util.DateUtil;
-import com.escuela.techcup.core.util.IdGeneratorUtil;
-import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
-import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
-import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
-import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
-import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
-import com.escuela.techcup.persistence.entity.users.GraduateEntity;
-import com.escuela.techcup.persistence.entity.users.PlayerEntity;
-import com.escuela.techcup.persistence.entity.users.StudentEntity;
-import com.escuela.techcup.persistence.entity.users.TeacherEntity;
-import com.escuela.techcup.persistence.entity.users.UserEntity;
-import com.escuela.techcup.persistence.mapper.TeamMapper;
-import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
-import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
-import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
-import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
-import com.escuela.techcup.persistence.repository.tournament.TournamentRepository;
+import com.escuela.techcup.persistence.entity.tournament.*;
+import com.escuela.techcup.persistence.entity.users.*;
+import com.escuela.techcup.persistence.repository.tournament.*;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.UserRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Service
-public class TeamServiceImpl implements TeamService {
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-    private static final Logger log = LoggerFactory.getLogger(TeamServiceImpl.class);
+@ExtendWith(MockitoExtension.class)
+class TeamServiceImplTest {
 
-    private final TeamRepository teamRepository;
-    private final TeamPlayerRepository teamPlayerRepository;
-    private final PlayerRepository playerRepository;
-    private final InvitationRepository invitationRepository;
-    private final TournamentRepository tournamentRepository;
-    private final UserRepository userRepository;
-    private final MatchRepository matchRepository;
+    @Mock private TeamRepository       teamRepository;
+    @Mock private TeamPlayerRepository teamPlayerRepository;
+    @Mock private PlayerRepository     playerRepository;
+    @Mock private InvitationRepository invitationRepository;
+    @Mock private TournamentRepository tournamentRepository;
+    @Mock private UserRepository       userRepository;
+    @Mock private MatchRepository      matchRepository;
 
-    public TeamServiceImpl(
-            TeamRepository teamRepository,
-            TeamPlayerRepository teamPlayerRepository,
-            PlayerRepository playerRepository,
-            InvitationRepository invitationRepository,
-            TournamentRepository tournamentRepository,
-            UserRepository userRepository,
-            MatchRepository matchRepository) {
-        this.teamRepository = teamRepository;
-        this.teamPlayerRepository = teamPlayerRepository;
-        this.playerRepository = playerRepository;
-        this.invitationRepository = invitationRepository;
-        this.tournamentRepository = tournamentRepository;
-        this.userRepository = userRepository;
-        this.matchRepository = matchRepository;
+    @InjectMocks private TeamServiceImpl teamService;
+
+    private TeamEntity teamEntity;
+    private PlayerEntity playerEntity;
+    private UserPlayerEntity userEntity;
+    private TournamentEntity tournamentEntity;
+
+    @BeforeEach
+    void setUp() {
+        userEntity = new UserPlayerEntity();
+        userEntity.setId("user-1");
+
+        playerEntity = new PlayerEntity();
+        playerEntity.setId("player-1");
+        playerEntity.setUser(userEntity);
+
+        tournamentEntity = new TournamentEntity();
+        tournamentEntity.setId("tour-1");
+        tournamentEntity.setStatus(TournamentStatus.ACTIVE);
+
+        teamEntity = new TeamEntity();
+        teamEntity.setId("team-1");
+        teamEntity.setName("Los Tigres");
+        teamEntity.setUniformColor("Rojo y Negro");
+        teamEntity.setTournament(tournamentEntity);
     }
 
-    @Override
-    @Transactional
-    public Team createTeam(String name, String uniformColors, BufferedImage logo, String captainUserId) {
-        if (name == null || name.isBlank()) throw new InvalidInputException("Team name is required");
-        if (name.length() < 5) throw new InvalidInputException("Team name must have at least 5 characters");
-        if (uniformColors == null || uniformColors.isBlank()) throw new InvalidInputException("Uniform colors are required");
-        if (captainUserId == null || captainUserId.isBlank()) throw new InvalidInputException("captainUserId is required");
-        if (teamRepository.existsByNameIgnoreCase(name)) throw new TeamAlreadyExistsException(name);
+    // ── createTeam ───────────────────────────────────────────────────────
 
-        TournamentEntity activeTournament = tournamentRepository
-                .findByStatus(TournamentStatus.ACTIVE)
-                .stream().findFirst()
-                .orElseThrow(TournamentNotActiveException::new);
+    @Nested
+    class CreateTeam {
 
-        PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
-                .orElseThrow(() -> new InvalidInputException("Captain player profile not found for userId: " + captainUserId));
+        @Test
+        void createsTeamSuccessfully() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of(tournamentEntity));
+            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.of(playerEntity));
+            when(userRepository.save(any())).thenReturn(userEntity);
+            when(teamRepository.save(any())).thenReturn(teamEntity);
 
-        UserEntity captainUser = captainPlayer.getUser();
-        captainUser.addRole(UserRole.CAPTAIN);
-        userRepository.save(captainUser);
+            Team result = teamService.createTeam("Los Tigres", "Rojo y Negro", null, "user-1");
 
-        String teamId = IdGeneratorUtil.generateId();
-        Team team = new Team(teamId, name, uniformColors, logo, null);
-
-        TeamEntity entity = TeamMapper.toEntity(team);
-        entity.setTournament(activeTournament);
-        entity.setCaptainPlayer(captainPlayer);
-        teamRepository.save(entity);
-
-        TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
-        teamPlayer.setId(IdGeneratorUtil.generateId());
-        teamPlayer.setTeam(entity);
-        teamPlayer.setPlayer(captainPlayer);
-        teamPlayerRepository.save(teamPlayer);
-
-        log.info("Team created. teamId={}, captainUserId={}, tournamentId={}", teamId, captainUserId, activeTournament.getId());
-        return team;
-    }
-
-    @Override
-    @Transactional
-    public void invitePlayer(String teamId, String playerId, String message) {
-        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
-
-        TeamEntity team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new TeamNotFoundException(teamId));
-
-        PlayerEntity player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new InvalidInputException("Player not found"));
-
-        if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId))
-            throw new PlayerAlreadyInvitedException(playerId);
-
-        List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(teamId);
-        if (currentPlayers.size() >= 12)
-            throw new InvalidInputException("Team already has the maximum of 12 players");
-
-        if (team.getTournament() != null) {
-            String tournamentId = team.getTournament().getId();
-            if (teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId))
-                throw new InvalidInputException("Player is already registered in another team for this tournament");
+            assertThat(result).isNotNull();
+            assertThat(result.getName()).isEqualTo("Los Tigres");
+            verify(teamPlayerRepository).save(any());
+            verify(userRepository).save(any());
         }
 
-        if (!currentPlayers.isEmpty() && !isMajorityEngineering(currentPlayers))
-            throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
+        @Test
+        void throwsWhenNameIsNull() {
+            assertThatThrownBy(() -> teamService.createTeam(null, "red", null, "cap-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Team name is required");
+        }
 
-        InvitationEntity invitation = new InvitationEntity();
-        invitation.setId(IdGeneratorUtil.generateId());
-        invitation.setTeam(team);
-        invitation.setPlayer(player);
-        invitation.setMessage(message);
-        invitation.setStatus(InvitationStatus.PENDING);
+        @Test
+        void throwsWhenNameIsBlank() {
+            assertThatThrownBy(() -> teamService.createTeam("   ", "red", null, "cap-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Team name is required");
+        }
 
-        invitationRepository.save(invitation);
-        log.info("Invitation sent. teamId={}, playerId={}", teamId, playerId);
-    }
+        @Test
+        void throwsWhenNameTooShort() {
+            assertThatThrownBy(() -> teamService.createTeam("AB", "red", null, "cap-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("at least 5 characters");
+        }
 
-    @Override
-    @Transactional
-    public void respondInvitation(String invitationId, InvitationStatus action) {
-        if (invitationId == null || invitationId.isBlank()) throw new InvalidInputException("invitationId is required");
-        if (action == null) throw new InvalidInputException("action is required");
+        @Test
+        void throwsWhenUniformColorsIsNull() {
+            assertThatThrownBy(() -> teamService.createTeam("Dream Team", null, null, "cap-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Uniform colors are required");
+        }
 
-        InvitationEntity invitation = invitationRepository
-                .findByIdAndStatus(invitationId, InvitationStatus.PENDING)
-                .orElseThrow(() -> new InvitationNotFoundException(invitationId));
+        @Test
+        void throwsWhenUniformColorsIsBlank() {
+            assertThatThrownBy(() -> teamService.createTeam("Dream Team", "  ", null, "cap-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Uniform colors are required");
+        }
 
-        invitation.setStatus(action);
-        invitationRepository.save(invitation);
+        @Test
+        void throwsWhenCaptainIdIsNull() {
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, null))
+                    .isInstanceOf(InvalidInputException.class);
+        }
 
-        if (action == InvitationStatus.ACCEPTED) {
-            UserEntity user = invitation.getPlayer().getUser();
-            user.addRole(UserRole.PLAYER);
-            userRepository.save(user);
+        @Test
+        void throwsWhenTeamNameAlreadyExists() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(true);
 
-            TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
-            teamPlayer.setId(IdGeneratorUtil.generateId());
-            teamPlayer.setTeam(invitation.getTeam());
-            teamPlayer.setPlayer(invitation.getPlayer());
-            teamPlayerRepository.save(teamPlayer);
-            log.info("Player accepted invitation. invitationId={}", invitationId);
-        } else {
-            log.info("Player rejected invitation. invitationId={}", invitationId);
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "red", null, "cap-1"))
+                    .isInstanceOf(TeamAlreadyExistsException.class);
+        }
+
+        @Test
+        void throwsWhenNoActiveTournament() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, "user-1"))
+                    .isInstanceOf(TournamentNotActiveException.class);
+        }
+
+        @Test
+        void throwsWhenCaptainPlayerNotFound() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of(tournamentEntity));
+            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, "user-1"))
+                    .isInstanceOf(InvalidInputException.class);
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Invitation> getInvitationsByPlayer(String playerId) {
-        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
+    // ── invitePlayer ─────────────────────────────────────────────────────
 
-        playerRepository.findById(playerId)
-                .orElseThrow(() -> new InvalidInputException("Player not found"));
+    @Nested
+    class InvitePlayer {
 
-        return invitationRepository.findByPlayerId(playerId).stream()
-                .map(entity -> {
-                    Invitation inv = new Invitation();
-                    inv.setId(entity.getId());
-                    inv.setTeamId(entity.getTeam().getId());
-                    inv.setTeamName(entity.getTeam().getName());
-                    inv.setPlayerId(entity.getPlayer().getId());
-                    inv.setMessage(entity.getMessage());
-                    inv.setStatus(entity.getStatus());
-                    return inv;
-                })
-                .toList();
-    }
+        @Test
+        void invitesPlayerSuccessfully() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(false);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of());
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean validateTeamComposition(String teamId) {
-        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        List<TeamPlayerEntity> players = teamPlayerRepository.findByTeamId(teamId);
-        int count = players.size();
-        boolean valid = count >= 7 && count <= 12;
-        log.info("Team composition validation. teamId={}, players={}, valid={}", teamId, count, valid);
-        return valid;
-    }
+            teamService.invitePlayer("team-1", "player-1", "Join us!");
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean validatePlayerUniquePerTournament(String playerId, String tournamentId) {
-        if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
-        if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
-        boolean exists = teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId);
-        log.info("Player unique validation. playerId={}, tournamentId={}, exists={}", playerId, tournamentId, exists);
-        return !exists;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Team getTeamById(String teamId) {
-        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        return teamRepository.findById(teamId)
-                .map(TeamMapper::toModel)
-                .orElseThrow(() -> new TeamNotFoundException(teamId));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Team> getAllTeams() {
-        return teamRepository.findAll().stream()
-                .map(TeamMapper::toModel)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public boolean validateEngineeringMajority(String teamId) {
-        if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(teamId);
-        if (teamPlayers.isEmpty()) throw new InvalidInputException("Team has no players");
-
-        long engineeringCount = teamPlayers.stream()
-                .map(TeamPlayerEntity::getPlayer)
-                .map(PlayerEntity::getUser)
-                .filter(user -> {
-                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
-                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
-                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
-                    return false;
-                })
-                .count();
-
-        int total = teamPlayers.size();
-        boolean valid = engineeringCount > total / 2.0;
-        log.info("Engineering majority validation. teamId={}, total={}, engineering={}, valid={}",
-                teamId, total, engineeringCount, valid);
-        return valid;
-    }
-
-    @Override
-    @Transactional
-    public void changeFormation(Formation formation, String teamId, String matchId) {
-        log.info("Starting formation change. teamId={}, matchId={}, formation={}", teamId, matchId, formation);
-
-        validateSchedule(matchId, teamId);
-
-        TeamEntity team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new TeamNotFoundException(teamId));
-
-        team.setFormation(formation);
-        teamRepository.save(team);
-
-        log.info("Formation changed successfully. teamId={}, matchId={}, formation={}", teamId, matchId, formation);
-    }
-
-    private void validateSchedule(String matchId, String teamId) {
-        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
-                .orElseThrow(() -> new MatchNotFoundException(matchId));
-
-        if (DateUtil.isInThePast(match.getDateTime())) {
-            throw new ScheduleConflictException("Cannot change formation, match has already started");
+            verify(invitationRepository).save(any(InvitationEntity.class));
         }
 
-        if (DateUtil.isWithinOneHour(match.getDateTime())) {
-            throw new ScheduleConflictException(
-                    String.format("Cannot change formation, match starts in %d minutes",
-                            DateUtil.minutesUntil(match.getDateTime())));
+        @Test
+        void throwsWhenTeamIdIsNull() {
+            assertThatThrownBy(() -> teamService.invitePlayer(null, "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+
+        @Test
+        void throwsWhenTeamIdIsBlank() {
+            assertThatThrownBy(() -> teamService.invitePlayer("  ", "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsNull() {
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", null, "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("playerId is required");
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsBlank() {
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "  ", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("playerId is required");
+        }
+
+        @Test
+        void throwsWhenTeamNotFound() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(TeamNotFoundException.class);
+        }
+
+        @Test
+        void throwsWhenPlayerNotFound() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Player not found");
+        }
+
+        @Test
+        void throwsWhenPlayerAlreadyInvited() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(true);
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(PlayerAlreadyInvitedException.class);
+        }
+
+        @Test
+        void throwsWhenTeamFull() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(false);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(12));
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("maximum of 12");
         }
     }
 
-    @Override
-    public List<Formation> getAllFormations() {
-        log.info("Fetching all formations from enum");
-        return Arrays.stream(Formation.values()).toList();
+    // ── respondInvitation ────────────────────────────────────────────────
+
+    @Nested
+    class RespondInvitation {
+
+        @Test
+        void acceptsInvitationAndCreatesTeamPlayer() {
+            InvitationEntity invitation = buildPendingInvitation();
+            when(invitationRepository.findByIdAndStatus("inv-1", InvitationStatus.PENDING))
+                    .thenReturn(Optional.of(invitation));
+
+            teamService.respondInvitation("inv-1", InvitationStatus.ACCEPTED);
+
+            verify(teamPlayerRepository).save(any(TeamPlayerEntity.class));
+            verify(userRepository).save(any());
+            assertThat(invitation.getStatus()).isEqualTo(InvitationStatus.ACCEPTED);
+        }
+
+        @Test
+        void rejectsInvitationWithoutCreatingTeamPlayer() {
+            InvitationEntity invitation = buildPendingInvitation();
+            when(invitationRepository.findByIdAndStatus("inv-1", InvitationStatus.PENDING))
+                    .thenReturn(Optional.of(invitation));
+
+            teamService.respondInvitation("inv-1", InvitationStatus.REJECTED);
+
+            verify(teamPlayerRepository, never()).save(any());
+            verify(userRepository, never()).save(any());
+            assertThat(invitation.getStatus()).isEqualTo(InvitationStatus.REJECTED);
+        }
+
+        @Test
+        void throwsWhenInvitationIdIsNull() {
+            assertThatThrownBy(() -> teamService.respondInvitation(null, InvitationStatus.ACCEPTED))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("invitationId is required");
+        }
+
+        @Test
+        void throwsWhenInvitationIdIsBlank() {
+            assertThatThrownBy(() -> teamService.respondInvitation("  ", InvitationStatus.ACCEPTED))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("invitationId is required");
+        }
+
+        @Test
+        void throwsWhenActionIsNull() {
+            assertThatThrownBy(() -> teamService.respondInvitation("inv-1", null))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("action is required");
+        }
+
+        @Test
+        void throwsWhenInvitationNotFound() {
+            when(invitationRepository.findByIdAndStatus("inv-1", InvitationStatus.PENDING))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.respondInvitation("inv-1", InvitationStatus.ACCEPTED))
+                    .isInstanceOf(InvitationNotFoundException.class);
+        }
+
+        private InvitationEntity buildPendingInvitation() {
+            InvitationEntity inv = new InvitationEntity();
+            inv.setId("inv-1");
+            inv.setTeam(teamEntity);
+            inv.setPlayer(playerEntity);
+            inv.setStatus(InvitationStatus.PENDING);
+            return inv;
+        }
     }
 
-    @Override
-    public Formation getEnemyFormation(String teamId) {
-        TeamEntity team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new TeamNotFoundException(teamId));
-        return team.getFormation();
+    // ── getInvitationsByPlayer ────────────────────────────────────────────
+
+    @Nested
+    class GetInvitationsByPlayer {
+
+        @Test
+        void returnsListWhenFound() {
+            InvitationEntity inv = new InvitationEntity();
+            inv.setId("inv-1");
+            inv.setTeam(teamEntity);
+            inv.setPlayer(playerEntity);
+            inv.setStatus(InvitationStatus.PENDING);
+
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.findByPlayerId("player-1")).thenReturn(List.of(inv));
+
+            List<Invitation> result = teamService.getInvitationsByPlayer("player-1");
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo("inv-1");
+            assertThat(result.get(0).getTeamId()).isEqualTo("team-1");
+        }
+
+        @Test
+        void returnsEmptyWhenNone() {
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.findByPlayerId("player-1")).thenReturn(List.of());
+
+            assertThat(teamService.getInvitationsByPlayer("player-1")).isEmpty();
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsNull() {
+            assertThatThrownBy(() -> teamService.getInvitationsByPlayer(null))
+                    .isInstanceOf(InvalidInputException.class);
+        }
+
+        @Test
+        void throwsWhenPlayerNotFound() {
+            when(playerRepository.findById("no-existe")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.getInvitationsByPlayer("no-existe"))
+                    .isInstanceOf(InvalidInputException.class);
+        }
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────────
+    // ── validateTeamComposition ──────────────────────────────────────────
 
-    private boolean isEngineeringCareer(Career career) {
-        return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
+    @Nested
+    class ValidateTeamComposition {
+
+        @Test
+        void returnsTrueAtLowerBoundary() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(7));
+            assertThat(teamService.validateTeamComposition("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsTrueAtUpperBoundary() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(12));
+            assertThat(teamService.validateTeamComposition("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsTrueWithinRange() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(9));
+            assertThat(teamService.validateTeamComposition("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsFalseWhenFewerThanSevenPlayers() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(6));
+            assertThat(teamService.validateTeamComposition("team-1")).isFalse();
+        }
+
+        @Test
+        void returnsFalseWhenMoreThanTwelvePlayers() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(13));
+            assertThat(teamService.validateTeamComposition("team-1")).isFalse();
+        }
+
+        @Test
+        void throwsWhenTeamIdIsNull() {
+            assertThatThrownBy(() -> teamService.validateTeamComposition(null))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+
+        @Test
+        void throwsWhenTeamIdIsBlank() {
+            assertThatThrownBy(() -> teamService.validateTeamComposition("  "))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
     }
 
-    private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
-        long engineeringCount = teamPlayers.stream()
-                .map(TeamPlayerEntity::getPlayer)
-                .map(PlayerEntity::getUser)
-                .filter(user -> {
-                    if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
-                    else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
-                    else if (user instanceof GraduateEntity g) return isEngineeringCareer(g.getCareer());
-                    return false;
-                })
-                .count();
-        return engineeringCount > teamPlayers.size() / 2.0;
+    // ── validatePlayerUniquePerTournament ────────────────────────────────
+
+    @Nested
+    class ValidatePlayerUniquePerTournament {
+
+        @Test
+        void returnsTrueWhenPlayerNotInTournament() {
+            when(teamPlayerRepository.existsByPlayerIdAndTournamentId("p1", "t1")).thenReturn(false);
+            assertThat(teamService.validatePlayerUniquePerTournament("p1", "t1")).isTrue();
+        }
+
+        @Test
+        void returnsFalseWhenPlayerAlreadyInTournament() {
+            when(teamPlayerRepository.existsByPlayerIdAndTournamentId("p1", "t1")).thenReturn(true);
+            assertThat(teamService.validatePlayerUniquePerTournament("p1", "t1")).isFalse();
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsNull() {
+            assertThatThrownBy(() -> teamService.validatePlayerUniquePerTournament(null, "t1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("playerId is required");
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsBlank() {
+            assertThatThrownBy(() -> teamService.validatePlayerUniquePerTournament("  ", "t1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("playerId is required");
+        }
+
+        @Test
+        void throwsWhenTournamentIdIsNull() {
+            assertThatThrownBy(() -> teamService.validatePlayerUniquePerTournament("p1", null))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("tournamentId is required");
+        }
+
+        @Test
+        void throwsWhenTournamentIdIsBlank() {
+            assertThatThrownBy(() -> teamService.validatePlayerUniquePerTournament("p1", "  "))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("tournamentId is required");
+        }
+    }
+
+    // ── getTeamById ──────────────────────────────────────────────────────
+
+    @Nested
+    class GetTeamById {
+
+        @Test
+        void returnsTeamWhenFound() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            Team result = teamService.getTeamById("team-1");
+            assertThat(result).isNotNull();
+        }
+
+        @Test
+        void throwsWhenTeamNotFound() {
+            when(teamRepository.findById("team-x")).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> teamService.getTeamById("team-x"))
+                    .isInstanceOf(TeamNotFoundException.class);
+        }
+
+        @Test
+        void throwsWhenTeamIdIsNull() {
+            assertThatThrownBy(() -> teamService.getTeamById(null))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+
+        @Test
+        void throwsWhenTeamIdIsBlank() {
+            assertThatThrownBy(() -> teamService.getTeamById("  "))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+    }
+
+    // ── getAllTeams ──────────────────────────────────────────────────────
+
+    @Nested
+    class GetAllTeams {
+
+        @Test
+        void returnsEmptyListWhenNoTeams() {
+            when(teamRepository.findAll()).thenReturn(List.of());
+            assertThat(teamService.getAllTeams()).isEmpty();
+        }
+
+        @Test
+        void returnsMappedTeams() {
+            when(teamRepository.findAll()).thenReturn(List.of(teamEntity));
+            assertThat(teamService.getAllTeams()).hasSize(1);
+        }
+    }
+
+    // ── validateEngineeringMajority ──────────────────────────────────────
+
+    @Nested
+    class ValidateEngineeringMajority {
+
+        @Test
+        void returnsTrueWhenMajorityAreStudents() {
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsTrueWhenMajorityAreTeachers() {
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(t), buildTeamPlayer(t), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsTrueWhenMajorityAreGraduates() {
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(g), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsTrueWithMixedEngineeringTypes() {
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(t), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
+        }
+
+        @Test
+        void returnsFalseWhenMajorityAreFamiliars() {
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.OTHER);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity()), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isFalse();
+        }
+
+        @Test
+        void returnsFalseWhenExactlyHalfAreEngineering() {
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
+            ));
+            assertThat(teamService.validateEngineeringMajority("team-1")).isFalse();
+        }
+
+        @Test
+        void throwsWhenTeamHasNoPlayers() {
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of());
+            assertThatThrownBy(() -> teamService.validateEngineeringMajority("team-1"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("Team has no players");
+        }
+
+        @Test
+        void throwsWhenTeamIdIsNull() {
+            assertThatThrownBy(() -> teamService.validateEngineeringMajority(null))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+
+        @Test
+        void throwsWhenTeamIdIsBlank() {
+            assertThatThrownBy(() -> teamService.validateEngineeringMajority("  "))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("teamId is required");
+        }
+    }
+
+    // ── changeFormation ──────────────────────────────────────────────────
+
+    @Nested
+    class ChangeFormation {
+
+        @Test
+        void changesFormationSuccessfully() {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(LocalDateTime.now().plusHours(3));
+            when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+
+            teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1");
+
+            assertThat(teamEntity.getFormation()).isEqualTo(Formation.FORMATION_4_3_3);
+            verify(teamRepository).save(teamEntity);
+        }
+
+        @Test
+        void throwsWhenMatchNotFound() {
+            when(matchRepository.findByIdAndTeam("match-x", "team-1")).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-x"))
+                    .isInstanceOf(MatchNotFoundException.class);
+        }
+
+        @Test
+        void throwsWhenMatchHasAlreadyStarted() {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(LocalDateTime.now().minusMinutes(1));
+            when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
+            assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
+                    .isInstanceOf(ScheduleConflictException.class)
+                    .hasMessageContaining("already started");
+        }
+
+        @Test
+        void throwsWhenMatchStartsWithinOneHour() {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(LocalDateTime.now().plusMinutes(30));
+            when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
+            assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
+                    .isInstanceOf(ScheduleConflictException.class)
+                    .hasMessageContaining("minutes");
+        }
+
+        @Test
+        void throwsWhenTeamNotFound() {
+            MatchEntity match = new MatchEntity();
+            match.setDateTime(LocalDateTime.now().plusHours(3));
+            when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
+                    .isInstanceOf(TeamNotFoundException.class);
+        }
+    }
+
+    // ── getAllFormations ─────────────────────────────────────────────────
+
+    @Nested
+    class GetAllFormations {
+
+        @Test
+        void returnsAllEnumValues() {
+            List<Formation> result = teamService.getAllFormations();
+            assertThat(result).containsExactlyInAnyOrder(Formation.values());
+        }
+    }
+
+    // ── getEnemyFormation ────────────────────────────────────────────────
+
+    @Nested
+    class GetEnemyFormation {
+
+        @Test
+        void returnsFormationOfTeam() {
+            teamEntity.setFormation(Formation.FORMATION_4_4_2);
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            assertThat(teamService.getEnemyFormation("team-1")).isEqualTo(Formation.FORMATION_4_4_2);
+        }
+
+        @Test
+        void throwsWhenTeamNotFound() {
+            when(teamRepository.findById("team-x")).thenReturn(Optional.empty());
+            assertThatThrownBy(() -> teamService.getEnemyFormation("team-x"))
+                    .isInstanceOf(TeamNotFoundException.class);
+        }
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    private List<TeamPlayerEntity> buildPlayerList(int count) {
+        List<TeamPlayerEntity> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) list.add(new TeamPlayerEntity());
+        return list;
+    }
+
+    private TeamPlayerEntity buildTeamPlayer(UserPlayerEntity userEntity) {
+        PlayerEntity player = new PlayerEntity();
+        player.setUser(userEntity);
+        TeamPlayerEntity tpe = new TeamPlayerEntity();
+        tpe.setPlayer(player);
+        return tpe;
     }
 }
