@@ -36,7 +36,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://db:5432/techcup
+      DB_URL: jdbc:postgresql://db:5432/techcup?stringtype=unspecified
     ports:
       - "8443:8443"
     volumes:

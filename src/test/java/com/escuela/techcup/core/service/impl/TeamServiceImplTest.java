@@ -1,13 +1,19 @@
 package com.escuela.techcup.core.service.impl;
 
 import com.escuela.techcup.core.exception.*;
+import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.persistence.entity.tournament.*;
 import com.escuela.techcup.persistence.entity.users.*;
 import com.escuela.techcup.persistence.repository.tournament.*;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
+import com.escuela.techcup.persistence.repository.users.UserRepository;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,26 +37,56 @@ class TeamServiceImplTest {
     @Mock private TeamPlayerRepository teamPlayerRepository;
     @Mock private PlayerRepository     playerRepository;
     @Mock private InvitationRepository invitationRepository;
+    @Mock private TournamentRepository tournamentRepository;
+    @Mock private UserRepository       userRepository;
     @Mock private MatchRepository      matchRepository;
 
-    @InjectMocks
-    private TeamServiceImpl teamService;
+    @InjectMocks private TeamServiceImpl teamService;
 
+    private TeamEntity teamEntity;
+    private PlayerEntity playerEntity;
+    private UserPlayerEntity userEntity;
+    private TournamentEntity tournamentEntity;
 
+    @BeforeEach
+    void setUp() {
+        userEntity = new UserPlayerEntity();
+        userEntity.setId("user-1");
 
+        playerEntity = new PlayerEntity();
+        playerEntity.setId("player-1");
+        playerEntity.setUser(userEntity);
+
+        tournamentEntity = new TournamentEntity();
+        tournamentEntity.setId("tour-1");
+        tournamentEntity.setStatus(TournamentStatus.ACTIVE);
+
+        teamEntity = new TeamEntity();
+        teamEntity.setId("team-1");
+        teamEntity.setName("Los Tigres");
+        teamEntity.setUniformColor("Rojo y Negro");
+        teamEntity.setTournament(tournamentEntity);
+    }
+
+    // ── createTeam ───────────────────────────────────────────────────────
 
     @Nested
     class CreateTeam {
 
         @Test
         void createsTeamSuccessfully() {
-            when(teamRepository.existsByNameIgnoreCase("Dream Team")).thenReturn(false);
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of(tournamentEntity));
+            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.of(playerEntity));
+            when(userRepository.save(any())).thenReturn(userEntity);
+            when(teamRepository.save(any())).thenReturn(teamEntity);
 
-            Team result = teamService.createTeam("Dream Team", "red-white", null, "captain-1");
+            Team result = teamService.createTeam("Los Tigres", "Rojo y Negro", null, "user-1");
 
             assertThat(result).isNotNull();
-            assertThat(result.getName()).isEqualTo("Dream Team");
-            verify(teamRepository).save(any(TeamEntity.class));
+            assertThat(result.getName()).isEqualTo("Los Tigres");
+            verify(teamPlayerRepository).save(any());
+            verify(userRepository).save(any());
         }
 
         @Test
@@ -89,24 +125,50 @@ class TeamServiceImplTest {
         }
 
         @Test
-        void throwsWhenTeamNameAlreadyExists() {
-            when(teamRepository.existsByNameIgnoreCase("Dream Team")).thenReturn(true);
+        void throwsWhenCaptainIdIsNull() {
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, null))
+                    .isInstanceOf(InvalidInputException.class);
+        }
 
-            assertThatThrownBy(() -> teamService.createTeam("Dream Team", "red", null, "cap-1"))
+        @Test
+        void throwsWhenTeamNameAlreadyExists() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(true);
+
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "red", null, "cap-1"))
                     .isInstanceOf(TeamAlreadyExistsException.class);
+        }
+
+        @Test
+        void throwsWhenNoActiveTournament() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, "user-1"))
+                    .isInstanceOf(TournamentNotActiveException.class);
+        }
+
+        @Test
+        void throwsWhenCaptainPlayerNotFound() {
+            when(teamRepository.existsByNameIgnoreCase("Los Tigres")).thenReturn(false);
+            when(tournamentRepository.findByStatus(TournamentStatus.ACTIVE)).thenReturn(List.of(tournamentEntity));
+            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.createTeam("Los Tigres", "Rojo", null, "user-1"))
+                    .isInstanceOf(InvalidInputException.class);
         }
     }
 
-
+    // ── invitePlayer ─────────────────────────────────────────────────────
 
     @Nested
     class InvitePlayer {
 
         @Test
         void invitesPlayerSuccessfully() {
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(new TeamEntity()));
-            when(playerRepository.findById("player-1")).thenReturn(Optional.of(new PlayerEntity()));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
             when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(false);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of());
 
             teamService.invitePlayer("team-1", "player-1", "Join us!");
 
@@ -151,7 +213,7 @@ class TeamServiceImplTest {
 
         @Test
         void throwsWhenPlayerNotFound() {
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(new TeamEntity()));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
             when(playerRepository.findById("player-1")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
@@ -161,16 +223,28 @@ class TeamServiceImplTest {
 
         @Test
         void throwsWhenPlayerAlreadyInvited() {
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(new TeamEntity()));
-            when(playerRepository.findById("player-1")).thenReturn(Optional.of(new PlayerEntity()));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
             when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(true);
 
             assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
                     .isInstanceOf(PlayerAlreadyInvitedException.class);
         }
+
+        @Test
+        void throwsWhenTeamFull() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(false);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(12));
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class)
+                    .hasMessageContaining("maximum of 12");
+        }
     }
 
-
+    // ── respondInvitation ────────────────────────────────────────────────
 
     @Nested
     class RespondInvitation {
@@ -184,6 +258,7 @@ class TeamServiceImplTest {
             teamService.respondInvitation("inv-1", InvitationStatus.ACCEPTED);
 
             verify(teamPlayerRepository).save(any(TeamPlayerEntity.class));
+            verify(userRepository).save(any());
             assertThat(invitation.getStatus()).isEqualTo(InvitationStatus.ACCEPTED);
         }
 
@@ -196,6 +271,7 @@ class TeamServiceImplTest {
             teamService.respondInvitation("inv-1", InvitationStatus.REJECTED);
 
             verify(teamPlayerRepository, never()).save(any());
+            verify(userRepository, never()).save(any());
             assertThat(invitation.getStatus()).isEqualTo(InvitationStatus.REJECTED);
         }
 
@@ -232,13 +308,58 @@ class TeamServiceImplTest {
         private InvitationEntity buildPendingInvitation() {
             InvitationEntity inv = new InvitationEntity();
             inv.setId("inv-1");
-            inv.setTeam(new TeamEntity());
-            inv.setPlayer(new PlayerEntity());
+            inv.setTeam(teamEntity);
+            inv.setPlayer(playerEntity);
             inv.setStatus(InvitationStatus.PENDING);
             return inv;
         }
     }
 
+    // ── getInvitationsByPlayer ────────────────────────────────────────────
+
+    @Nested
+    class GetInvitationsByPlayer {
+
+        @Test
+        void returnsListWhenFound() {
+            InvitationEntity inv = new InvitationEntity();
+            inv.setId("inv-1");
+            inv.setTeam(teamEntity);
+            inv.setPlayer(playerEntity);
+            inv.setStatus(InvitationStatus.PENDING);
+
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.findByPlayerId("player-1")).thenReturn(List.of(inv));
+
+            List<Invitation> result = teamService.getInvitationsByPlayer("player-1");
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo("inv-1");
+            assertThat(result.get(0).getTeamId()).isEqualTo("team-1");
+        }
+
+        @Test
+        void returnsEmptyWhenNone() {
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.findByPlayerId("player-1")).thenReturn(List.of());
+
+            assertThat(teamService.getInvitationsByPlayer("player-1")).isEmpty();
+        }
+
+        @Test
+        void throwsWhenPlayerIdIsNull() {
+            assertThatThrownBy(() -> teamService.getInvitationsByPlayer(null))
+                    .isInstanceOf(InvalidInputException.class);
+        }
+
+        @Test
+        void throwsWhenPlayerNotFound() {
+            when(playerRepository.findById("no-existe")).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> teamService.getInvitationsByPlayer("no-existe"))
+                    .isInstanceOf(InvalidInputException.class);
+        }
+    }
 
     // ── validateTeamComposition ──────────────────────────────────────────
 
@@ -248,35 +369,30 @@ class TeamServiceImplTest {
         @Test
         void returnsTrueAtLowerBoundary() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(7));
-
             assertThat(teamService.validateTeamComposition("team-1")).isTrue();
         }
 
         @Test
         void returnsTrueAtUpperBoundary() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(12));
-
             assertThat(teamService.validateTeamComposition("team-1")).isTrue();
         }
 
         @Test
         void returnsTrueWithinRange() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(9));
-
             assertThat(teamService.validateTeamComposition("team-1")).isTrue();
         }
 
         @Test
         void returnsFalseWhenFewerThanSevenPlayers() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(6));
-
             assertThat(teamService.validateTeamComposition("team-1")).isFalse();
         }
 
         @Test
         void returnsFalseWhenMoreThanTwelvePlayers() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(buildPlayerList(13));
-
             assertThat(teamService.validateTeamComposition("team-1")).isFalse();
         }
 
@@ -295,7 +411,6 @@ class TeamServiceImplTest {
         }
     }
 
-
     // ── validatePlayerUniquePerTournament ────────────────────────────────
 
     @Nested
@@ -304,14 +419,12 @@ class TeamServiceImplTest {
         @Test
         void returnsTrueWhenPlayerNotInTournament() {
             when(teamPlayerRepository.existsByPlayerIdAndTournamentId("p1", "t1")).thenReturn(false);
-
             assertThat(teamService.validatePlayerUniquePerTournament("p1", "t1")).isTrue();
         }
 
         @Test
         void returnsFalseWhenPlayerAlreadyInTournament() {
             when(teamPlayerRepository.existsByPlayerIdAndTournamentId("p1", "t1")).thenReturn(true);
-
             assertThat(teamService.validatePlayerUniquePerTournament("p1", "t1")).isFalse();
         }
 
@@ -344,7 +457,6 @@ class TeamServiceImplTest {
         }
     }
 
-
     // ── getTeamById ──────────────────────────────────────────────────────
 
     @Nested
@@ -352,19 +464,14 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTeamWhenFound() {
-            TeamEntity entity = new TeamEntity();
-            entity.setId("team-1");
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(entity));
-
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
             Team result = teamService.getTeamById("team-1");
-
             assertThat(result).isNotNull();
         }
 
         @Test
         void throwsWhenTeamNotFound() {
             when(teamRepository.findById("team-x")).thenReturn(Optional.empty());
-
             assertThatThrownBy(() -> teamService.getTeamById("team-x"))
                     .isInstanceOf(TeamNotFoundException.class);
         }
@@ -384,7 +491,6 @@ class TeamServiceImplTest {
         }
     }
 
-
     // ── getAllTeams ──────────────────────────────────────────────────────
 
     @Nested
@@ -393,18 +499,15 @@ class TeamServiceImplTest {
         @Test
         void returnsEmptyListWhenNoTeams() {
             when(teamRepository.findAll()).thenReturn(List.of());
-
             assertThat(teamService.getAllTeams()).isEmpty();
         }
 
         @Test
         void returnsMappedTeams() {
-            when(teamRepository.findAll()).thenReturn(List.of(new TeamEntity()));
-
+            when(teamRepository.findAll()).thenReturn(List.of(teamEntity));
             assertThat(teamService.getAllTeams()).hasSize(1);
         }
     }
-
 
     // ── validateEngineeringMajority ──────────────────────────────────────
 
@@ -413,80 +516,63 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTrueWhenMajorityAreStudents() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new StudentEntity()),
-                    buildTeamPlayer(new StudentEntity()),
-                    buildTeamPlayer(new FamiliarEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
         }
 
         @Test
         void returnsTrueWhenMajorityAreTeachers() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new TeacherEntity()),
-                    buildTeamPlayer(new TeacherEntity()),
-                    buildTeamPlayer(new FamiliarEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(t), buildTeamPlayer(t), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
         }
 
         @Test
         void returnsTrueWhenMajorityAreGraduates() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new GraduateEntity()),
-                    buildTeamPlayer(new GraduateEntity()),
-                    buildTeamPlayer(new FamiliarEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(g), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
         }
 
         @Test
         void returnsTrueWithMixedEngineeringTypes() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new StudentEntity()),
-                    buildTeamPlayer(new TeacherEntity()),
-                    buildTeamPlayer(new GraduateEntity()),
-                    buildTeamPlayer(new FamiliarEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(t), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isTrue();
         }
 
         @Test
         void returnsFalseWhenMajorityAreFamiliars() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new FamiliarEntity()),
-                    buildTeamPlayer(new FamiliarEntity()),
-                    buildTeamPlayer(new StudentEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.OTHER);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity()), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isFalse();
         }
 
         @Test
         void returnsFalseWhenExactlyHalfAreEngineering() {
-            List<TeamPlayerEntity> players = List.of(
-                    buildTeamPlayer(new StudentEntity()),
-                    buildTeamPlayer(new FamiliarEntity())
-            );
-            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(players);
-
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
+                    buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
+            ));
             assertThat(teamService.validateEngineeringMajority("team-1")).isFalse();
         }
 
         @Test
         void throwsWhenTeamHasNoPlayers() {
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of());
-
             assertThatThrownBy(() -> teamService.validateEngineeringMajority("team-1"))
                     .isInstanceOf(InvalidInputException.class)
                     .hasMessageContaining("Team has no players");
@@ -507,7 +593,6 @@ class TeamServiceImplTest {
         }
     }
 
-
     // ── changeFormation ──────────────────────────────────────────────────
 
     @Nested
@@ -517,20 +602,18 @@ class TeamServiceImplTest {
         void changesFormationSuccessfully() {
             MatchEntity match = new MatchEntity();
             match.setDateTime(LocalDateTime.now().plusHours(3));
-            TeamEntity team = new TeamEntity();
             when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(team));
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
 
             teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1");
 
-            assertThat(team.getFormation()).isEqualTo(Formation.FORMATION_4_3_3);
-            verify(teamRepository).save(team);
+            assertThat(teamEntity.getFormation()).isEqualTo(Formation.FORMATION_4_3_3);
+            verify(teamRepository).save(teamEntity);
         }
 
         @Test
         void throwsWhenMatchNotFound() {
             when(matchRepository.findByIdAndTeam("match-x", "team-1")).thenReturn(Optional.empty());
-
             assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-x"))
                     .isInstanceOf(MatchNotFoundException.class);
         }
@@ -540,7 +623,6 @@ class TeamServiceImplTest {
             MatchEntity match = new MatchEntity();
             match.setDateTime(LocalDateTime.now().minusMinutes(1));
             when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
-
             assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
                     .isInstanceOf(ScheduleConflictException.class)
                     .hasMessageContaining("already started");
@@ -551,7 +633,6 @@ class TeamServiceImplTest {
             MatchEntity match = new MatchEntity();
             match.setDateTime(LocalDateTime.now().plusMinutes(30));
             when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
-
             assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
                     .isInstanceOf(ScheduleConflictException.class)
                     .hasMessageContaining("minutes");
@@ -563,12 +644,10 @@ class TeamServiceImplTest {
             match.setDateTime(LocalDateTime.now().plusHours(3));
             when(matchRepository.findByIdAndTeam("match-1", "team-1")).thenReturn(Optional.of(match));
             when(teamRepository.findById("team-1")).thenReturn(Optional.empty());
-
             assertThatThrownBy(() -> teamService.changeFormation(Formation.FORMATION_4_3_3, "team-1", "match-1"))
                     .isInstanceOf(TeamNotFoundException.class);
         }
     }
-
 
     // ── getAllFormations ─────────────────────────────────────────────────
 
@@ -578,11 +657,9 @@ class TeamServiceImplTest {
         @Test
         void returnsAllEnumValues() {
             List<Formation> result = teamService.getAllFormations();
-
             assertThat(result).containsExactlyInAnyOrder(Formation.values());
         }
     }
-
 
     // ── getEnemyFormation ────────────────────────────────────────────────
 
@@ -591,32 +668,24 @@ class TeamServiceImplTest {
 
         @Test
         void returnsFormationOfTeam() {
-            TeamEntity team = new TeamEntity();
-            team.setFormation(Formation.FORMATION_4_4_2);
-            when(teamRepository.findById("team-1")).thenReturn(Optional.of(team));
-
-            Formation result = teamService.getEnemyFormation("team-1");
-
-            assertThat(result).isEqualTo(Formation.FORMATION_4_4_2);
+            teamEntity.setFormation(Formation.FORMATION_4_4_2);
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            assertThat(teamService.getEnemyFormation("team-1")).isEqualTo(Formation.FORMATION_4_4_2);
         }
 
         @Test
         void throwsWhenTeamNotFound() {
             when(teamRepository.findById("team-x")).thenReturn(Optional.empty());
-
             assertThatThrownBy(() -> teamService.getEnemyFormation("team-x"))
                     .isInstanceOf(TeamNotFoundException.class);
         }
     }
 
-
     // ── Helpers ──────────────────────────────────────────────────────────
 
     private List<TeamPlayerEntity> buildPlayerList(int count) {
         List<TeamPlayerEntity> list = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            list.add(new TeamPlayerEntity());
-        }
+        for (int i = 0; i < count; i++) list.add(new TeamPlayerEntity());
         return list;
     }
 

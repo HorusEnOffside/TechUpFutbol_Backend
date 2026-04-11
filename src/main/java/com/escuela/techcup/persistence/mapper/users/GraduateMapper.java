@@ -5,22 +5,20 @@ import com.escuela.techcup.core.model.Graduate;
 
 public class GraduateMapper {
 
-    private GraduateMapper() {
-    }
+    private GraduateMapper() {}
 
     public static Graduate toModel(GraduateEntity entity) {
         if (entity == null) return null;
         Graduate graduate = new Graduate(
-            entity.getId(),
-            entity.getName(),
-            entity.getMail(),
-            entity.getDateOfBirth(),
-            entity.getGender(),
-            entity.getPasswordHash()
+                entity.getId(),
+                entity.getName(),
+                entity.getMail(),
+                entity.getDateOfBirth(),
+                entity.getGender(),
+                entity.getPasswordHash(),
+                entity.getCareer()
         );
-        if (entity.getRoles() != null) {
-            graduate.setRoles(entity.getRoles());
-        }
+        if (entity.getRoles() != null) graduate.setRoles(entity.getRoles());
         return graduate;
     }
 
@@ -33,6 +31,7 @@ public class GraduateMapper {
         entity.setDateOfBirth(model.getDateOfBirth());
         entity.setGender(model.getGender());
         entity.setPasswordHash(model.getPassword());
+        entity.setCareer(model.getCareer());
         entity.setRoles(model.getRoles());
         return entity;
     }

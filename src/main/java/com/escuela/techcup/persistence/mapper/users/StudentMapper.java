@@ -4,23 +4,22 @@ import com.escuela.techcup.core.model.Student;
 import com.escuela.techcup.persistence.entity.users.StudentEntity;
 
 public class StudentMapper {
-        private StudentMapper() {
-    }
+
+    private StudentMapper() {}
 
     public static Student toModel(StudentEntity entity) {
         if (entity == null) return null;
         Student student = new Student(
-            entity.getId(),
-            entity.getName(),
-            entity.getMail(),
-            entity.getDateOfBirth(),
-            entity.getGender(),
-            entity.getSemester(),
-            entity.getPasswordHash()
+                entity.getId(),
+                entity.getName(),
+                entity.getMail(),
+                entity.getDateOfBirth(),
+                entity.getGender(),
+                entity.getSemester(),
+                entity.getCareer(),
+                entity.getPasswordHash()
         );
-        if (entity.getRoles() != null) {
-            student.setRoles(entity.getRoles());
-        }
+        if (entity.getRoles() != null) student.setRoles(entity.getRoles());
         return student;
     }
 
@@ -33,6 +32,7 @@ public class StudentMapper {
         entity.setDateOfBirth(model.getDateOfBirth());
         entity.setGender(model.getGender());
         entity.setSemester(model.getSemester());
+        entity.setCareer(model.getCareer());
         entity.setPasswordHash(model.getPassword());
         entity.setRoles(model.getRoles());
         return entity;

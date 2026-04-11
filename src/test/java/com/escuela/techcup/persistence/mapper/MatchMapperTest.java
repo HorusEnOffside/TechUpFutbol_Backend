@@ -1,4 +1,4 @@
-package com.escuela.techcup.persistence.mapper.tournament;
+package com.escuela.techcup.persistence.mapper;
 
 import com.escuela.techcup.core.model.Match;
 import com.escuela.techcup.core.model.MatchEvent;
@@ -16,6 +16,7 @@ import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 
+import com.escuela.techcup.persistence.mapper.tournament.MatchMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

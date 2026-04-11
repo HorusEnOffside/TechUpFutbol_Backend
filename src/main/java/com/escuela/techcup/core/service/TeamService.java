@@ -1,5 +1,6 @@
 package com.escuela.techcup.core.service;
 
+import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
@@ -20,14 +21,14 @@ public interface TeamService {
     boolean validatePlayerUniquePerTournament(String playerId, String tournamentId);
 
     Team getTeamById(String teamId);
-
     List<Team> getAllTeams();
 
     boolean validateEngineeringMajority(String teamId);
 
-    void changeFormation(Formation formation, String teamId,String matchId);
+    // Consultar invitaciones de un jugador
+    List<Invitation> getInvitationsByPlayer(String playerId);
 
+    void changeFormation(Formation formation, String teamId, String matchId);
     List<Formation> getAllFormations();
-
     Formation getEnemyFormation(String teamId);
 }
