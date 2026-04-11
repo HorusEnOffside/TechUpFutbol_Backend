@@ -1,6 +1,7 @@
 package com.escuela.techcup.core.service.impl;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
 import com.escuela.techcup.controller.dto.GraduateUserDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
+import com.escuela.techcup.controller.dto.PlayerSearchDTO;
+import com.escuela.techcup.controller.dto.PlayerSearchResultDTO;
 import com.escuela.techcup.controller.dto.StudentPlayerDTO;
 import com.escuela.techcup.controller.dto.StudentUserDTO;
 import com.escuela.techcup.controller.dto.TeacherPlayerDTO;
@@ -21,10 +24,13 @@ import com.escuela.techcup.controller.dto.UserPlayerDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
+import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.core.validator.PlayerValidator;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+import com.escuela.techcup.persistence.entity.users.StudentEntity;
+import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
@@ -41,11 +47,15 @@ public class PlayerServiceImpl implements PlayerService {
     private final UserPlayerRepository userPlayerRepository;
     private final UserService userService;
 
-    public PlayerServiceImpl(PlayerRepository playerRepository, UserPlayerRepository userPlayerRepository, UserService userService) {
+    public PlayerServiceImpl(PlayerRepository playerRepository,
+                             UserPlayerRepository userPlayerRepository,
+                             UserService userService) {
         this.playerRepository = playerRepository;
         this.userPlayerRepository = userPlayerRepository;
         this.userService = userService;
     }
+
+    // ── Creación de perfiles deportivos ──────────────────────────────────
 
     @Override
     @Transactional
@@ -117,6 +127,8 @@ public class PlayerServiceImpl implements PlayerService {
         return savePlayerProfile(createdUser, graduatePlayerDTO.getPosition(), graduatePlayerDTO.getDorsalNumber());
     }
 
+    // ── Consultas ────────────────────────────────────────────────────────
+
     @Override
     @Transactional(readOnly = true)
     public List<Player> getAllPlayers() {
@@ -132,14 +144,82 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findByUserId(userId).map(PlayerMapper::toModel);
     }
 
-    private Player savePlayerProfile(UserPlayer createdUser, com.escuela.techcup.core.model.enums.Position position, int dorsalNumber) {
+    // ── RF-15: Búsqueda de jugadores ─────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlayerSearchResultDTO> searchPlayers(PlayerSearchDTO filters) {
+        log.info("Searching players. filters={}", filters);
+
+        // RN-15: Solo jugadores con status AVAILABLE
+        List<PlayerEntity> available = playerRepository.findByStatus(PlayerStatus.AVAILABLE);
+
+        return available.stream()
+                .filter(p -> matchesFilters(p, filters))
+                .map(this::toSearchResultDTO)
+                .toList();
+    }
+
+    private boolean matchesFilters(PlayerEntity player, PlayerSearchDTO filters) {
+        if (filters == null) return true;
+
+        if (filters.getPosition() != null && player.getPosition() != filters.getPosition())
+            return false;
+
+        if (filters.getGender() != null && player.getUser().getGender() != filters.getGender())
+            return false;
+
+        if (filters.getName() != null && !filters.getName().isBlank()) {
+            String filterName = filters.getName().trim().toLowerCase();
+            String playerName = player.getUser().getName() != null
+                    ? player.getUser().getName().toLowerCase() : "";
+            if (!playerName.contains(filterName)) return false;
+        }
+
+        if (filters.getPlayerId() != null && !filters.getPlayerId().isBlank()) {
+            if (!player.getId().equalsIgnoreCase(filters.getPlayerId().trim())) return false;
+        }
+
+        if (filters.getSemester() != null) {
+            UserEntity user = player.getUser();
+            if (!(user instanceof StudentEntity s)) return false;
+            if (!filters.getSemester().equals(s.getSemester())) return false;
+        }
+
+        if (filters.getAge() != null) {
+            LocalDate dob = player.getUser().getDateOfBirth();
+            if (dob == null) return false;
+            int age = LocalDate.now().getYear() - dob.getYear();
+            if (age != filters.getAge()) return false;
+        }
+
+        return true;
+    }
+
+    private PlayerSearchResultDTO toSearchResultDTO(PlayerEntity player) {
+        String teamName = player.getTeam() != null ? player.getTeam().getName() : null;
+        return new PlayerSearchResultDTO(
+                player.getId(),
+                player.getUser().getName(),
+                player.getUser().getMail(),
+                player.getPosition(),
+                player.getDorsalNumber(),
+                player.getUser().getGender(),
+                player.getStatus(),
+                teamName
+        );
+    }
+
+    // ── Helpers privados ─────────────────────────────────────────────────
+
+    private Player savePlayerProfile(UserPlayer createdUser,
+                                     com.escuela.techcup.core.model.enums.Position position,
+                                     int dorsalNumber) {
         UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
                 .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
 
-        if (playerRepository.existsByUserId(userPlayerEntity.getId())) {
+        if (playerRepository.existsByUserId(userPlayerEntity.getId()))
             throw new InvalidInputException("A sports profile already exists for that user");
-        }
-
 
         Player player = new Player(createdUser, position, dorsalNumber);
         PlayerEntity entity = PlayerMapper.toEntity(player);
@@ -149,8 +229,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     private void validatePlayerMailUnique(String mail) {
         if (mail == null || mail.isBlank()) throw new InvalidInputException("mail is required");
-        if (userPlayerRepository.existsByMailIgnoreCase(mail)) {
+        if (userPlayerRepository.existsByMailIgnoreCase(mail))
             throw new InvalidInputException("A sports profile already exists for that email");
-        }
     }
 }

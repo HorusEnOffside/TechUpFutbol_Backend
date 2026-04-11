@@ -90,6 +90,10 @@ public class TeamServiceImpl implements TeamService {
         captainUser.addRole(UserRole.CAPTAIN);
         userRepository.save(captainUser);
 
+        // El capitán pasa a estar en equipo
+        captainPlayer.setStatus(com.escuela.techcup.core.model.enums.PlayerStatus.IN_TEAM);
+        playerRepository.save(captainPlayer);
+
         String teamId = IdGeneratorUtil.generateId();
         Team team = new Team(teamId, name, uniformColors, logo, null);
 
@@ -164,6 +168,11 @@ public class TeamServiceImpl implements TeamService {
             UserEntity user = invitation.getPlayer().getUser();
             user.addRole(UserRole.PLAYER);
             userRepository.save(user);
+
+            // El jugador pasa a estar en equipo
+            PlayerEntity player = invitation.getPlayer();
+            player.setStatus(com.escuela.techcup.core.model.enums.PlayerStatus.IN_TEAM);
+            playerRepository.save(player);
 
             TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
             teamPlayer.setId(IdGeneratorUtil.generateId());
