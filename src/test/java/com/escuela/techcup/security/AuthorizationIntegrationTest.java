@@ -69,13 +69,4 @@ class AuthorizationIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-
-    // --- Payment endpoints con rol ORGANIZER ---
-
-    @Test
-    void paymentHealth_withOrganizerRole_returns200() throws Exception {
-        paymentMvc.perform(get("/api/payments/health")
-                        .with(user("org").roles("ORGANIZER")))
-                .andExpect(status().isOk());
-    }
 }

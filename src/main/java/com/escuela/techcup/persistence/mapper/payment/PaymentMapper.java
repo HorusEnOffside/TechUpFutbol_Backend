@@ -1,86 +1,191 @@
 package com.escuela.techcup.persistence.mapper.payment;
 
-
-import com.escuela.techcup.core.model.NormalPayment;
+import com.escuela.techcup.controller.dto.PaymentDTO;
+import com.escuela.techcup.controller.dto.PaymentRespondDTO;
 import com.escuela.techcup.core.model.Payment;
-import com.escuela.techcup.persistence.entity.payment.NormalPaymentEntity;
 import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-
 public class PaymentMapper {
-    private PaymentMapper() {}
 
+    private PaymentMapper() {
+    }
 
-    public static NormalPaymentEntity toEntity(NormalPayment model) {
-        if (model == null) return null;
-        NormalPaymentEntity entity = new NormalPaymentEntity();
+    public static Payment toModel(PaymentEntity entity, String voucherUrl) {
+        if (entity == null) {
+            return null;
+        }
+
+        return new Payment(
+                entity.getId(),
+                entity.getStatus(),
+                entity.getDescription(),
+                entity.getPaymentDate(),
+                voucherUrl
+        );
+    }
+
+    public static PaymentEntity toEntity(
+            Payment model,
+            byte[] voucherBytes,
+            String voucherType,
+            String voucherName,
+            Long voucherSize) {
+
+        if (model == null) {
+            return null;
+        }
+
+        PaymentEntity entity = new PaymentEntity();
         entity.setId(model.getId());
         entity.setStatus(model.getStatus());
         entity.setDescription(model.getDescription());
         entity.setPaymentDate(model.getPaymentDate());
-        entity.setPaymentProof(toPngBytes(model.getVoucher()));
+        entity.setVoucher(voucherBytes);
+        entity.setVoucherType(voucherType);
+        entity.setVoucherName(voucherName);
+        entity.setVoucherSize(voucherSize);
+
         return entity;
     }
 
-    public static NormalPaymentEntity toEntity(Payment model) {
-        if (model == null) return null;
-        NormalPaymentEntity entity = new NormalPaymentEntity();
+    public static PaymentEntity toEntity(Payment model) {
+        if (model == null) {
+            return null;
+        }
+
+        PaymentEntity entity = new PaymentEntity();
         entity.setId(model.getId());
         entity.setStatus(model.getStatus());
         entity.setDescription(model.getDescription());
         entity.setPaymentDate(model.getPaymentDate());
-        entity.setPaymentProof(toPngBytes(model.getVoucher()));
+
         return entity;
     }
 
-    public static NormalPayment toModel(NormalPaymentEntity entity) {
-        if (entity == null) return null;
-        NormalPayment model = new NormalPayment();
+    public static void updateEntity(PaymentEntity entity, Payment model) {
+        if (entity == null || model == null) {
+            return;
+        }
+        entity.setStatus(model.getStatus());
+        entity.setDescription(model.getDescription());
+        entity.setPaymentDate(model.getPaymentDate());
+    }
+
+    public static void updateEntityWithVoucher(
+            PaymentEntity entity,
+            Payment model,
+            byte[] voucherBytes,
+            String voucherType,
+            String voucherName,
+            Long voucherSize) {
+
+        if (entity == null || model == null) {
+            return;
+        }
+
+        entity.setStatus(model.getStatus());
+        entity.setDescription(model.getDescription());
+        entity.setPaymentDate(model.getPaymentDate());
+
+        if (voucherBytes != null) {
+            entity.setVoucher(voucherBytes);
+            entity.setVoucherType(voucherType);
+            entity.setVoucherName(voucherName);
+            entity.setVoucherSize(voucherSize);
+        }
+    }
+
+    public static Payment toModel(PaymentDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Payment model = new Payment();
+        model.setDescription(dto.getDescription());
+        model.setPaymentDate(dto.getPaymentDate());
+
+        return model;
+    }
+
+    public static Payment toModel(String id, PaymentDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Payment model = new Payment();
+        model.setId(id);
+        model.setDescription(dto.getDescription());
+        model.setPaymentDate(dto.getPaymentDate());
+
+        return model;
+    }
+
+    public static PaymentRespondDTO toRespondDTO(Payment model) {
+        if (model == null) {
+            return null;
+        }
+
+        PaymentRespondDTO dto = new PaymentRespondDTO();
+        dto.setId(model.getId());
+        dto.setStatus(model.getStatus());
+        dto.setDescription(model.getDescription());
+        dto.setPaymentDate(model.getPaymentDate());
+        dto.setUrlComprobante(model.getUrlComprobante());
+
+        return dto;
+    }
+
+        public static void updateModel(Payment model, PaymentDTO dto) {
+        if (model == null || dto == null) {
+            return;
+        }
+        model.setDescription(dto.getDescription());
+        model.setPaymentDate(dto.getPaymentDate());
+    }
+    public static Payment toModel(PaymentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Payment model = new Payment();
         model.setId(entity.getId());
         model.setStatus(entity.getStatus());
         model.setDescription(entity.getDescription());
         model.setPaymentDate(entity.getPaymentDate());
-        model.setVoucher(toBufferedImage(entity.getPaymentProof()));
+
         return model;
     }
 
-    public static NormalPayment toModel(PaymentEntity entity) {
-        if (entity == null) return null;
-        NormalPayment model = new NormalPayment();
-        model.setId(entity.getId());
-        model.setStatus(entity.getStatus());
-        model.setDescription(entity.getDescription());
-        model.setPaymentDate(entity.getPaymentDate());
-        model.setVoucher(toBufferedImage(entity.getPaymentProof()));
-        return model;
-    }
-
-    private static byte[] toPngBytes(BufferedImage image) {
-        if (image == null) {
-            return new byte[0];
-        }
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", baos);
-            return baos.toByteArray();
-        } catch (IOException e) {
-            return new byte[0];
-        }
-    }
-
-    private static BufferedImage toBufferedImage(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
+    public static VoucherMetadata getVoucherMetadata(PaymentEntity entity) {
+        if (entity == null) {
             return null;
         }
-        try {
-            return ImageIO.read(new ByteArrayInputStream(bytes));
-        } catch (IOException e) {
-            return null;
+
+        return new VoucherMetadata(
+                entity.getVoucher(),
+                entity.getVoucherType(),
+                entity.getVoucherName(),
+                entity.getVoucherSize()
+        );
+    }
+
+
+    public static class VoucherMetadata {
+        private final byte[] bytes;
+        private final String type;
+        private final String name;
+        private final Long size;
+
+        public VoucherMetadata(byte[] bytes, String type, String name, Long size) {
+            this.bytes = bytes;
+            this.type = type;
+            this.name = name;
+            this.size = size;
         }
+
+        public byte[] getBytes() { return bytes; }
+        public String getType() { return type; }
+        public String getName() { return name; }
+        public Long getSize() { return size; }
     }
 }

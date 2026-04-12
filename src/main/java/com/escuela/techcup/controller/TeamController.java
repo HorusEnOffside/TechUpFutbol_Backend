@@ -1,11 +1,16 @@
 package com.escuela.techcup.controller;
 
 import com.escuela.techcup.controller.dto.InvitationResponseDTO;
+import com.escuela.techcup.controller.dto.PaymentDTO;
+import com.escuela.techcup.controller.dto.PaymentRespondDTO;
 import com.escuela.techcup.controller.dto.TeamFullInfoDTO;
+import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.core.service.TeamFullInfoService;
 import com.escuela.techcup.core.service.TeamService;
+import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +35,7 @@ public class TeamController {
     private final TeamService teamService;
     private final TeamFullInfoService teamFullInfoService;
 
-    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService) {
+    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService,  PaymentService paymentService) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
     }
@@ -135,5 +140,18 @@ public class TeamController {
     ) {
         log.info("Request to validate player unique per tournament. playerId={}, tournamentId={}", playerId, tournamentId);
         return ResponseEntity.ok(teamService.validatePlayerUniquePerTournament(playerId, tournamentId));
+    }
+
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
+    @PostMapping(value = "/{teamId}/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PaymentRespondDTO> uploadPayment(
+            @PathVariable String teamId,
+            @RequestPart("payment") PaymentDTO paymentDTO
+    ) {
+        log.info("Request to upload payment. teamId={}", teamId);
+
+        Payment payment = teamService.uploadPayment(teamId, paymentDTO);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

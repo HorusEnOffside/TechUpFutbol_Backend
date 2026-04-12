@@ -1,5 +1,16 @@
 package com.escuela.techcup.core.service;
 
-public interface PaymentService {
+import com.escuela.techcup.controller.dto.PaymentDTO;
+import com.escuela.techcup.core.model.Payment;
+import com.escuela.techcup.core.model.enums.PaymentStatus;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
+public interface PaymentService {
+    Payment createPayment(PaymentDTO paymentDTO, MultipartFile file);
+    List<Payment> getPayments();
+    Payment getPaymentById(String id);
+    Payment updatePaymentState(String id, PaymentStatus paymentStatus);
+    void deletePayment(String id);
 }

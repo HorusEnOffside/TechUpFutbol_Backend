@@ -1,16 +1,21 @@
 package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Invitation;
+import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
+import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.model.enums.UserRole;
+import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.DateUtil;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
+import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
@@ -22,6 +27,8 @@ import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
+import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
+import com.escuela.techcup.persistence.repository.payment.PaymentRepository;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
 import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
@@ -30,8 +37,10 @@ import com.escuela.techcup.persistence.repository.tournament.TournamentRepositor
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +60,8 @@ public class TeamServiceImpl implements TeamService {
     private final TournamentRepository tournamentRepository;
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
+    private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
@@ -59,7 +70,9 @@ public class TeamServiceImpl implements TeamService {
             InvitationRepository invitationRepository,
             TournamentRepository tournamentRepository,
             UserRepository userRepository,
-            MatchRepository matchRepository) {
+            MatchRepository matchRepository,
+            PaymentRepository paymentRepository,
+            PaymentService paymentService) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
@@ -67,6 +80,8 @@ public class TeamServiceImpl implements TeamService {
         this.tournamentRepository = tournamentRepository;
         this.userRepository = userRepository;
         this.matchRepository = matchRepository;
+        this.paymentService = paymentService;
+        this.paymentRepository = paymentRepository;
     }
 
     @Override
@@ -312,6 +327,29 @@ public class TeamServiceImpl implements TeamService {
         TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
         return team.getFormation();
+    }
+
+
+    @Override
+    public Payment uploadPayment(String teamId, PaymentDTO paymentDTO) {
+
+
+        TeamEntity team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new EntityNotFoundException("Equipo no encontrado: " + teamId));
+
+        TournamentEntity tournament = team.getTournament();
+
+        if (!DateUtil.isBeforeDeadline(paymentDTO.getPaymentDate(), tournament.getStartDate())) {
+            throw new PaymentDateException(paymentDTO.getPaymentDate(), tournament.getStartDate());
+        }
+
+        Payment payment = paymentService.createPayment(paymentDTO, paymentDTO.getComprobante());
+        PaymentEntity paymentEntity = PaymentMapper.toEntity(payment);
+        team.setPayment(paymentEntity);
+        teamRepository.save(team);
+
+        return payment;
+
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

@@ -1,11 +1,11 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import com.escuela.techcup.core.model.enums.Formation;
-import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import java.util.List;
 

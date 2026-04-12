@@ -34,4 +34,8 @@ public class DateUtil {
     public static boolean isWithinOneHour(LocalDateTime dateTime) {
         return minutesUntil(dateTime) < 60;
     }
+
+    public static boolean isBeforeDeadline(LocalDateTime paymentDate, LocalDateTime deadline) {
+        return paymentDate.isBefore(deadline);
+    }
 }
