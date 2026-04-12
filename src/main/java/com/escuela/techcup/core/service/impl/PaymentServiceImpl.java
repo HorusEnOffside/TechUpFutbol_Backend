@@ -106,12 +106,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void updatePaymentState(String id, PaymentStatus paymentStatus) {
+    public Payment updatePaymentState(String id, PaymentStatus paymentStatus) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new PaymentNotFoundException("Pago no encontrado con ID: " + id));
 
         entity.setStatus(paymentStatus);
         paymentRepository.save(entity);
+
+        return  PaymentMapper.toModel(entity, id);
     }
 
     @Override

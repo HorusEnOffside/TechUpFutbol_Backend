@@ -4,6 +4,7 @@ import com.escuela.techcup.controller.dto.InvitationResponseDTO;
 import com.escuela.techcup.controller.dto.TeamFullInfoDTO;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.core.service.TeamFullInfoService;
 import com.escuela.techcup.core.service.TeamService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,10 +30,12 @@ public class TeamController {
     private static final Logger log = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
     private final TeamFullInfoService teamFullInfoService;
+    private final PaymentService paymentService;
 
-    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService) {
+    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService,  PaymentService paymentService) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
+        this.paymentService = paymentService;
     }
 
     @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")

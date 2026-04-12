@@ -11,6 +11,6 @@ public interface PaymentService {
     Payment createPayment(PaymentDTO paymentDTO, MultipartFile file);
     List<Payment> getPayments();
     Payment getPaymentById(String id);
-    void updatePaymentState(String id, PaymentStatus paymentStatus);
+    Payment updatePaymentState(String id, PaymentStatus paymentStatus);
     void deletePayment(String id);
 }
