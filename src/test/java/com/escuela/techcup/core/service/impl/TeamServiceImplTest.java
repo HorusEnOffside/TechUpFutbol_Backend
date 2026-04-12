@@ -704,6 +704,7 @@ class TeamServiceImplTest {
     }
 
     // ── UploadPayment ────────────────────────────────────────────────────
+
     @Nested
     class UploadPayment {
 
