@@ -1,39 +1,34 @@
 package com.escuela.techcup.persistence.entity.payment;
 
-import java.time.LocalDate;
 
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "payments")
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class PaymentEntity {
+@Data
+public class PaymentEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
     private String id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
+    @Column(name = "formation", length = 50)
     private PaymentStatus status;
 
-    
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "payment_proof")
-    private byte[] paymentProof;
 
-
-    @Column(name = "description", nullable = false, length = 255)
+    @Column(name = "descripcion")
     private String description;
 
+    @Column(name = "fecha_pago")
+    private LocalDateTime paymentDate;
 
-    @Column(name = "payment_date", nullable = false)
-    private LocalDate paymentDate;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB", nullable = false)
+    private byte[] voucher;
+
 }
