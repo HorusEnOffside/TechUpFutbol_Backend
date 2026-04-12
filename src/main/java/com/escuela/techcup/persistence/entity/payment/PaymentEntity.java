@@ -31,4 +31,12 @@ public class PaymentEntity {
     @Column(columnDefinition = "LONGBLOB", nullable = false)
     private byte[] voucher;
 
+    @Column(name = "voucher_type", length = 100)
+    private String voucherType;
+
+    @Column(name = "voucher_name", length = 255)
+    private String voucherName;
+
+    @Column(name = "voucher_size")
+    private Long voucherSize;
 }
