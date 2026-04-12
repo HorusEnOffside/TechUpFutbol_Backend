@@ -1,15 +1,20 @@
 package com.escuela.techcup.core.model;
 
-import java.awt.image.BufferedImage;
-import java.time.LocalDate;
-
-
+import java.time.LocalDateTime;
 import com.escuela.techcup.core.model.enums.PaymentStatus;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface Payment {
-    String getId();
-    PaymentStatus getStatus();
-    String getDescription();
-    LocalDate getPaymentDate();
-    BufferedImage getVoucher();
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Payment {
+
+    private String id;
+    private PaymentStatus status;
+    private String description;
+    private LocalDateTime paymentDate;
+    private String urlComprobante;
 }

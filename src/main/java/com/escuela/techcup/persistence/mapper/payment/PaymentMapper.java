@@ -1,10 +1,7 @@
 package com.escuela.techcup.persistence.mapper.payment;
 
 
-import com.escuela.techcup.core.model.NormalPayment;
 import com.escuela.techcup.core.model.Payment;
-import com.escuela.techcup.persistence.entity.payment.NormalPaymentEntity;
-import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
