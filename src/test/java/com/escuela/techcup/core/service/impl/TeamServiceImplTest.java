@@ -1,18 +1,20 @@
 package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Invitation;
+import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
-import com.escuela.techcup.core.model.enums.Career;
-import com.escuela.techcup.core.model.enums.Formation;
-import com.escuela.techcup.core.model.enums.InvitationStatus;
-import com.escuela.techcup.core.model.enums.TournamentStatus;
+import com.escuela.techcup.core.model.enums.*;
+import com.escuela.techcup.core.service.PaymentService;
+import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.entity.tournament.*;
 import com.escuela.techcup.persistence.entity.users.*;
 import com.escuela.techcup.persistence.repository.tournament.*;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,13 +22,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +49,14 @@ class TeamServiceImplTest {
     @Mock private MatchRepository      matchRepository;
 
     @InjectMocks private TeamServiceImpl teamService;
+
+
+
+
+    @Mock private PaymentService paymentService;
+    private TeamEntity mockTeamEntity;
+    private TournamentEntity mockTournamentEntity;
+    private Payment mockPayment;
 
     private TeamEntity teamEntity;
     private PlayerEntity playerEntity;
@@ -66,6 +81,13 @@ class TeamServiceImplTest {
         teamEntity.setName("Los Tigres");
         teamEntity.setUniformColor("Rojo y Negro");
         teamEntity.setTournament(tournamentEntity);
+
+        mockTournamentEntity = mock(TournamentEntity.class);
+        mockTeamEntity = mock(TeamEntity.class);
+
+        mockPayment = new Payment();
+        mockPayment.setId("pay-1");
+        mockPayment.setStatus(PaymentStatus.PENDING);
     }
 
     // ── createTeam ───────────────────────────────────────────────────────
@@ -680,6 +702,110 @@ class TeamServiceImplTest {
                     .isInstanceOf(TeamNotFoundException.class);
         }
     }
+
+    // ── UploadPayment ────────────────────────────────────────────────────
+    @Nested
+    class UploadPayment {
+
+        private PaymentDTO buildDTO(LocalDateTime paymentDate) {
+            PaymentDTO dto = new PaymentDTO();
+            dto.setDescription("Comprobante torneo");
+            dto.setPaymentDate(paymentDate);
+            dto.setComprobante(mockMultipartFile());
+            return dto;
+        }
+
+        private MultipartFile mockMultipartFile() {
+            // TeamService solo pasa el archivo al PaymentService (mockeado),
+            // no lo lee directamente, así que no necesita stubs
+            return mock(MultipartFile.class);
+        }
+
+        @Test
+        void whenValidPayment_thenSavesTeamAndReturnsPayment() {
+            PaymentDTO dto = buildDTO(LocalDateTime.of(2025, 3, 1, 10, 0));
+
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(mockTeamEntity));
+            when(mockTeamEntity.getTournament()).thenReturn(mockTournamentEntity);
+            when(mockTournamentEntity.getStartDate()).thenReturn(LocalDateTime.of(2025, 4, 1, 0, 0));
+            when(paymentService.createPayment(any(), any())).thenReturn(mockPayment);
+
+            Payment result = teamService.uploadPayment("team-1", dto);
+
+            assertNotNull(result);
+            assertEquals("pay-1", result.getId());
+            assertEquals(PaymentStatus.PENDING, result.getStatus());
+            verify(teamRepository).save(mockTeamEntity);
+        }
+
+        @Test
+        void whenTeamNotFound_thenThrowsEntityNotFoundException() {
+            PaymentDTO dto = buildDTO(LocalDateTime.of(2025, 3, 1, 10, 0));
+            when(teamRepository.findById("unknown")).thenReturn(Optional.empty());
+
+            assertThrows(EntityNotFoundException.class,
+                    () -> teamService.uploadPayment("unknown", dto));
+            verifyNoInteractions(paymentService);
+        }
+
+        @Test
+        void whenPaymentDateAfterDeadline_thenThrowsPaymentDateException() {
+            PaymentDTO dto = buildDTO(LocalDateTime.of(2025, 5, 1, 10, 0));
+
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(mockTeamEntity));
+            when(mockTeamEntity.getTournament()).thenReturn(mockTournamentEntity);
+            when(mockTournamentEntity.getStartDate()).thenReturn(LocalDateTime.of(2025, 4, 1, 0, 0));
+
+            assertThrows(PaymentDateException.class,
+                    () -> teamService.uploadPayment("team-1", dto));
+            verifyNoInteractions(paymentService);
+        }
+
+        @Test
+        void whenPaymentDateEqualsDeadline_thenThrowsPaymentDateException() {
+            LocalDateTime deadline = LocalDateTime.of(2025, 4, 1, 0, 0);
+            PaymentDTO dto = buildDTO(deadline);
+
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(mockTeamEntity));
+            when(mockTeamEntity.getTournament()).thenReturn(mockTournamentEntity);
+            when(mockTournamentEntity.getStartDate()).thenReturn(deadline);
+
+            assertThrows(PaymentDateException.class,
+                    () -> teamService.uploadPayment("team-1", dto));
+            verifyNoInteractions(paymentService);
+        }
+
+        @Test
+        void whenPaymentDateOneSecondBeforeDeadline_thenSucceeds() {
+            LocalDateTime deadline = LocalDateTime.of(2025, 4, 1, 0, 0);
+            PaymentDTO dto = buildDTO(deadline.minusSeconds(1));
+
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(mockTeamEntity));
+            when(mockTeamEntity.getTournament()).thenReturn(mockTournamentEntity);
+            when(mockTournamentEntity.getStartDate()).thenReturn(deadline);
+            when(paymentService.createPayment(any(), any())).thenReturn(mockPayment);
+
+            Payment result = teamService.uploadPayment("team-1", dto);
+
+            assertNotNull(result);
+            verify(teamRepository).save(mockTeamEntity);
+        }
+
+        @Test
+        void whenValidPayment_thenAssociatesPaymentToTeam() {
+            PaymentDTO dto = buildDTO(LocalDateTime.of(2025, 3, 1, 10, 0));
+
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(mockTeamEntity));
+            when(mockTeamEntity.getTournament()).thenReturn(mockTournamentEntity);
+            when(mockTournamentEntity.getStartDate()).thenReturn(LocalDateTime.of(2025, 4, 1, 0, 0));
+            when(paymentService.createPayment(any(), any())).thenReturn(mockPayment);
+
+            teamService.uploadPayment("team-1", dto);
+
+            verify(mockTeamEntity).setPayment(any(PaymentEntity.class));
+        }
+    }
+
 
     // ── Helpers ──────────────────────────────────────────────────────────
 

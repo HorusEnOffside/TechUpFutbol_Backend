@@ -45,6 +45,8 @@ public class PaymentController {
 
     }
 
+
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<PaymentRespondDTO>> getAllPayments() {
         log.info("Obtener todos los pagos");
