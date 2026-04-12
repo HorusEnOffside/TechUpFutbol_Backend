@@ -1,10 +1,9 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
-import com.escuela.techcup.persistence.entity.users.*;
+import com.escuela.techcup.persistence.entity.users.RefereeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class MatchEntity {
     @JoinColumn(name = "team_b_id", nullable = false, foreignKey = @ForeignKey(name = "fk_matches_team_b"))
     private TeamEntity teamB;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "soccer_field_id", nullable = false, foreignKey = @ForeignKey(name = "fk_matches_soccer_field"))
     private SoccerFieldEntity soccerField;
 
@@ -48,13 +47,12 @@ public class MatchEntity {
     @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CardEntity> cards = new ArrayList<>();
 
+    @Column(name = "status", nullable = false)
+    private String status = "PENDING";
+
     public void addGoal(GoalEntity goal) {
         goals.add(goal);
         goal.setMatch(this);
     }
 
-    public void addCard(CardEntity card) {
-        cards.add(card);
-        card.setMatch(this);
-    }
 }

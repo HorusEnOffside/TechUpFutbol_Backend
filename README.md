@@ -250,7 +250,7 @@ Esto levanta dos servicios:
 docker-compose ps
 ```
 
-Accede a la API en: `https://localhost:8443`
+Accede a la API en: `https://localhost:8443/swagger-ui/index.html`
 
 ### Detener el entorno
 
