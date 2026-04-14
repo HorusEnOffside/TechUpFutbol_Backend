@@ -13,10 +13,9 @@ public class PaymentDTO {
     @NotNull(message = "El comprobante es obligatorio")
     private MultipartFile comprobante;
 
-    @NotBlank(message = "password is required")
     private String description;
 
-    @NotBlank(message = "password is required")
+    @NotNull(message = "La fecha de pago es obligatoria")
     private LocalDateTime paymentDate;
 
 }
