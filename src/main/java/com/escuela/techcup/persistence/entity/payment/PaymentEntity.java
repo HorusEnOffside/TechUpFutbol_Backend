@@ -27,8 +27,7 @@ public class PaymentEntity {
     @Column(name = "fecha_pago")
     private LocalDateTime paymentDate;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB", nullable = false)
+    @Column(name = "voucher", nullable = false, columnDefinition = "bytea")
     private byte[] voucher;
 
     @Column(name = "voucher_type", length = 100)
