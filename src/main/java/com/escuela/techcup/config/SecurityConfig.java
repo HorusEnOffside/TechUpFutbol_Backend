@@ -92,6 +92,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/**",
                                 "/api/players/**",
+                                "/api/teams/search",
                                 "/api/users/admin",
                                 "/login/oauth2/**",
                                 "/oauth2/**"

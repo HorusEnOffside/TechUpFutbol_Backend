@@ -1,5 +1,6 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
 import com.escuela.techcup.controller.dto.InvitationResponseDTO;
 import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.controller.dto.PaymentRespondDTO;
@@ -38,6 +39,15 @@ public class TeamController {
     public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService,  PaymentService paymentService) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/search")
+    public ResponseEntity<EntitySearchResultDTO> searchTeamByName(@RequestParam String name) {
+        log.info("Request to search team by name={}", name);
+        return teamService.findByNameContaining(name)
+                .map(team -> ResponseEntity.ok(new EntitySearchResultDTO(team.getId(), team.getName())))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")

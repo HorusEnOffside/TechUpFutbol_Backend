@@ -331,6 +331,15 @@ public class TeamServiceImpl implements TeamService {
 
 
     @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<Team> findByNameContaining(String name) {
+        if (name == null || name.isBlank()) throw new InvalidInputException("name is required");
+        return teamRepository.findByNameContainingIgnoreCase(name).stream()
+                .findFirst()
+                .map(TeamMapper::toModel);
+    }
+
+    @Override
     public Payment uploadPayment(String teamId, PaymentDTO paymentDTO) {
 
 

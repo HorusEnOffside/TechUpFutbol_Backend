@@ -8,6 +8,7 @@ import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.service.PlayerService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -615,5 +616,31 @@ class PlayerControllerTest {
         when(playerService.getPlayerByUserId("u1")).thenReturn(Optional.of(playerMock));
         mockMvc.perform(get("/api/players/u1"));
         verify(playerService, times(1)).getPlayerByUserId("u1");
+    }
+
+    // --- GET /api/players/find?name= ---
+
+    @Nested
+    class FindPlayerByName {
+
+        @Test
+        void retorna200ConIdYNombreCuandoEncuentra() throws Exception {
+            when(playerService.findByNameContaining("Pedro"))
+                    .thenReturn(Optional.of(playerMock));
+
+            mockMvc.perform(get("/api/players/find").param("name", "Pedro"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value("u1"))
+                    .andExpect(jsonPath("$.name").value("Pedro"));
+        }
+
+        @Test
+        void retorna404CuandoNoEncuentra() throws Exception {
+            when(playerService.findByNameContaining("xyz"))
+                    .thenReturn(Optional.empty());
+
+            mockMvc.perform(get("/api/players/find").param("name", "xyz"))
+                    .andExpect(status().isNotFound());
+        }
     }
 }
