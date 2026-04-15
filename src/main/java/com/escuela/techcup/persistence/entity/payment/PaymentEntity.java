@@ -28,4 +28,7 @@ public class PaymentEntity {
 
     @Column(name = "voucher", nullable = false, columnDefinition = "bytea")
     private byte[] voucher;
+
+    private String voucherName;
+    private String voucherType;
 }

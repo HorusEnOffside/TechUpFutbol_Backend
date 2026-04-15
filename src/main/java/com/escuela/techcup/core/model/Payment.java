@@ -17,5 +17,5 @@ public class Payment {
     private PaymentStatus status;
     private String description;
     private LocalDateTime paymentDate;
-    private BufferedImage voucher;
+    private String voucherURL;
 }
