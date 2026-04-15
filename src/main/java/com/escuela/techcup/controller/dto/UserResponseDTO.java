@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserResponseDTO {
+public class   UserResponseDTO {
     private String name;
     private String mail;
     private LocalDate dateOfBirth;
