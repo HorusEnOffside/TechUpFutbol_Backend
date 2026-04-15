@@ -24,6 +24,7 @@ public interface TeamService {
 
     Team getTeamById(String teamId);
     List<Team> getAllTeams();
+    java.util.Optional<Team> findByNameContaining(String name);
 
     boolean validateEngineeringMajority(String teamId);
 

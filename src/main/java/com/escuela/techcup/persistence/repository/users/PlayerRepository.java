@@ -18,4 +18,6 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, String> {
     List<PlayerEntity> findByStatus(PlayerStatus status);
 
     List<PlayerEntity> findByPosition(Position position);
+
+    List<PlayerEntity> findByUser_NameContainingIgnoreCase(String name);
 }
