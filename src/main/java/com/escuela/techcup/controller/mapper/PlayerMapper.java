@@ -56,6 +56,7 @@ public class PlayerMapper {
             throw new InvalidInputException("Player cannot be null");
         }
         return new PlayerResponseDTO(
+            player.getUserId(),
             player.getName(),
             player.getMail(),
             player.getDateOfBirth(),
