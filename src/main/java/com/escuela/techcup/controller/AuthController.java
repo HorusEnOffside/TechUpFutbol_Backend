@@ -84,12 +84,17 @@ public class AuthController {
 		}
 
 		String userId = jwtService.extractUserId(token);
-		String email = jwtService.extractEmail(token);
-		Set<String> roles = jwtService.extractRoles(token);
 
-		String newToken = jwtService.generateToken(userId, email, roles);
-		log.info("Token refreshed successfully for userId={}", userId);
+		User user = userService.getUserById(userId)
+				.orElseThrow(() -> new TechcupException("User not found", HttpStatus.UNAUTHORIZED));
 
-		return ResponseEntity.ok(new LoginResponse(newToken, userId, email, null));
+		Set<String> freshRoles = user.getRoles().stream()
+				.map(Enum::name)
+				.collect(Collectors.toSet());
+
+		String newToken = jwtService.generateToken(userId, user.getMail(), freshRoles);
+		log.info("Token refreshed successfully for userId={}, roles={}", userId, freshRoles);
+
+		return ResponseEntity.ok(new LoginResponse(newToken, userId, user.getMail(), user.getRoles()));
 	}
 }

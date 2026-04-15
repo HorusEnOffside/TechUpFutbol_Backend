@@ -14,11 +14,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class PlayerResponseDTO extends UserResponseDTO {
 
+    private String id;
     private int dorsalNumber;
     private Position position;
 
-    public PlayerResponseDTO(String name, String mail, LocalDate dateOfBirth, Gender gender, int dorsalNumber, Position position, Set<UserRole> roles) {
+    public PlayerResponseDTO(String id, String name, String mail, LocalDate dateOfBirth, Gender gender, int dorsalNumber, Position position, Set<UserRole> roles) {
         super(name, mail, dateOfBirth, gender, roles);
+        this.id = id;
         this.dorsalNumber = dorsalNumber;
         this.position = position;
     }
