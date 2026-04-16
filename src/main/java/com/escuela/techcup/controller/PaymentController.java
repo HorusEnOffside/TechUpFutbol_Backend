@@ -5,11 +5,13 @@ import com.escuela.techcup.controller.dto.PaymentRespondDTO;
 import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import com.escuela.techcup.core.service.PaymentService;
+import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +27,11 @@ import java.util.stream.Collectors;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final PaymentMapper mapper;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService,  PaymentMapper mapper) {
         this.paymentService = paymentService;
+        this.mapper = mapper;
     }
 
 
@@ -39,7 +43,7 @@ public class PaymentController {
 
         Payment created = paymentService.createPayment(paymentDTO, file);
 
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(created);
+        PaymentRespondDTO response = mapper.toRespondDTO(created);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -51,7 +55,7 @@ public class PaymentController {
         List<Payment> payments = paymentService.getPayments();
 
         List<PaymentRespondDTO> response = payments.stream()
-                .map(PaymentMapper::toRespondDTO)
+                .map(mapper::toRespondDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
@@ -63,7 +67,7 @@ public class PaymentController {
             @PathVariable @Parameter(description = "ID del pago") String id) {
 
         Payment payment = paymentService.getPaymentById(id);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
+        PaymentRespondDTO response = mapper.toRespondDTO(payment);
 
         return ResponseEntity.ok(response);
     }
@@ -76,7 +80,7 @@ public class PaymentController {
             @RequestParam PaymentStatus status) {
 
         Payment updated = paymentService.updatePaymentState(id, status);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(updated);
+        PaymentRespondDTO response = mapper.toRespondDTO(updated);
 
         return ResponseEntity.ok(response);
     }
@@ -87,5 +91,17 @@ public class PaymentController {
     public ResponseEntity<Void> deletePayment(@PathVariable String id) {
         paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/voucher")
+    @Operation(summary = "Obtener comprobante de pago")
+    public ResponseEntity<byte[]> getVoucher(@PathVariable String id) {
+        PaymentEntity entity = paymentService.getVoucherById(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(entity.getVoucherType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + entity.getVoucherName() + "\"")
+                .body(entity.getVoucher());
     }
 }

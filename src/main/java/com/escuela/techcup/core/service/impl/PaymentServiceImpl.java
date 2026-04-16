@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PaymentMapper mapper;
 
     @Override
     @Transactional
@@ -30,11 +31,11 @@ public class PaymentServiceImpl implements PaymentService {
         if (file == null || file.isEmpty()) {
             throw new InvalidImageException("El comprobante de pago es obligatorio");
         }
-        PaymentEntity entity = PaymentMapper.toEntity(paymentDTO, file);
+        PaymentEntity entity = mapper.toEntity(paymentDTO, file);
 
         PaymentEntity savedEntity = paymentRepository.save(entity);
 
-        return PaymentMapper.toModel(savedEntity);
+        return mapper.toModel(savedEntity);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     public List<Payment> getPayments() {
         return paymentRepository.findAll()
                 .stream()
-                .map(PaymentMapper::toModel)
+                .map(mapper::toModel)
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment getPaymentById(String id) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
-        return PaymentMapper.toModel(entity);
+        return mapper.toModel(entity);
     }
 
 
@@ -63,10 +64,10 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
 
-        PaymentMapper.updateStatus(entity, paymentStatus);
+        mapper.updateStatus(entity, paymentStatus);
 
         PaymentEntity updatedEntity = paymentRepository.save(entity);
-        return PaymentMapper.toModel(updatedEntity);
+        return mapper.toModel(updatedEntity);
     }
 
     @Override
@@ -76,5 +77,12 @@ public class PaymentServiceImpl implements PaymentService {
             throw new EntityNotFoundException("Pago no encontrado con id: " + id);
         }
         paymentRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentEntity getVoucherById(String id) {
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
     }
 }
