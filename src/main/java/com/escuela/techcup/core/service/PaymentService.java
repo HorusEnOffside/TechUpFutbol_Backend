@@ -16,4 +16,5 @@ public interface PaymentService {
     Payment updatePaymentState(String id, PaymentStatus paymentStatus);
     void deletePayment(String id);
     PaymentEntity getVoucherById(String id);
+    List<Payment> getPaymentsByStatus(PaymentStatus status);
 }

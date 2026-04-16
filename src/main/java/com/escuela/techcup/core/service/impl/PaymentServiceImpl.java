@@ -2,6 +2,7 @@ package com.escuela.techcup.core.service.impl;
 
 import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.core.exception.InvalidImageException;
+import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import com.escuela.techcup.core.service.PaymentService;
@@ -83,5 +84,19 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentEntity getVoucherById(String id) {
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Payment> getPaymentsByStatus(PaymentStatus status) {
+        if (status == null) {
+            throw new InvalidInputException("Status is required");
+        }
+
+        List<PaymentEntity> paymentEntities = paymentRepository.findByStatus(status);
+
+        return paymentEntities.stream()
+                .map(PaymentMapper::toModel)
+                .collect(Collectors.toList());
     }
 }

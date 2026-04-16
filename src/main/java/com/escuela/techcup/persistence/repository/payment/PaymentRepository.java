@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface PaymentRepository extends JpaRepository<PaymentEntity, String> {
 
     List<PaymentEntity> findByStatus(PaymentStatus status);
+
 }

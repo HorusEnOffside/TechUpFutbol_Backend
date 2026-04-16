@@ -114,4 +114,20 @@ public class PaymentController {
                         "inline; filename=\"" + entity.getVoucherName() + "\"")
                 .body(entity.getVoucher());
     }
+
+
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    @GetMapping("/filter-by-status")
+    @Operation(summary = "Filtrar pagos por estado", description = "Obtiene todos los pagos filtrados por su estado")
+    public ResponseEntity<List<PaymentRespondDTO>> getPaymentsByStatus(
+            @RequestParam PaymentStatus status) {
+
+        List<Payment> payments = paymentService.getPaymentsByStatus(status);
+
+        List<PaymentRespondDTO> response = payments.stream()
+                .map(PaymentMapper::toRespondDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
 }
