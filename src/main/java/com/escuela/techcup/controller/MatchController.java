@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-import com.escuela.techcup.core.model.Match;
+import com.escuela.techcup.controller.dto.MatchResponseDTO;
+import com.escuela.techcup.controller.mapper.MatchResponseMapper;
 import com.escuela.techcup.core.service.MatchService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,64 +36,65 @@ public class MatchController {
 
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('REFEREE') or hasRole('USER')")
-	public ResponseEntity<Match> getMatchById(@PathVariable String id) {
+	public ResponseEntity<MatchResponseDTO> getMatchById(@PathVariable String id) {
 		log.info("Received request to get match by id: {}", id);
-		return ResponseEntity.ok(matchService.getMatchById(id));
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.getMatchById(id)));
 	}
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN') or hasRole('REFEREE') or hasRole('USER')")
-	public ResponseEntity<List<Match>> getAllMatches() {
+	public ResponseEntity<List<MatchResponseDTO>> getAllMatches() {
 		log.info("Received request to get all matches");
-		return ResponseEntity.ok(matchService.getAllMatches());
+		return ResponseEntity.ok(matchService.getAllMatches().stream()
+				.map(MatchResponseMapper::toDTO).toList());
 	}
 
 	@GetMapping("/my-matches")
 	@PreAuthorize("hasRole('REFEREE')")
-	public ResponseEntity<List<Match>> getMyMatches(Authentication auth) {
+	public ResponseEntity<List<MatchResponseDTO>> getMyMatches(Authentication auth) {
 		String refereeId = auth.getName();
 		log.info("Referee {} requested their matches", refereeId);
-		return ResponseEntity.ok(matchService.getMatchesByRefereeId(refereeId));
+		return ResponseEntity.ok(matchService.getMatchesByRefereeId(refereeId).stream()
+				.map(MatchResponseMapper::toDTO).toList());
 	}
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
-	public ResponseEntity<Match> createMatch(
+	public ResponseEntity<MatchResponseDTO> createMatch(
 			@RequestParam LocalDate date,
 			@RequestParam String teamAId,
 			@RequestParam String teamBId) {
 		log.info("Received request to create match: date={}, teamAId={}, teamBId={}", date, teamAId, teamBId);
-		Match match = matchService.createMatch(date, teamAId, teamBId);
-		return ResponseEntity.status(201).body(match);
+		return ResponseEntity.status(201).body(MatchResponseMapper.toDTO(matchService.createMatch(date, teamAId, teamBId)));
 	}
 
 	@PutMapping("/{matchId}/referee")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
-	public ResponseEntity<Match> setReferee(
+	public ResponseEntity<MatchResponseDTO> setReferee(
 			@PathVariable String matchId,
 			@RequestParam String refereeId) {
 		log.info("Received request to set referee for match. matchId={}, refereeId={}", matchId, refereeId);
-		return ResponseEntity.ok(matchService.setReferee(matchId, refereeId));
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.setReferee(matchId, refereeId)));
 	}
 
 	@PostMapping("/{matchId}/soccer-field")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
-	public ResponseEntity<Match> setSoccerField(
+	public ResponseEntity<MatchResponseDTO> setSoccerField(
 			@PathVariable String matchId,
 			@RequestParam String soccerFieldId) {
 		log.info("Received request to set soccer field for match. matchId={}, soccerFieldId={}", matchId, soccerFieldId);
-		return ResponseEntity.ok(matchService.setSoccerField(matchId, soccerFieldId));
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.setSoccerField(matchId, soccerFieldId)));
 	}
 
 	@PostMapping("/{matchId}/events/goal")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('REFEREE')")
-	public ResponseEntity<Match> addMatchEventGoal(
+	public ResponseEntity<MatchResponseDTO> addMatchEventGoal(
 			@PathVariable String matchId,
 			@RequestParam String playerId,
 			@RequestParam int minute,
 			@RequestParam String description) {
 		log.info("Received request to add goal event to match. matchId={}, playerId={}, minute={}, description={}", matchId, playerId, minute, description);
-		return ResponseEntity.ok(matchService.addMatchEventGoal(matchId, playerId, minute, description));
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.addMatchEventGoal(matchId, playerId, minute, description)));
 	}
 
 }
