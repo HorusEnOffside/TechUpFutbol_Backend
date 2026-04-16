@@ -34,10 +34,13 @@ public class TeamController {
     private static final Logger log = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
     private final TeamFullInfoService teamFullInfoService;
+    private final PaymentMapper paymentMapper;
 
-    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService,  PaymentService paymentService) {
+    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService, PaymentMapper paymentMapper) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
+        this.paymentMapper = paymentMapper;
+
     }
 
     @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
@@ -142,16 +145,17 @@ public class TeamController {
         return ResponseEntity.ok(teamService.validatePlayerUniquePerTournament(playerId, tournamentId));
     }
 
-//    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
-//    @PostMapping(value = "/{teamId}/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<PaymentRespondDTO> uploadPayment(
-//            @PathVariable String teamId,
-//            @RequestPart("payment") PaymentDTO paymentDTO
-//    ) {
-//        log.info("Request to upload payment. teamId={}", teamId);
-//
-//        Payment payment = teamService.uploadPayment(teamId, paymentDTO);
-//        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN')")
+    @PostMapping(value = "/{teamId}/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PaymentRespondDTO> uploadPayment(
+            @PathVariable String teamId,
+            @RequestPart("payment") PaymentDTO paymentDTO,
+            @RequestPart("voucher") MultipartFile voucher) {
+
+        log.info("Request to upload payment. teamId={}", teamId);
+
+        Payment payment = teamService.uploadPayment(teamId, paymentDTO, voucher);
+        PaymentRespondDTO response = paymentMapper.toRespondDTO(payment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }
