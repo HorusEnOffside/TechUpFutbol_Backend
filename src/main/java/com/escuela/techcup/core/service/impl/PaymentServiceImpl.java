@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentMapper mapper;
 
     @Override
     @Transactional
@@ -31,11 +30,11 @@ public class PaymentServiceImpl implements PaymentService {
         if (file == null || file.isEmpty()) {
             throw new InvalidImageException("El comprobante de pago es obligatorio");
         }
-        PaymentEntity entity = mapper.toEntity(paymentDTO, file);
+        PaymentEntity entity = PaymentMapper.toEntity(paymentDTO, file);
 
         PaymentEntity savedEntity = paymentRepository.save(entity);
 
-        return mapper.toModel(savedEntity);
+        return PaymentMapper.toModel(savedEntity);
     }
 
     @Override
@@ -43,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     public List<Payment> getPayments() {
         return paymentRepository.findAll()
                 .stream()
-                .map(mapper::toModel)
+                .map(PaymentMapper::toModel)
                 .collect(Collectors.toList());
     }
 
@@ -54,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment getPaymentById(String id) {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
-        return mapper.toModel(entity);
+        return PaymentMapper.toModel(entity);
     }
 
 
@@ -64,10 +63,10 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentEntity entity = paymentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado con id: " + id));
 
-        mapper.updateStatus(entity, paymentStatus);
+        PaymentMapper.updateStatus(entity, paymentStatus);
 
         PaymentEntity updatedEntity = paymentRepository.save(entity);
-        return mapper.toModel(updatedEntity);
+        return PaymentMapper.toModel(updatedEntity);
     }
 
     @Override

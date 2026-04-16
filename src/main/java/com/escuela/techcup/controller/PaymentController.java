@@ -27,11 +27,9 @@ import java.util.stream.Collectors;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final PaymentMapper mapper;
 
-    public PaymentController(PaymentService paymentService,  PaymentMapper mapper) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.mapper = mapper;
     }
 
 
@@ -43,7 +41,7 @@ public class PaymentController {
 
         Payment created = paymentService.createPayment(paymentDTO, file);
 
-        PaymentRespondDTO response = mapper.toRespondDTO(created);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(created);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -55,7 +53,7 @@ public class PaymentController {
         List<Payment> payments = paymentService.getPayments();
 
         List<PaymentRespondDTO> response = payments.stream()
-                .map(mapper::toRespondDTO)
+                .map(PaymentMapper::toRespondDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
@@ -67,7 +65,7 @@ public class PaymentController {
             @PathVariable @Parameter(description = "ID del pago") String id) {
 
         Payment payment = paymentService.getPaymentById(id);
-        PaymentRespondDTO response = mapper.toRespondDTO(payment);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
 
         return ResponseEntity.ok(response);
     }
@@ -80,7 +78,7 @@ public class PaymentController {
             @RequestParam PaymentStatus status) {
 
         Payment updated = paymentService.updatePaymentState(id, status);
-        PaymentRespondDTO response = mapper.toRespondDTO(updated);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(updated);
 
         return ResponseEntity.ok(response);
     }

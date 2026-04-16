@@ -34,12 +34,10 @@ public class TeamController {
     private static final Logger log = LoggerFactory.getLogger(TeamController.class);
     private final TeamService teamService;
     private final TeamFullInfoService teamFullInfoService;
-    private final PaymentMapper paymentMapper;
 
-    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService, PaymentMapper paymentMapper) {
+    public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
-        this.paymentMapper = paymentMapper;
 
     }
 
@@ -155,7 +153,7 @@ public class TeamController {
         log.info("Request to upload payment. teamId={}", teamId);
 
         Payment payment = teamService.uploadPayment(teamId, paymentDTO, voucher);
-        PaymentRespondDTO response = paymentMapper.toRespondDTO(payment);
+        PaymentRespondDTO response =PaymentMapper.toRespondDTO(payment);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

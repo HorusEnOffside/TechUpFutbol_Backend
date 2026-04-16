@@ -15,11 +15,15 @@ import java.util.UUID;
 @Component
 public class PaymentMapper {
 
+    private static String baseUrl;
+
     @Value("${app.base-url:http://localhost:8080}")
-    private String baseUrl;
+    public void setBaseUrl(String url) {
+        PaymentMapper.baseUrl = url;
+    }
 
 
-    public PaymentEntity toEntity(PaymentDTO paymentDTO, MultipartFile voucher) {
+    public static PaymentEntity toEntity(PaymentDTO paymentDTO, MultipartFile voucher) {
         if (paymentDTO == null) return null;
 
         PaymentEntity entity = new PaymentEntity();
@@ -41,7 +45,7 @@ public class PaymentMapper {
         return entity;
     }
 
-    public  PaymentRespondDTO toRespondDTO(Payment entity) {
+    public static PaymentRespondDTO toRespondDTO(Payment entity) {
         if (entity == null) return null;
 
         PaymentRespondDTO respondDTO = new PaymentRespondDTO();
@@ -54,8 +58,8 @@ public class PaymentMapper {
         return respondDTO;
     }
 
-    private  String buildVoucherUrl(String paymentId) {
-        if (paymentId == null) return null;
+    private static String buildVoucherUrl(String paymentId) {
+        if (paymentId == null || baseUrl == null) return null;
 
         String normalizedBaseUrl = baseUrl.endsWith("/")
                 ? baseUrl.substring(0, baseUrl.length() - 1)
@@ -64,7 +68,7 @@ public class PaymentMapper {
         return String.format("%s/api/payments/%s/voucher", normalizedBaseUrl, paymentId);
     }
 
-    public  void updateEntity(PaymentEntity existingEntity, PaymentDTO paymentDTO, MultipartFile newVoucher) {
+    public static void updateEntity(PaymentEntity existingEntity, PaymentDTO paymentDTO, MultipartFile newVoucher) {
         if (existingEntity == null || paymentDTO == null) return;
 
         if (paymentDTO.getDescription() != null)
@@ -84,12 +88,12 @@ public class PaymentMapper {
         }
     }
 
-    public void updateStatus(PaymentEntity entity, PaymentStatus status) {
+    public static void updateStatus(PaymentEntity entity, PaymentStatus status) {
         if (entity != null && status != null)
             entity.setStatus(status);
     }
 
-    public Payment toModel(PaymentEntity entity) {
+    public static Payment toModel(PaymentEntity entity) {
         if (entity == null) return null;
 
         Payment payment = new Payment();
