@@ -17,25 +17,18 @@ public class PaymentEntity {
     private String id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "formation", length = 50)
+    @Column(name = "status", length = 50)
     private PaymentStatus status;
 
-
-    @Column(name = "descripcion")
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "fecha_pago")
+    @Column(name = "payment_date")
     private LocalDateTime paymentDate;
 
     @Column(name = "voucher", nullable = false, columnDefinition = "bytea")
     private byte[] voucher;
 
-    @Column(name = "voucher_type", length = 100)
-    private String voucherType;
-
-    @Column(name = "voucher_name", length = 255)
     private String voucherName;
-
-    @Column(name = "voucher_size")
-    private Long voucherSize;
+    private String voucherType;
 }
