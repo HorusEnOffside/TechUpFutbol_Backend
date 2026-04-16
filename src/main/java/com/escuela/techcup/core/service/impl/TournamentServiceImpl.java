@@ -48,12 +48,8 @@ public class TournamentServiceImpl implements TournamentService {
     public Tournament createTournament(LocalDateTime startDate, LocalDateTime endDate,
                                        int teamsMaxAmount, Double teamCost,
                                        TournamentStatus status, String organizerId) {
-        if (startDate == null) throw new InvalidInputException("startDate is required");
-        if (endDate == null) throw new InvalidInputException("endDate is required");
+        // RN-05: endDate debe ser posterior a startDate
         if (endDate.isBefore(startDate)) throw new InvalidInputException("endDate must be after startDate");
-        if (teamsMaxAmount < 2) throw new InvalidInputException("teamsMaxAmount must be at least 2");
-        if (teamCost == null || teamCost < 0) throw new InvalidInputException("teamCost is required and must be positive");
-        if (status == null) throw new InvalidInputException("status is required");
 
         // RN-05: No fechas sobrepuestas
         boolean overlap = tournamentRepository.findAll().stream()
@@ -147,19 +143,6 @@ public class TournamentServiceImpl implements TournamentService {
     public Tournament configureTournament(String tournamentId, String reglamento,
                                           LocalDateTime closingDate, List<CanchaDTO> canchas,
                                           List<HorarioDTO> horarios, String sanciones) {
-        if (tournamentId == null || tournamentId.isBlank())
-            throw new InvalidInputException("tournamentId is required");
-        if (reglamento == null || reglamento.isBlank())
-            throw new InvalidInputException("reglamento is required");
-        if (reglamento.length() > 2000)
-            throw new InvalidInputException("reglamento must not exceed 2000 characters");
-        if (closingDate == null)
-            throw new InvalidInputException("closingDate is required");
-        if (canchas == null || canchas.isEmpty())
-            throw new InvalidInputException("canchas is required");
-        if (horarios == null || horarios.isEmpty())
-            throw new InvalidInputException("horarios is required");
-
         TournamentEntity entity = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 

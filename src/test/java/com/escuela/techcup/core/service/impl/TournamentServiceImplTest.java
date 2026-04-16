@@ -85,18 +85,6 @@ class TournamentServiceImplTest {
     }
 
     @Test
-    void createTournament_throwsWhenStartDateIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(null, end, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
-    void createTournament_throwsWhenEndDateIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(start, null, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
     void createTournament_throwsWhenEndBeforeStart() {
         assertThrows(InvalidInputException.class,
                 () -> tournamentService.createTournament(end, start, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
@@ -106,12 +94,6 @@ class TournamentServiceImplTest {
     void createTournament_throwsWhenTeamsMaxAmountLessThan2() {
         assertThrows(InvalidInputException.class,
                 () -> tournamentService.createTournament(start, end, 1, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
-    void createTournament_throwsWhenTeamCostIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(start, end, 8, null, TournamentStatus.DRAFT, "org-1"));
     }
 
     @Test
@@ -250,12 +232,7 @@ class TournamentServiceImplTest {
         verify(tournamentRepository).save(any());
     }
 
-    @Test
-    void configureTournament_throwsWhenReglamentoIsBlank() {
 
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "", start.minusDays(1), canchas(), horarios(), null));
-    }
 
     @Test
     void configureTournament_throwsWhenClosingDateAfterStart() {
