@@ -41,3 +41,9 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:3600000}
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  environment: ${APP_ENVIRONMENT:local}
+  voucher:
+    url-pattern: /api/payments/%s/voucher

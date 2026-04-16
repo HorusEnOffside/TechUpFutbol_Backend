@@ -5,106 +5,87 @@ import com.escuela.techcup.controller.dto.PaymentRespondDTO;
 import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import com.escuela.techcup.core.service.PaymentService;
-import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
-import com.escuela.techcup.persistence.repository.payment.PaymentRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/payments")
-@Tag(name = "Gestion de pagos", description = "Operaciones de pagos")
-@Slf4j
+@Tag(name = "Payments", description = "Endpoints para gestión de pagos")
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final PaymentRepository paymentRepository;
 
-    public PaymentController(PaymentService paymentService, PaymentRepository paymentRepository) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.paymentRepository = paymentRepository;
     }
 
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Crear un nuevo pago", description = "Crea un pago con comprobante (imagen/PDF)")
+    public ResponseEntity<PaymentRespondDTO> createPayment(
+            @Valid @RequestPart("payment") PaymentDTO paymentDTO,
+            @RequestPart("file") MultipartFile file) {
 
-    @PreAuthorize("hasRole('ORGANIZER')")
-    @GetMapping("/{id}/status")
-    public ResponseEntity<PaymentRespondDTO> managePayment( @PathVariable String id,
-                                                  @RequestParam PaymentStatus status){
+        Payment created = paymentService.createPayment(paymentDTO, file);
 
-        log.info("Petición para actualizar estado de pago - ID: {}, Estado solicitado: {}", id, status);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(created);
 
-
-        Payment updatedModel = paymentService.updatePaymentState(id, status);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(updatedModel);
-
-        log.info("Estado actualizado correctamente - ID: {}, Nuevo estado: {}", id, status);
-
-        return ResponseEntity.ok(response);
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     @GetMapping
+    @Operation(summary = "Listar todos los pagos")
     public ResponseEntity<List<PaymentRespondDTO>> getAllPayments() {
-        log.info("Obtener todos los pagos");
-
         List<Payment> payments = paymentService.getPayments();
 
         List<PaymentRespondDTO> response = payments.stream()
                 .map(PaymentMapper::toRespondDTO)
                 .collect(Collectors.toList());
 
-        log.info("Se encontraron {} pagos", response.size());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener pago por ID")
+    public ResponseEntity<PaymentRespondDTO> getPaymentById(
+            @PathVariable @Parameter(description = "ID del pago") String id) {
+
+        Payment payment = paymentService.getPaymentById(id);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
 
         return ResponseEntity.ok(response);
     }
 
 
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PaymentRespondDTO> createPayment(
-            @ModelAttribute @Valid PaymentDTO dto) {
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Actualizar estado del pago")
+    public ResponseEntity<PaymentRespondDTO> updatePaymentStatus(
+            @PathVariable String id,
+            @RequestParam PaymentStatus status) {
 
-        log.info("Petición para crear pago");
+        Payment updated = paymentService.updatePaymentState(id, status);
+        PaymentRespondDTO response = PaymentMapper.toRespondDTO(updated);
 
-        Payment payment = paymentService.createPayment(dto, dto.getComprobante());
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
-
-        log.info("Pago creado correctamente - ID: {}", payment.getId());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 
-
-    @GetMapping("/{id}/voucher")
-    public ResponseEntity<byte[]> getVoucher(@PathVariable String id) {
-        log.info("Petición para obtener voucher - ID: {}", id);
-
-        Payment payment = paymentService.getPaymentById(id);
-        PaymentEntity entity = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pago no encontrado"));
-
-        PaymentMapper.VoucherMetadata metadata = PaymentMapper.getVoucherMetadata(entity);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(metadata.getType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + metadata.getName() + "\"")
-                .body(metadata.getBytes());
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar pago")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deletePayment(@PathVariable String id) {
+        paymentService.deletePayment(id);
+        return ResponseEntity.noContent().build();
     }
-
-
-
 }

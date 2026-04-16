@@ -343,10 +343,7 @@ public class TeamServiceImpl implements TeamService {
             throw new PaymentDateException(paymentDTO.getPaymentDate(), tournament.getStartDate());
         }
 
-        Payment payment = paymentService.createPayment(paymentDTO, paymentDTO.getComprobante());
-        PaymentEntity paymentEntity = PaymentMapper.toEntity(payment);
-        team.setPayment(paymentEntity);
-        teamRepository.save(team);
+        Payment payment = new Payment();
 
         return payment;
 
