@@ -5,7 +5,6 @@ import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Invitation;
 import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
-import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
@@ -15,7 +14,6 @@ import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.DateUtil;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
-import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.entity.tournament.InvitationEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
@@ -27,8 +25,6 @@ import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.TeacherEntity;
 import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.mapper.TeamMapper;
-import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
-import com.escuela.techcup.persistence.repository.payment.PaymentRepository;
 import com.escuela.techcup.persistence.repository.tournament.InvitationRepository;
 import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamPlayerRepository;
@@ -40,7 +36,6 @@ import com.escuela.techcup.persistence.repository.users.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,7 +66,6 @@ public class TeamServiceImpl implements TeamService {
             TournamentRepository tournamentRepository,
             UserRepository userRepository,
             MatchRepository matchRepository,
-            PaymentRepository paymentRepository,
             PaymentService paymentService) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
