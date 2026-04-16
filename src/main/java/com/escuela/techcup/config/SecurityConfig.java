@@ -2,6 +2,9 @@ package com.escuela.techcup.config;
 
 import java.util.Arrays;
 
+import com.escuela.techcup.controller.handler.OAuth2AuthenticationFailureHandler;
+import com.escuela.techcup.controller.handler.OAuth2SuccessHandler;
+import com.escuela.techcup.core.service.impl.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,13 +31,23 @@ public class SecurityConfig {
 
     private final HttpsEnforcementFilter httpsEnforcementFilter;
     private final JwtAuthFilter jwtAuthFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+
 
     @Value("${CORS_ALLOWED_ORIGINS:https://localhost:3000,http://localhost:3000,http://127.0.0.1:3000}")
     private String corsAllowedOrigins;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, HttpsEnforcementFilter httpsEnforcementFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, HttpsEnforcementFilter httpsEnforcementFilter,CustomOAuth2UserService customOAuth2UserService,
+                          OAuth2SuccessHandler oAuth2SuccessHandler,
+                          OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.httpsEnforcementFilter = httpsEnforcementFilter;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
+
     }
 
     @Bean
@@ -55,9 +68,22 @@ public class SecurityConfig {
                         "/swagger-ui.html"
                 ))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
+
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
+                )
+
+
+
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
@@ -66,7 +92,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api/auth/**",
                                 "/api/players/**",
-                                "/api/users/admin"
+                                "/api/teams/search",
+                                "/api/users/admin",
+                                "/login/oauth2/**",
+                                "/oauth2/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
