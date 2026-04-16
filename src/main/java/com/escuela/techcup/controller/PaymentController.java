@@ -9,12 +9,15 @@ import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,21 +35,24 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Crear un nuevo pago", description = "Crea un pago con comprobante (imagen/PDF)")
+    @Operation(summary = "Crear un nuevo pago", description = "Crea un pago con comprobante (imagen)")
     public ResponseEntity<PaymentRespondDTO> createPayment(
-            @Valid @RequestPart("payment") PaymentDTO paymentDTO,
+            @Valid
+            @Parameter(description = "Datos del pago", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PaymentDTO.class)))
+            @RequestPart("payment") PaymentDTO paymentDTO,
+
+            @Parameter(description = "Archivo del comprobante", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE, schema = @Schema(type = "string", format = "binary")))
             @RequestPart("file") MultipartFile file) {
 
         Payment created = paymentService.createPayment(paymentDTO, file);
-
         PaymentRespondDTO response = PaymentMapper.toRespondDTO(created);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
+    @PreAuthorize("hasAnyRole( 'ORGANIZER', 'ADMIN')")
     @GetMapping
     @Operation(summary = "Listar todos los pagos")
     public ResponseEntity<List<PaymentRespondDTO>> getAllPayments() {
@@ -59,6 +65,7 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole( 'ORGANIZER', 'ADMIN')")
     @GetMapping("/{id}")
     @Operation(summary = "Obtener pago por ID")
     public ResponseEntity<PaymentRespondDTO> getPaymentById(
@@ -71,6 +78,7 @@ public class PaymentController {
     }
 
 
+    @PreAuthorize("hasAnyRole('CAPTAIN', 'ORGANIZER', 'ADMIN')")
     @PatchMapping("/{id}/status")
     @Operation(summary = "Actualizar estado del pago")
     public ResponseEntity<PaymentRespondDTO> updatePaymentStatus(
@@ -78,11 +86,13 @@ public class PaymentController {
             @RequestParam PaymentStatus status) {
 
         Payment updated = paymentService.updatePaymentState(id, status);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(updated);
+        PaymentRespondDTO response = PaymentMapper  .toRespondDTO(updated);
 
         return ResponseEntity.ok(response);
     }
 
+
+    @PreAuthorize("hasAnyRole( 'ORGANIZER', 'ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar pago")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -91,6 +101,8 @@ public class PaymentController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @PreAuthorize("hasAnyRole( 'ORGANIZER', 'ADMIN')")
     @GetMapping("/{id}/voucher")
     @Operation(summary = "Obtener comprobante de pago")
     public ResponseEntity<byte[]> getVoucher(@PathVariable String id) {
