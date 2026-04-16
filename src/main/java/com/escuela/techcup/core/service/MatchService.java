@@ -9,6 +9,7 @@ public interface MatchService {
 
     Match getMatchById(String id);
     List<Match> getAllMatches();
+    List<Match> getMatchesByRefereeId(String refereeId);
     Match createMatch(LocalDate date, String teamAId, String teamBId);
     Match setReferee(String matchId, String refereeId);
     Match setSoccerField(String matchId, String soccerFieldId);

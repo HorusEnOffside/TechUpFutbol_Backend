@@ -17,6 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.escuela.techcup.controller.dto.CanchaDTO;
+import com.escuela.techcup.controller.dto.HorarioDTO;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -142,12 +146,21 @@ class TournamentControllerTest {
         when(tournamentService.configureTournament(any(), any(), any(), any(), any(), any()))
                 .thenReturn(tournament);
 
-        String body = objectMapper.writeValueAsString(new com.escuela.techcup.controller.dto.ConfigureTournamentDTO() {{
-            setReglamento("Reglamento de prueba");
-            setClosingDate(LocalDateTime.of(2026, 5, 1, 0, 0));
-            setCanchas("Cancha A");
-            setHorarios("10:00");
-        }});
+        CanchaDTO canchaDTO = new CanchaDTO();
+        canchaDTO.setNombre("Cancha A");
+
+        HorarioDTO horarioDTO = new HorarioDTO();
+        horarioDTO.setFecha(LocalDate.of(2026, 6, 1));
+        horarioDTO.setDescripcion("Jornada 1");
+
+        com.escuela.techcup.controller.dto.ConfigureTournamentDTO dto =
+                new com.escuela.techcup.controller.dto.ConfigureTournamentDTO();
+        dto.setReglamento("Reglamento de prueba");
+        dto.setClosingDate(LocalDateTime.of(2026, 5, 1, 0, 0));
+        dto.setCanchas(List.of(canchaDTO));
+        dto.setHorarios(List.of(horarioDTO));
+
+        String body = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put("/api/tournaments/tour-1/configure")
                         .contentType(MediaType.APPLICATION_JSON)

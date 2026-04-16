@@ -66,6 +66,14 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesByRefereeId(String refereeId) {
+        return matchRepository.findByRefereeId(refereeId).stream()
+                .map(MatchMapper::toModel)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Match createMatch(LocalDate date, String teamAId, String teamBId) {
         log.info("Creating match for date: {}, teamAId: {}, teamBId: {}", date, teamAId, teamBId);

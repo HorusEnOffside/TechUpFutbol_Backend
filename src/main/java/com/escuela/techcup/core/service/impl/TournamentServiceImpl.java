@@ -1,5 +1,7 @@
 package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.controller.dto.CanchaDTO;
+import com.escuela.techcup.controller.dto.HorarioDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.TournamentFinalizedException;
 import com.escuela.techcup.core.exception.TournamentNotActiveException;
@@ -9,6 +11,8 @@ import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.service.TournamentService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
+import com.escuela.techcup.persistence.entity.tournament.CanchaEntity;
+import com.escuela.techcup.persistence.entity.tournament.HorarioEntity;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
 import com.escuela.techcup.persistence.mapper.tournament.TournamentMapper;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -140,8 +145,8 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     @Transactional
     public Tournament configureTournament(String tournamentId, String reglamento,
-                                          LocalDateTime closingDate, String canchas,
-                                          String horarios, String sanciones) {
+                                          LocalDateTime closingDate, List<CanchaDTO> canchas,
+                                          List<HorarioDTO> horarios, String sanciones) {
         if (tournamentId == null || tournamentId.isBlank())
             throw new InvalidInputException("tournamentId is required");
         if (reglamento == null || reglamento.isBlank())
@@ -150,9 +155,9 @@ public class TournamentServiceImpl implements TournamentService {
             throw new InvalidInputException("reglamento must not exceed 2000 characters");
         if (closingDate == null)
             throw new InvalidInputException("closingDate is required");
-        if (canchas == null || canchas.isBlank())
+        if (canchas == null || canchas.isEmpty())
             throw new InvalidInputException("canchas is required");
-        if (horarios == null || horarios.isBlank())
+        if (horarios == null || horarios.isEmpty())
             throw new InvalidInputException("horarios is required");
 
         TournamentEntity entity = tournamentRepository.findById(tournamentId)
@@ -167,12 +172,33 @@ public class TournamentServiceImpl implements TournamentService {
 
         entity.setReglamento(reglamento);
         entity.setClosingDate(closingDate);
-        entity.setCanchas(canchas);
-        entity.setHorarios(horarios);
         entity.setSanciones(sanciones);
 
+        // Reemplazar canchas: orphanRemoval elimina las anteriores
+        entity.getCanchas().clear();
+        canchas.forEach(dto -> {
+            CanchaEntity c = new CanchaEntity();
+            c.setId(IdGeneratorUtil.generateId());
+            c.setNombre(dto.getNombre());
+            if (dto.getFoto() != null && !dto.getFoto().isBlank())
+                c.setFoto(Base64.getDecoder().decode(dto.getFoto()));
+            c.setTournament(entity);
+            entity.getCanchas().add(c);
+        });
+
+        // Reemplazar horarios: orphanRemoval elimina los anteriores
+        entity.getHorarios().clear();
+        horarios.forEach(dto -> {
+            HorarioEntity h = new HorarioEntity();
+            h.setId(IdGeneratorUtil.generateId());
+            h.setFecha(dto.getFecha());
+            h.setDescripcion(dto.getDescripcion());
+            h.setTournament(entity);
+            entity.getHorarios().add(h);
+        });
+
         tournamentRepository.save(entity);
-        log.info("Tournament configured. id={}", tournamentId);
+        log.info("Tournament configured. id={}, canchas={}, horarios={}", tournamentId, canchas.size(), horarios.size());
         return TournamentMapper.toModel(entity);
     }
 

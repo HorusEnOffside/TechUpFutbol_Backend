@@ -1,5 +1,7 @@
 package com.escuela.techcup.core.service;
 
+import com.escuela.techcup.controller.dto.CanchaDTO;
+import com.escuela.techcup.controller.dto.HorarioDTO;
 import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 
@@ -21,10 +23,10 @@ public interface TournamentService {
                                 Double teamCost, TournamentStatus status);
     void finalizeTournament(String tournamentId);
 
-    // RF-07: Configurar reglamento, fechas, canchas
+    // RF-07: Configurar reglamento, fechas, canchas y horarios
     Tournament configureTournament(String tournamentId, String reglamento,
-                                   LocalDateTime closingDate, String canchas,
-                                   String horarios, String sanciones);
+                                   LocalDateTime closingDate, List<CanchaDTO> canchas,
+                                   List<HorarioDTO> horarios, String sanciones);
 
     // Obtener torneo activo (usado por TeamService)
     Tournament getActiveTournament();
