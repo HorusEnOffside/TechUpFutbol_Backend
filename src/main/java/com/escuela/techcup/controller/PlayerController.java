@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerResponseDTO;
@@ -147,6 +148,15 @@ public class PlayerController {
 	}
 
 	// ── Consultas ────────────────────────────────────────────────────────
+
+	@PreAuthorize("permitAll()")
+	@GetMapping("/find")
+	public ResponseEntity<EntitySearchResultDTO> findPlayerByName(@RequestParam String name) {
+		log.info("Request to find player by name={}", name);
+		return playerService.findByNameContaining(name)
+				.map(p -> ResponseEntity.ok(new EntitySearchResultDTO(p.getUserId(), p.getName())))
+				.orElse(ResponseEntity.notFound().build());
+	}
 
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping

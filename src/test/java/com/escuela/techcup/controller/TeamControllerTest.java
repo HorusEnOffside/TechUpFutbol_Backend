@@ -9,6 +9,7 @@ import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.core.service.TeamFullInfoService;
 import com.escuela.techcup.core.service.TeamService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -186,5 +188,31 @@ class TeamControllerTest {
         mockMvc.perform(get("/api/teams/validate/player/p1/tournament/t1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
+    }
+
+    // --- GET /api/teams/search?name= ---
+
+    @Nested
+    class SearchTeamByName {
+
+        @Test
+        void retorna200ConIdYNombreCuandoEncuentra() throws Exception {
+            when(teamService.findByNameContaining("Tigres"))
+                    .thenReturn(Optional.of(team));
+
+            mockMvc.perform(get("/api/teams/search").param("name", "Tigres"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value("team-1"))
+                    .andExpect(jsonPath("$.name").value("Los Tigres"));
+        }
+
+        @Test
+        void retorna404CuandoNoEncuentra() throws Exception {
+            when(teamService.findByNameContaining("xyz"))
+                    .thenReturn(Optional.empty());
+
+            mockMvc.perform(get("/api/teams/search").param("name", "xyz"))
+                    .andExpect(status().isNotFound());
+        }
     }
 }

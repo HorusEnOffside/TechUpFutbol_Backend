@@ -21,6 +21,13 @@ spring:
     user:
       name: admin
       password: 1234
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client123
+            client-secret: test-secret123
+            scope: email,profile
 
 jwt:
   secret: test-secret-key-for-jwt-signing-must-be-long-enough-for-security-purposes-change-this-in-production-xd

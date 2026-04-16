@@ -144,6 +144,15 @@ public class PlayerServiceImpl implements PlayerService {
         return playerRepository.findByUserId(userId).map(PlayerMapper::toModel);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Player> findByNameContaining(String name) {
+        if (name == null || name.isBlank()) throw new InvalidInputException("name is required");
+        return playerRepository.findByUser_NameContainingIgnoreCase(name).stream()
+                .findFirst()
+                .map(PlayerMapper::toModel);
+    }
+
     // ── RF-15: Búsqueda de jugadores ─────────────────────────────────────
 
     @Override

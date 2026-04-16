@@ -16,6 +16,16 @@ spring:
     user:
       name: ${SPRING_SECURITY_USER_NAME}
       password: ${SPRING_SECURITY_USER_PASSWORD}
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - email
+              - profile
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/techcup?stringtype=unspecified}
