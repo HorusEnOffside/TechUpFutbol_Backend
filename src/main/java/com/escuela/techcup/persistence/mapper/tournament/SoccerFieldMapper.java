@@ -11,10 +11,13 @@ public class SoccerFieldMapper {
         entity.setId(model.getId());
         entity.setName(model.getName());
         entity.setLocation(model.getLocation());
+        entity.setFoto(model.getFoto());
         return entity;
     }
 
     public static SoccerField toModel(SoccerFieldEntity entity) {
-        return new SoccerField(entity.getId(), entity.getName(), entity.getLocation());
+        SoccerField model = new SoccerField(entity.getId(), entity.getName(), entity.getLocation());
+        model.setFoto(entity.getFoto());
+        return model;
     }
 }

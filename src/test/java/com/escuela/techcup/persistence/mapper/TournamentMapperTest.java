@@ -1,11 +1,17 @@
 package com.escuela.techcup.persistence.mapper.tournament;
 
+import com.escuela.techcup.core.model.Cancha;
+import com.escuela.techcup.core.model.Horario;
 import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
+import com.escuela.techcup.persistence.entity.tournament.CanchaEntity;
+import com.escuela.techcup.persistence.entity.tournament.HorarioEntity;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,28 +35,34 @@ class TournamentMapperTest {
         entity.setTeamCost(50.0);
         entity.setStatus(TournamentStatus.ACTIVE);
         entity.setReglamento("Reglamento oficial");
-        entity.setCanchas("Cancha A, Cancha B");
-        entity.setHorarios("08:00-18:00");
         entity.setSanciones("Tarjeta roja = 1 partido");
+
+        CanchaEntity canchaEntity = new CanchaEntity();
+        canchaEntity.setId("c-1");
+        canchaEntity.setNombre("Cancha A");
+        entity.getCanchas().add(canchaEntity);
+
+        HorarioEntity horarioEntity = new HorarioEntity();
+        horarioEntity.setId("h-1");
+        horarioEntity.setFecha(LocalDate.of(2025, 6, 10));
+        horarioEntity.setDescripcion("Jornada 1");
+        entity.getHorarios().add(horarioEntity);
 
         Tournament model = TournamentMapper.toModel(entity);
 
         assertNotNull(model);
         assertEquals("tour-1", model.getId());
-        assertEquals(LocalDateTime.of(2025, 6, 1, 8, 0), model.getStartDate());
-        assertEquals(LocalDateTime.of(2025, 7, 1, 8, 0), model.getEndDate());
-        assertEquals(LocalDateTime.of(2025, 5, 20, 8, 0), model.getClosingDate());
-        assertEquals(8, model.getTeamsMaxAmount());
-        assertEquals(50.0, model.getTeamCost());
         assertEquals(TournamentStatus.ACTIVE, model.getStatus());
         assertEquals("Reglamento oficial", model.getReglamento());
-        assertEquals("Cancha A, Cancha B", model.getCanchas());
-        assertEquals("08:00-18:00", model.getHorarios());
         assertEquals("Tarjeta roja = 1 partido", model.getSanciones());
+        assertEquals(1, model.getCanchas().size());
+        assertEquals("Cancha A", model.getCanchas().get(0).getNombre());
+        assertEquals(1, model.getHorarios().size());
+        assertEquals("Jornada 1", model.getHorarios().get(0).getDescripcion());
     }
 
     @Test
-    void toModel_withNullOptionalFields_mapsCorrectly() {
+    void toModel_withEmptyLists_mapsCorrectly() {
         TournamentEntity entity = new TournamentEntity();
         entity.setId("tour-2");
         entity.setStartDate(LocalDateTime.of(2025, 6, 1, 8, 0));
@@ -64,9 +76,9 @@ class TournamentMapperTest {
         assertNotNull(model);
         assertNull(model.getClosingDate());
         assertNull(model.getReglamento());
-        assertNull(model.getCanchas());
-        assertNull(model.getHorarios());
         assertNull(model.getSanciones());
+        assertTrue(model.getCanchas().isEmpty());
+        assertTrue(model.getHorarios().isEmpty());
     }
 
     // ── toEntity ─────────────────────────────────────────────────────────
@@ -77,7 +89,7 @@ class TournamentMapperTest {
     }
 
     @Test
-    void toEntity_mapsAllFieldsCorrectly() {
+    void toEntity_mapsScalarFieldsCorrectly() {
         Tournament model = new Tournament();
         model.setId("tour-3");
         model.setStartDate(LocalDateTime.of(2025, 8, 1, 9, 0));
@@ -87,23 +99,25 @@ class TournamentMapperTest {
         model.setTeamCost(100.0);
         model.setStatus(TournamentStatus.ACTIVE);
         model.setReglamento("Reglas");
-        model.setCanchas("Cancha C");
-        model.setHorarios("10:00-20:00");
         model.setSanciones("Ninguna");
+
+        Cancha cancha = new Cancha();
+        cancha.setId("c-1");
+        cancha.setNombre("Cancha C");
+        model.setCanchas(List.of(cancha));
+
+        Horario horario = new Horario();
+        horario.setId("h-1");
+        horario.setFecha(LocalDate.of(2025, 8, 10));
+        horario.setDescripcion("Jornada 1");
+        model.setHorarios(List.of(horario));
 
         TournamentEntity entity = TournamentMapper.toEntity(model);
 
         assertNotNull(entity);
         assertEquals("tour-3", entity.getId());
-        assertEquals(LocalDateTime.of(2025, 8, 1, 9, 0), entity.getStartDate());
-        assertEquals(LocalDateTime.of(2025, 9, 1, 9, 0), entity.getEndDate());
-        assertEquals(LocalDateTime.of(2025, 7, 15, 9, 0), entity.getClosingDate());
-        assertEquals(16, entity.getTeamsMaxAmount());
-        assertEquals(100.0, entity.getTeamCost());
         assertEquals(TournamentStatus.ACTIVE, entity.getStatus());
         assertEquals("Reglas", entity.getReglamento());
-        assertEquals("Cancha C", entity.getCanchas());
-        assertEquals("10:00-20:00", entity.getHorarios());
         assertEquals("Ninguna", entity.getSanciones());
     }
 
@@ -122,15 +136,13 @@ class TournamentMapperTest {
         assertNotNull(entity);
         assertNull(entity.getClosingDate());
         assertNull(entity.getReglamento());
-        assertNull(entity.getCanchas());
-        assertNull(entity.getHorarios());
         assertNull(entity.getSanciones());
     }
 
     // ── roundtrip ────────────────────────────────────────────────────────
 
     @Test
-    void roundtrip_toEntityThenToModel_preservesData() {
+    void roundtrip_toEntityThenToModel_preservesScalarData() {
         Tournament original = new Tournament();
         original.setId("tour-5");
         original.setStartDate(LocalDateTime.of(2025, 6, 1, 8, 0));
@@ -139,9 +151,9 @@ class TournamentMapperTest {
         original.setTeamCost(50.0);
         original.setStatus(TournamentStatus.ACTIVE);
         original.setReglamento("Reglamento");
-        original.setCanchas("Cancha A");
-        original.setHorarios("08:00");
         original.setSanciones("Ninguna");
+        original.setCanchas(List.of());
+        original.setHorarios(List.of());
 
         Tournament result = TournamentMapper.toModel(TournamentMapper.toEntity(original));
 

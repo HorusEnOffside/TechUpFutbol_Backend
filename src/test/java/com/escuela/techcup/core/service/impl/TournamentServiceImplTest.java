@@ -1,5 +1,7 @@
 package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.controller.dto.CanchaDTO;
+import com.escuela.techcup.controller.dto.HorarioDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.TournamentFinalizedException;
 import com.escuela.techcup.core.exception.TournamentNotFoundException;
@@ -19,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +42,19 @@ class TournamentServiceImplTest {
     private OrganizerEntity organizerEntity;
     private final LocalDateTime start = LocalDateTime.of(2026, 6, 1, 0, 0);
     private final LocalDateTime end   = LocalDateTime.of(2026, 7, 1, 0, 0);
+
+    private List<CanchaDTO> canchas() {
+        CanchaDTO c = new CanchaDTO();
+        c.setNombre("Cancha A");
+        return List.of(c);
+    }
+
+    private List<HorarioDTO> horarios() {
+        HorarioDTO h = new HorarioDTO();
+        h.setFecha(LocalDate.of(2026, 5, 15));
+        h.setDescripcion("Jornada 1");
+        return List.of(h);
+    }
 
     @BeforeEach
     void setUp() {
@@ -228,7 +244,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
 
         Tournament result = tournamentService.configureTournament(
-                "tour-1", "Reglamento X", closing, "Cancha A", "10:00", null);
+                "tour-1", "Reglamento X", closing, canchas(), horarios(), null);
 
         assertNotNull(result);
         verify(tournamentRepository).save(any());
@@ -238,7 +254,7 @@ class TournamentServiceImplTest {
     void configureTournament_throwsWhenReglamentoIsBlank() {
 
         assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "", start.minusDays(1), "Cancha", "10:00", null));
+                () -> tournamentService.configureTournament("tour-1", "", start.minusDays(1), canchas(), horarios(), null));
     }
 
     @Test
@@ -246,7 +262,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), "Cancha", "10:00", null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), canchas(), horarios(), null));
     }
 
     @Test
@@ -255,7 +271,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(TournamentFinalizedException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), "Cancha", "10:00", null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), canchas(), horarios(), null));
     }
 
     // --- getActiveTournament ---
