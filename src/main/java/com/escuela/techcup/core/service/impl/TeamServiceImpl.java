@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -340,8 +341,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Payment uploadPayment(String teamId, PaymentDTO paymentDTO) {
-
+    public Payment uploadPayment(String teamId, PaymentDTO paymentDTO, MultipartFile voucher) {
 
         TeamEntity team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new EntityNotFoundException("Equipo no encontrado: " + teamId));
@@ -352,12 +352,7 @@ public class TeamServiceImpl implements TeamService {
             throw new PaymentDateException(paymentDTO.getPaymentDate(), tournament.getStartDate());
         }
 
-        Payment payment = paymentService.createPayment(paymentDTO, paymentDTO.getComprobante());
-        PaymentEntity paymentEntity = PaymentMapper.toEntity(payment);
-        team.setPayment(paymentEntity);
-        teamRepository.save(team);
-
-        return payment;
+        return paymentService.createPayment(paymentDTO, voucher);
 
     }
 

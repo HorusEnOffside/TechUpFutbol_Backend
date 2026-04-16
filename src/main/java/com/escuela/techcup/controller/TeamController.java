@@ -156,12 +156,13 @@ public class TeamController {
     @PostMapping(value = "/{teamId}/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PaymentRespondDTO> uploadPayment(
             @PathVariable String teamId,
-            @RequestPart("payment") PaymentDTO paymentDTO
-    ) {
+            @RequestPart("payment") PaymentDTO paymentDTO,
+            @RequestPart("voucher") MultipartFile voucher) {
+
         log.info("Request to upload payment. teamId={}", teamId);
 
-        Payment payment = teamService.uploadPayment(teamId, paymentDTO);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
+        Payment payment = teamService.uploadPayment(teamId, paymentDTO, voucher);
+        PaymentRespondDTO response =PaymentMapper.toRespondDTO(payment);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
