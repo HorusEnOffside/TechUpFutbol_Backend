@@ -17,6 +17,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import com.escuela.techcup.core.model.Match;
 import com.escuela.techcup.core.service.MatchService;
+
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
