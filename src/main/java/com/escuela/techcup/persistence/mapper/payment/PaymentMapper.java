@@ -27,7 +27,7 @@ public class PaymentMapper {
         if (paymentDTO == null) return null;
 
         PaymentEntity entity = new PaymentEntity();
-        entity.setId(UUID.randomUUID().toString());
+        entity.setId(UUID.randomUUID());
         entity.setStatus(PaymentStatus.PENDING);
         entity.setDescription(paymentDTO.getDescription());
         entity.setPaymentDate(paymentDTO.getPaymentDate());
@@ -97,11 +97,11 @@ public class PaymentMapper {
         if (entity == null) return null;
 
         Payment payment = new Payment();
-        payment.setId(entity.getId());
+        payment.setId(entity.getId().toString());
         payment.setStatus(entity.getStatus());
         payment.setDescription(entity.getDescription());
         payment.setPaymentDate(entity.getPaymentDate());
-        payment.setVoucherURL(buildVoucherUrl(entity.getId()));
+        payment.setVoucherURL(buildVoucherUrl(entity.getId().toString()));
 
         return payment;
     }

@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.users;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.model.enums.Gender;
 import com.escuela.techcup.core.model.enums.UserRole;
 import jakarta.persistence.*;
@@ -24,7 +26,7 @@ public abstract class UserEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Column(name = "name", nullable = false, length = 120)
     private String name;

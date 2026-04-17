@@ -13,7 +13,7 @@ import java.util.Set;
 public class LoginResponse {
 
 	private String token;
-	private String userId;
-	private String email;
+	private String id;
+	private String mail;
 	private Set<UserRole> roles;
 }

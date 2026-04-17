@@ -2,6 +2,7 @@ package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.RefereeEntity;
 import com.escuela.techcup.core.model.Referee;
+import java.util.UUID;
 
 public class RefereeMapper {
 
@@ -11,7 +12,7 @@ public class RefereeMapper {
     public static Referee toModel(RefereeEntity entity) {
         if (entity == null) return null;
         Referee referee = new Referee(
-            entity.getId(),
+            entity.getId().toString(),
             entity.getName(),
             entity.getMail(),
             entity.getDateOfBirth(),
@@ -27,7 +28,7 @@ public class RefereeMapper {
     public static RefereeEntity toEntity(Referee model) {
         if (model == null) return null;
         RefereeEntity entity = new RefereeEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());

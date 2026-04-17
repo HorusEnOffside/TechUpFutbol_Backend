@@ -14,6 +14,7 @@ import com.escuela.techcup.persistence.mapper.users.RefereeMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class MatchMapper {
@@ -22,7 +23,7 @@ public class MatchMapper {
     public static MatchEntity toEntity(Match match) {
         if (match == null) return null;
         MatchEntity matchEntity = new MatchEntity();
-        matchEntity.setId(match.getId());
+        matchEntity.setId(UUID.fromString(match.getId()));
         matchEntity.setDateTime(match.getDateTime());
         if (match.getTeamA() != null) {
             matchEntity.setTeamA(TeamMapper.toEntity(match.getTeamA()));
@@ -79,7 +80,7 @@ public class MatchMapper {
         }
 
         Match match = new Match(
-                matchEntity.getId(),
+                matchEntity.getId().toString(),
                 matchEntity.getDateTime(),
                 teamA,
                 teamB,

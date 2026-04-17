@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.model.enums.Formation;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,7 +22,7 @@ public class LineupEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id", nullable = false, foreignKey = @ForeignKey(name = "fk_lineups_match"))

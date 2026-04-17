@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.UserNotFoundException;
 import com.escuela.techcup.core.model.User;
@@ -39,7 +41,7 @@ public class AdminServiceImpl implements AdminService {
             throw new InvalidInputException(ROLE_IS_REQUIRED);
         }
 
-        UserEntity entity = userRepository.findById(userId)
+        UserEntity entity = userRepository.findById(UUID.fromString(userId))
             .orElseThrow(() -> {
                 log.warn("Role assignment failed: user not found for userId={}", userId);
                 return new UserNotFoundException(userId);

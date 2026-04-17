@@ -2,6 +2,7 @@ package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.AdministratorEntity;
 import com.escuela.techcup.core.model.Administrator;
+import java.util.UUID;
 
 public class AdminMapper {
 
@@ -11,7 +12,7 @@ public class AdminMapper {
     public static Administrator toModel(AdministratorEntity entity) {
         if (entity == null) return null;
         Administrator admin = new Administrator(
-            entity.getId(),
+            entity.getId().toString(),
             entity.getName(),
             entity.getMail(),
             entity.getDateOfBirth(),
@@ -27,7 +28,7 @@ public class AdminMapper {
     public static AdministratorEntity toEntity(Administrator model) {
         if (model == null) return null;
         AdministratorEntity entity = new AdministratorEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());

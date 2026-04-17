@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TeamFullInfoServiceImpl implements TeamFullInfoService {
@@ -49,7 +50,7 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     @Transactional(readOnly = true)
     public TeamFullInfoDTO getTeamFullInfo(String teamId) {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        TeamEntity team = teamRepository.findById(teamId)
+        TeamEntity team = teamRepository.findById(UUID.fromString(teamId))
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
         return buildTeamFullInfo(team);
     }
@@ -58,10 +59,10 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     @Transactional(readOnly = true)
     public List<TeamFullInfoDTO> getTeamsByTournament(String tournamentId) {
         if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
-        tournamentRepository.findById(tournamentId)
+        tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new InvalidInputException("Tournament not found: " + tournamentId));
         return teamRepository.findAll().stream()
-                .filter(t -> t.getTournament() != null && t.getTournament().getId().equals(tournamentId))
+                .filter(t -> t.getTournament() != null && UUID.fromString(tournamentId).equals(t.getTournament().getId()))
                 .map(this::buildTeamFullInfo)
                 .toList();
     }
@@ -70,7 +71,7 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
 
     private TeamFullInfoDTO buildTeamFullInfo(TeamEntity team) {
         List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(team.getId());
-        String captainPlayerId = resolveCaptainId(team);
+        String captainPlayerId = resolveCaptainId(team);  // already String via toString()
 
         List<TeamPlayerInfoDTO> playerDTOs = buildPlayerDTOs(teamPlayers, captainPlayerId);
         List<TeamMatchInfoDTO> matchDTOs = buildMatchDTOs(team);
@@ -84,7 +85,7 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
                 team.getId(), playerDTOs.size(), matchDTOs.size());
 
         return new TeamFullInfoDTO(
-                team.getId(),
+                team.getId() != null ? team.getId().toString() : null,
                 team.getName(),
                 team.getUniformColor(),
                 tournamentId,
@@ -97,7 +98,8 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     }
 
     private String resolveCaptainId(TeamEntity team) {
-        return team.getCaptainPlayer() != null ? team.getCaptainPlayer().getId() : null;
+        return team.getCaptainPlayer() != null && team.getCaptainPlayer().getId() != null
+                ? team.getCaptainPlayer().getId().toString() : null;
     }
 
     private String resolveCaptainName(TeamEntity team) {
@@ -105,12 +107,13 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     }
 
     private String resolveTournamentId(TeamEntity team) {
-        return team.getTournament() != null ? team.getTournament().getId() : null;
+        return team.getTournament() != null && team.getTournament().getId() != null
+                ? team.getTournament().getId().toString() : null;
     }
 
     private String resolveTournamentName(TeamEntity team) {
-        if (team.getTournament() == null) return null;
-        String tourId = team.getTournament().getId();
+        if (team.getTournament() == null || team.getTournament().getId() == null) return null;
+        String tourId = team.getTournament().getId().toString();
         return "Torneo " + tourId.substring(0, Math.min(8, tourId.length()));
     }
 
@@ -121,25 +124,27 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
     }
 
     private TeamPlayerInfoDTO toPlayerInfoDTO(PlayerEntity p, String captainPlayerId) {
+        String playerId = p.getId() != null ? p.getId().toString() : null;
         return new TeamPlayerInfoDTO(
-                p.getId(),
+                playerId,
                 p.getUser().getName(),
                 p.getUser().getMail(),
                 p.getPosition(),
                 p.getDorsalNumber(),
-                p.getId().equals(captainPlayerId)
+                playerId != null && playerId.equals(captainPlayerId)
         );
     }
 
     private List<TeamMatchInfoDTO> buildMatchDTOs(TeamEntity team) {
         List<MatchEntity> matches = matchRepository.findByTeamAIdOrTeamBId(team.getId(), team.getId());
         LocalDateTime now = LocalDateTime.now();
+        UUID teamUUID = team.getId();
         return matches.stream()
-                .map(match -> toMatchInfoDTO(match, team.getId(), now))
+                .map(match -> toMatchInfoDTO(match, teamUUID, now))
                 .toList();
     }
 
-    private TeamMatchInfoDTO toMatchInfoDTO(MatchEntity match, String teamId, LocalDateTime now) {
+    private TeamMatchInfoDTO toMatchInfoDTO(MatchEntity match, UUID teamId, LocalDateTime now) {
         boolean isTeamA = match.getTeamA().getId().equals(teamId);
         String opponentName = isTeamA ? match.getTeamB().getName() : match.getTeamA().getName();
 
@@ -149,15 +154,17 @@ public class TeamFullInfoServiceImpl implements TeamFullInfoService {
 
         String result = resolveMatchResult(match.getDateTime(), now, goalsFor, goalsAgainst);
 
-        return new TeamMatchInfoDTO(match.getId(), match.getDateTime(), opponentName, goalsFor, goalsAgainst, result);
+        return new TeamMatchInfoDTO(
+                match.getId() != null ? match.getId().toString() : null,
+                match.getDateTime(), opponentName, goalsFor, goalsAgainst, result);
     }
 
-    private int[] countGoals(MatchEntity match, String teamId) {
+    private int[] countGoals(MatchEntity match, UUID teamId) {
         List<GoalEntity> goals = goalRepository.findByMatchId(match.getId());
         int goalsFor = 0;
         int goalsAgainst = 0;
         for (GoalEntity goal : goals) {
-            String scorerTeamId = goal.getPlayer().getTeam() != null
+            UUID scorerTeamId = goal.getPlayer().getTeam() != null
                     ? goal.getPlayer().getTeam().getId() : null;
             if (teamId.equals(scorerTeamId)) goalsFor++;
             else goalsAgainst++;

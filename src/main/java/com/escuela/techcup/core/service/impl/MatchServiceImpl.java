@@ -3,6 +3,7 @@ package com.escuela.techcup.core.service.impl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional(readOnly = true)
     public Match getMatchById(String matchId) {
-        return matchRepository.findById(matchId)
+        return matchRepository.findById(UUID.fromString(matchId))
                 .map(MatchMapper::toModel)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
     }
@@ -81,7 +82,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional(readOnly = true)
     public List<Match> getMatchesByRefereeId(String refereeId) {
-        return matchRepository.findByRefereeId(refereeId).stream()
+        return matchRepository.findByRefereeId(UUID.fromString(refereeId)).stream()
                 .map(MatchMapper::toModel)
                 .toList();
     }
@@ -95,16 +96,16 @@ public class MatchServiceImpl implements MatchService {
             throw new InvalidInputException("Un equipo no puede jugar contra sí mismo");
         }
 
-        TeamEntity teamA = teamRepository.findById(teamAId)
+        TeamEntity teamA = teamRepository.findById(UUID.fromString(teamAId))
                 .orElseThrow(() -> new TeamNotFoundException(teamAId));
-        TeamEntity teamB = teamRepository.findById(teamBId)
+        TeamEntity teamB = teamRepository.findById(UUID.fromString(teamBId))
                 .orElseThrow(() -> new TeamNotFoundException(teamBId));
 
         LocalDateTime dateTime = date.atStartOfDay();
 
         // RN: un equipo no puede jugar dos partidos a la misma hora
-        if (matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, teamAId, dateTime, teamAId)
-                || matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, teamBId, dateTime, teamBId)) {
+        if (matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, UUID.fromString(teamAId), dateTime, UUID.fromString(teamAId))
+                || matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, UUID.fromString(teamBId), dateTime, UUID.fromString(teamBId))) {
             throw new ScheduleConflictException("One of the teams already has a match scheduled at that date and time");
         }
 
@@ -117,10 +118,10 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public Match setReferee(String matchId, String refereeId) {
-        MatchEntity matchEntity = matchRepository.findById(matchId)
+        MatchEntity matchEntity = matchRepository.findById(UUID.fromString(matchId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
-        RefereeEntity refereeEntity = refereeRepository.findById(refereeId)
+        RefereeEntity refereeEntity = refereeRepository.findById(UUID.fromString(refereeId))
                 .orElseThrow(() -> new UserNotFoundException(refereeId));
 
         matchEntity.setReferee(refereeEntity);
@@ -132,11 +133,11 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public Match setSoccerField(String matchId, String soccerFieldId) {
-        MatchEntity matchEntity = matchRepository.findById(matchId)
+        MatchEntity matchEntity = matchRepository.findById(UUID.fromString(matchId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
         // RN: una cancha no puede tener dos partidos a la misma hora
-        if (matchRepository.existsByDateTimeAndSoccerFieldId(matchEntity.getDateTime(), soccerFieldId)) {
+        if (matchRepository.existsByDateTimeAndSoccerFieldId(matchEntity.getDateTime(), UUID.fromString(soccerFieldId))) {
             throw new ScheduleConflictException("The soccer field already has a match scheduled at that date and time");
         }
 
@@ -150,10 +151,10 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public Match addMatchEventGoal(String matchId, String playerId, int minute, String description) {
         log.info("Adding goal to match {}. playerId={}, minute={}", matchId, playerId, minute);
-        MatchEntity matchEntity = matchRepository.findById(matchId)
+        MatchEntity matchEntity = matchRepository.findById(UUID.fromString(matchId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
-        PlayerEntity playerEntity = playerRepository.findByUserId(playerId)
+        PlayerEntity playerEntity = playerRepository.findByUserId(UUID.fromString(playerId))
                 .orElseThrow(() -> new UserNotFoundException(playerId));
 
         validatePlayerBelongsToMatch(playerEntity, matchEntity);
@@ -169,10 +170,10 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public Match addMatchEventCard(String matchId, String playerId, int minute, CardEntity.CardType type, String description) {
         log.info("Adding card to match {}. playerId={}, minute={}, type={}", matchId, playerId, minute, type);
-        MatchEntity matchEntity = matchRepository.findById(matchId)
+        MatchEntity matchEntity = matchRepository.findById(UUID.fromString(matchId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
-        PlayerEntity playerEntity = playerRepository.findByUserId(playerId)
+        PlayerEntity playerEntity = playerRepository.findByUserId(UUID.fromString(playerId))
                 .orElseThrow(() -> new UserNotFoundException(playerId));
 
         validatePlayerBelongsToMatch(playerEntity, matchEntity);
@@ -198,7 +199,7 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public Match finalizeMatch(String matchId, MatchResultDTO result) {
         log.info("Finalizing match {}. localScore={}, visitorScore={}", matchId, result.getLocalScore(), result.getVisitorScore());
-        MatchEntity matchEntity = matchRepository.findById(matchId)
+        MatchEntity matchEntity = matchRepository.findById(UUID.fromString(matchId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
         matchEntity.setLocalScore(result.getLocalScore());
@@ -206,13 +207,13 @@ public class MatchServiceImpl implements MatchService {
 
         if (result.getPlayerStats() != null) {
             for (PlayerMatchStatsDTO stats : result.getPlayerStats()) {
-                PlayerEntity playerEntity = playerRepository.findByUserId(stats.getPlayerId())
+                PlayerEntity playerEntity = playerRepository.findByUserId(UUID.fromString(stats.getPlayerId()))
                         .orElse(null);
                 if (playerEntity == null) continue;
 
                 for (int i = 0; i < stats.getGoals(); i++) {
                     GoalEntity goal = new GoalEntity();
-                    goal.setId(idGenerator());
+                    goal.setId(UUID.randomUUID());
                     goal.setMinute(0);
                     goal.setDescription("Gol registrado al finalizar partido");
                     goal.setPlayer(playerEntity);
@@ -251,7 +252,7 @@ public class MatchServiceImpl implements MatchService {
         if (player.getTeam() == null) {
             throw new InvalidInputException("El jugador no pertenece a ningún equipo");
         }
-        String playerTeamId = player.getTeam().getId();
+        UUID playerTeamId = player.getTeam().getId();
         boolean inTeamA = match.getTeamA() != null && match.getTeamA().getId().equals(playerTeamId);
         boolean inTeamB = match.getTeamB() != null && match.getTeamB().getId().equals(playerTeamId);
         if (!inTeamA && !inTeamB) {

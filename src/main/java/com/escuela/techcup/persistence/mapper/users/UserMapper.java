@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 
 public class UserMapper {
@@ -24,7 +25,7 @@ public class UserMapper {
             }
         }
         User user = new User(
-            entity.getId(),
+            entity.getId().toString(),
             entity.getName(),
             entity.getMail(),
             entity.getDateOfBirth(),
@@ -37,7 +38,7 @@ public class UserMapper {
     }
 
     public static void updateEntityFromModel(User model, UserEntity entity) {
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());

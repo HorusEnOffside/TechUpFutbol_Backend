@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +15,7 @@ public class SoccerFieldEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Column(name = "name", nullable = false, length = 120)
     private String name;

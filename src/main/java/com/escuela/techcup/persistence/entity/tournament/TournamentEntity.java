@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
 
@@ -19,7 +21,7 @@ public class TournamentEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;

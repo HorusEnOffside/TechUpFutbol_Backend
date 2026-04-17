@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.model.enums.InvitationStatus;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import jakarta.persistence.*;
@@ -14,7 +16,7 @@ public class InvitationEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false, foreignKey = @ForeignKey(name = "fk_invitations_team"))

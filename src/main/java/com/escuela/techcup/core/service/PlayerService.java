@@ -24,4 +24,6 @@ public interface PlayerService {
     Player updateStatus(String userId, PlayerStatus status);
 
     Player updateProfile(String userId, PlayerUpdateDTO dto);
+
+    Player linkSportsProfile(LinkSportsProfileDTO dto);
 }

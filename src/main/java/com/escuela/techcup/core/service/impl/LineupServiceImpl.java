@@ -7,7 +7,6 @@ import com.escuela.techcup.controller.dto.LineupResponseDTO.LineupPlayerResponse
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.MatchNotFoundException;
 import com.escuela.techcup.core.service.LineupService;
-import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.LineupEntity;
 import com.escuela.techcup.persistence.entity.tournament.LineupPlayerEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class LineupServiceImpl implements LineupService {
@@ -48,27 +48,27 @@ public class LineupServiceImpl implements LineupService {
         if (request.getPlayers() == null || request.getPlayers().isEmpty())
             throw new InvalidInputException("La alineación debe tener al menos un jugador");
 
-        MatchEntity match = matchRepository.findById(request.getMatchId())
+        MatchEntity match = matchRepository.findById(UUID.fromString(request.getMatchId()))
                 .orElseThrow(() -> new MatchNotFoundException(request.getMatchId()));
 
-        TeamEntity team = teamRepository.findById(request.getTeamId())
+        TeamEntity team = teamRepository.findById(UUID.fromString(request.getTeamId()))
                 .orElseThrow(() -> new InvalidInputException("Equipo no encontrado: " + request.getTeamId()));
 
-        if (lineupRepository.existsByMatchIdAndTeamId(request.getMatchId(), request.getTeamId()))
+        if (lineupRepository.existsByMatchIdAndTeamId(UUID.fromString(request.getMatchId()), UUID.fromString(request.getTeamId())))
             throw new InvalidInputException("Ya existe una alineación para este equipo en este partido");
 
         LineupEntity lineup = new LineupEntity();
-        lineup.setId(IdGeneratorUtil.generateId());
+        lineup.setId(UUID.randomUUID());
         lineup.setMatch(match);
         lineup.setTeam(team);
         lineup.setFormation(request.getFormation());
         lineup.setStatus("SUBMITTED");
 
         for (LineupPlayerDTO p : request.getPlayers()) {
-            PlayerEntity playerEntity = playerRepository.findByUserId(p.getPlayerId())
+            PlayerEntity playerEntity = playerRepository.findByUserId(UUID.fromString(p.getPlayerId()))
                     .orElseThrow(() -> new InvalidInputException("Jugador no encontrado: " + p.getPlayerId()));
             LineupPlayerEntity lp = new LineupPlayerEntity();
-            lp.setId(IdGeneratorUtil.generateId());
+            lp.setId(UUID.randomUUID());
             lp.setLineup(lineup);
             lp.setPlayer(playerEntity);
             lp.setPosition(p.getPosition());
@@ -84,7 +84,7 @@ public class LineupServiceImpl implements LineupService {
     @Override
     @Transactional(readOnly = true)
     public LineupResponseDTO getLineup(String matchId, String teamId) {
-        LineupEntity lineup = lineupRepository.findByMatchIdAndTeamId(matchId, teamId)
+        LineupEntity lineup = lineupRepository.findByMatchIdAndTeamId(UUID.fromString(matchId), UUID.fromString(teamId))
                 .orElseThrow(() -> new InvalidInputException("No se encontró alineación para matchId=" + matchId + " teamId=" + teamId));
         return toDTO(lineup);
     }
@@ -92,7 +92,7 @@ public class LineupServiceImpl implements LineupService {
     @Override
     @Transactional
     public LineupResponseDTO validateLineup(String lineupId) {
-        LineupEntity lineup = lineupRepository.findById(lineupId)
+        LineupEntity lineup = lineupRepository.findById(UUID.fromString(lineupId))
                 .orElseThrow(() -> new InvalidInputException("Alineación no encontrada: " + lineupId));
 
         List<LineupPlayerEntity> players = lineup.getPlayers();
@@ -114,7 +114,7 @@ public class LineupServiceImpl implements LineupService {
     private LineupResponseDTO toDTO(LineupEntity lineup) {
         List<LineupPlayerResponseDTO> playerDTOs = lineup.getPlayers().stream()
                 .map(p -> new LineupPlayerResponseDTO(
-                        p.getPlayer().getId(),
+                        p.getPlayer().getId() != null ? p.getPlayer().getId().toString() : null,
                         p.getPlayer().getUser() != null ? p.getPlayer().getUser().getName() : null,
                         p.getPosition() != null ? p.getPosition().name() : null,
                         p.getDorsalNumber()
@@ -122,9 +122,9 @@ public class LineupServiceImpl implements LineupService {
                 .toList();
 
         return new LineupResponseDTO(
-                lineup.getId(),
-                lineup.getMatch().getId(),
-                lineup.getTeam().getId(),
+                lineup.getId() != null ? lineup.getId().toString() : null,
+                lineup.getMatch().getId() != null ? lineup.getMatch().getId().toString() : null,
+                lineup.getTeam().getId() != null ? lineup.getTeam().getId().toString() : null,
                 lineup.getTeam().getName(),
                 lineup.getFormation(),
                 lineup.getStatus(),

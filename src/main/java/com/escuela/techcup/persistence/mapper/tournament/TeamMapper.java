@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 
 public class TeamMapper {
@@ -25,7 +26,7 @@ public class TeamMapper {
     public static TeamEntity toEntity(Team team) {
         if (team == null) return null;
         TeamEntity teamEntity = new TeamEntity();
-        teamEntity.setId(team.getId());
+        teamEntity.setId(UUID.fromString(team.getId()));
         teamEntity.setName(team.getName());
         teamEntity.setLogo(toPngBytes(team.getLogo()));
         teamEntity.setUniformColor(team.getUniformColor());
@@ -58,7 +59,7 @@ public class TeamMapper {
     public static Team toModel(TeamEntity teamEntity) {
         if (teamEntity == null) return null;
         Team team = new Team(
-                teamEntity.getId(),
+                teamEntity.getId().toString(),
                 teamEntity.getName(),
                 teamEntity.getUniformColor(),
                 toBufferedImage(teamEntity.getLogo()),

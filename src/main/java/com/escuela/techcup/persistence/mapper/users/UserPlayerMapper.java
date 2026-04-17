@@ -5,6 +5,7 @@ import com.escuela.techcup.core.model.UserPlayer;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 
 public class UserPlayerMapper {
@@ -23,7 +24,7 @@ public class UserPlayerMapper {
             }
         }
         UserPlayer userPlayer = new UserPlayer(
-            entity.getId(),
+            entity.getId().toString(),
             entity.getName(),
             entity.getMail(),
             entity.getDateOfBirth(),
@@ -40,7 +41,7 @@ public class UserPlayerMapper {
     public static UserPlayerEntity toEntity(UserPlayer model) {
         if (model == null) return null;
         UserPlayerEntity entity = new UserPlayerEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());

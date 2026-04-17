@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
+import com.escuela.techcup.controller.dto.LinkSportsProfileDTO;
 import com.escuela.techcup.controller.dto.PlayerUpdateDTO;
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
@@ -212,6 +213,17 @@ public class PlayerController {
 		filters.setPlayerId(playerId);
 
 		return ResponseEntity.ok(playerService.searchPlayers(filters));
+	}
+
+	// ── Vincular perfil deportivo a usuario existente ────────────────────
+
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/link")
+	public ResponseEntity<PlayerResponseDTO> linkSportsProfile(
+			@Valid @RequestBody LinkSportsProfileDTO dto) {
+		log.info("Request to link sports profile. userId={}", dto.getUserId());
+		Player player = playerService.linkSportsProfile(dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(PlayerMapper.toResponseDTO(player));
 	}
 
 	// ── Actualizar perfil deportivo ──────────────────────────────────────

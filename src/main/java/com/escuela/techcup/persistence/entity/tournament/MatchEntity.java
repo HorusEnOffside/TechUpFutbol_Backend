@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import com.escuela.techcup.persistence.entity.users.RefereeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -16,7 +18,7 @@ public class MatchEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Column(name = "date_time", nullable = false)
     private LocalDateTime dateTime;

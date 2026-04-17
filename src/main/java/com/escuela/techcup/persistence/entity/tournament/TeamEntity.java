@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,7 +19,7 @@ public class TeamEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Column(name = "name", nullable = false, length = 120, unique = true)
     private String name;

@@ -2,6 +2,7 @@ package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.GraduateEntity;
 import com.escuela.techcup.core.model.Graduate;
+import java.util.UUID;
 
 public class GraduateMapper {
 
@@ -10,7 +11,7 @@ public class GraduateMapper {
     public static Graduate toModel(GraduateEntity entity) {
         if (entity == null) return null;
         Graduate graduate = new Graduate(
-                entity.getId(),
+                entity.getId().toString(),
                 entity.getName(),
                 entity.getMail(),
                 entity.getDateOfBirth(),
@@ -25,7 +26,7 @@ public class GraduateMapper {
     public static GraduateEntity toEntity(Graduate model) {
         if (model == null) return null;
         GraduateEntity entity = new GraduateEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());

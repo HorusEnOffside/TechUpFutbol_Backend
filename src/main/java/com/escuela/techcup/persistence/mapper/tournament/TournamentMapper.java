@@ -6,6 +6,7 @@ import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 public class TournamentMapper {
 
@@ -14,7 +15,7 @@ public class TournamentMapper {
     public static Tournament toModel(TournamentEntity entity) {
         if (entity == null) return null;
         Tournament tournament = new Tournament();
-        tournament.setId(entity.getId());
+        tournament.setId(entity.getId().toString());
         tournament.setStartDate(entity.getStartDate());
         tournament.setEndDate(entity.getEndDate());
         tournament.setClosingDate(entity.getClosingDate());
@@ -26,7 +27,7 @@ public class TournamentMapper {
 
         List<Cancha> canchas = entity.getCanchas().stream().map(c -> {
             Cancha cancha = new Cancha();
-            cancha.setId(c.getId());
+            cancha.setId(c.getId().toString());
             cancha.setTipo(c.getTipo());
             cancha.setNombre(c.getNombre());
             cancha.setFotoUrl(c.getFotoUrl());
@@ -36,7 +37,7 @@ public class TournamentMapper {
 
         List<Horario> horarios = entity.getHorarios().stream().map(h -> {
             Horario horario = new Horario();
-            horario.setId(h.getId());
+            horario.setId(h.getId().toString());
             horario.setFecha(h.getFecha());
             horario.setDescripcion(h.getDescripcion());
             return horario;
@@ -49,7 +50,7 @@ public class TournamentMapper {
     public static TournamentEntity toEntity(Tournament model) {
         if (model == null) return null;
         TournamentEntity entity = new TournamentEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setStartDate(model.getStartDate());
         entity.setEndDate(model.getEndDate());
         entity.setClosingDate(model.getClosingDate());

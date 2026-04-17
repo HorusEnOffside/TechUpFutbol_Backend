@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.escuela.techcup.core.model.enums.UserRole;
 import org.slf4j.Logger;
@@ -183,7 +184,7 @@ public class UserServiceImpl implements com.escuela.techcup.core.service.UserSer
     @Transactional(readOnly = true)
     public Optional<User> getUserById(String id) {
         if (id == null || id.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
-        return userRepository.findById(id).map(UserMapper::toModel);
+        return userRepository.findById(UUID.fromString(id)).map(UserMapper::toModel);
     }
 
     @Override

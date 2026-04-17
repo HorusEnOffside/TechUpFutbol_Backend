@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional(readOnly = true)
     public Payment getPaymentById(String id) {
         log.info("Fetching payment by id={}", id);
-        PaymentEntity entity = paymentRepository.findById(id)
+        PaymentEntity entity = paymentRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new TechcupException(PAYMENT_NOT_FOUND + id, HttpStatus.NOT_FOUND));
         return PaymentMapper.toModel(entity);
     }
@@ -65,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public Payment updatePaymentState(String id, PaymentStatus paymentStatus) {
         log.info("Updating payment id={} to status={}", id, paymentStatus);
-        PaymentEntity entity = paymentRepository.findById(id)
+        PaymentEntity entity = paymentRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new TechcupException(PAYMENT_NOT_FOUND + id, HttpStatus.NOT_FOUND));
         PaymentMapper.updateStatus(entity, paymentStatus);
         PaymentEntity updatedEntity = paymentRepository.save(entity);
@@ -76,17 +77,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void deletePayment(String id) {
         log.info("Deleting payment id={}", id);
-        if (!paymentRepository.existsById(id)) {
+        if (!paymentRepository.existsById(UUID.fromString(id))) {
             throw new TechcupException(PAYMENT_NOT_FOUND + id, HttpStatus.NOT_FOUND);
         }
-        paymentRepository.deleteById(id);
+        paymentRepository.deleteById(UUID.fromString(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public PaymentEntity getVoucherById(String id) {
         log.info("Fetching voucher for payment id={}", id);
-        return paymentRepository.findById(id)
+        return paymentRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new TechcupException(PAYMENT_NOT_FOUND + id, HttpStatus.NOT_FOUND));
     }
 

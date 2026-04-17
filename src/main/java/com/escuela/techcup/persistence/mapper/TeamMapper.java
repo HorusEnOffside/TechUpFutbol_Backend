@@ -8,6 +8,7 @@ import com.escuela.techcup.persistence.entity.tournament.TeamPlayerEntity;
 import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
 
 import java.awt.image.BufferedImage;
+import java.util.UUID;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class TeamMapper {
         }
         
         Team team = new Team(
-                entity.getId(),
+                entity.getId().toString(),
                 entity.getName(),
                 entity.getUniformColor(),
                 logo,
@@ -63,7 +64,7 @@ public class TeamMapper {
     public static TeamEntity toEntity(Team model) {
         if (model == null) return null;
         TeamEntity entity = new TeamEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setUniformColor(model.getUniformColor());
         entity.setFormation(model.getFormation());

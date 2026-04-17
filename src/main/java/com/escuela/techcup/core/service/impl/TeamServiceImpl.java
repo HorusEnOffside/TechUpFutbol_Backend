@@ -48,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -99,7 +100,7 @@ public class TeamServiceImpl implements TeamService {
                 .stream().findFirst()
                 .orElseThrow(TournamentNotActiveException::new);
 
-        PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
+        PlayerEntity captainPlayer = playerRepository.findByUserId(UUID.fromString(captainUserId))
                 .orElseThrow(() -> new InvalidInputException("El usuario no tiene perfil deportivo registrado. Completa tu perfil deportivo antes de crear un equipo."));
 
         UserEntity captainUser = captainPlayer.getUser();
@@ -119,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
         teamRepository.save(entity);
 
         TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
-        teamPlayer.setId(IdGeneratorUtil.generateId());
+        teamPlayer.setId(UUID.randomUUID());
         teamPlayer.setTeam(entity);
         teamPlayer.setPlayer(captainPlayer);
         teamPlayerRepository.save(teamPlayer);
@@ -134,22 +135,22 @@ public class TeamServiceImpl implements TeamService {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
         if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
 
-        TeamEntity team = teamRepository.findById(teamId)
+        TeamEntity team = teamRepository.findById(UUID.fromString(teamId))
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
 
-        PlayerEntity player = playerRepository.findById(playerId)
+        PlayerEntity player = playerRepository.findById(UUID.fromString(playerId))
                 .orElseThrow(() -> new InvalidInputException("Player not found"));
 
-        if (invitationRepository.existsByTeamIdAndPlayerId(teamId, playerId))
+        if (invitationRepository.existsByTeamIdAndPlayerId(UUID.fromString(teamId), UUID.fromString(playerId)))
             throw new PlayerAlreadyInvitedException(playerId);
 
-        List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(teamId);
+        List<TeamPlayerEntity> currentPlayers = teamPlayerRepository.findByTeamId(UUID.fromString(teamId));
         if (currentPlayers.size() >= 12)
             throw new InvalidInputException("Team already has the maximum of 12 players");
 
         if (team.getTournament() != null) {
-            String tournamentId = team.getTournament().getId();
-            if (teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId))
+            UUID tournamentId = team.getTournament().getId();
+            if (teamPlayerRepository.existsByPlayerIdAndTournamentId(UUID.fromString(playerId), tournamentId))
                 throw new InvalidInputException("Player is already registered in another team for this tournament");
         }
 
@@ -157,7 +158,7 @@ public class TeamServiceImpl implements TeamService {
             throw new InvalidInputException("Team must have a majority of Engineering or Data Science players");
 
         InvitationEntity invitation = new InvitationEntity();
-        invitation.setId(IdGeneratorUtil.generateId());
+        invitation.setId(UUID.randomUUID());
         invitation.setTeam(team);
         invitation.setPlayer(player);
         invitation.setMessage(message);
@@ -174,7 +175,7 @@ public class TeamServiceImpl implements TeamService {
         if (action == null) throw new InvalidInputException("action is required");
 
         InvitationEntity invitation = invitationRepository
-                .findByIdAndStatus(invitationId, InvitationStatus.PENDING)
+                .findByIdAndStatus(UUID.fromString(invitationId), InvitationStatus.PENDING)
                 .orElseThrow(() -> new InvitationNotFoundException(invitationId));
 
         invitation.setStatus(action);
@@ -191,7 +192,7 @@ public class TeamServiceImpl implements TeamService {
             playerRepository.save(player);
 
             TeamPlayerEntity teamPlayer = new TeamPlayerEntity();
-            teamPlayer.setId(IdGeneratorUtil.generateId());
+            teamPlayer.setId(UUID.randomUUID());
             teamPlayer.setTeam(invitation.getTeam());
             teamPlayer.setPlayer(invitation.getPlayer());
             teamPlayerRepository.save(teamPlayer);
@@ -206,16 +207,16 @@ public class TeamServiceImpl implements TeamService {
     public List<Invitation> getInvitationsByPlayer(String playerId) {
         if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
 
-        playerRepository.findById(playerId)
+        playerRepository.findById(UUID.fromString(playerId))
                 .orElseThrow(() -> new InvalidInputException("Player not found"));
 
-        return invitationRepository.findByPlayerId(playerId).stream()
+        return invitationRepository.findByPlayerId(UUID.fromString(playerId)).stream()
                 .map(entity -> {
                     Invitation inv = new Invitation();
-                    inv.setId(entity.getId());
-                    inv.setTeamId(entity.getTeam().getId());
+                    inv.setId(entity.getId() != null ? entity.getId().toString() : null);
+                    inv.setTeamId(entity.getTeam().getId() != null ? entity.getTeam().getId().toString() : null);
                     inv.setTeamName(entity.getTeam().getName());
-                    inv.setPlayerId(entity.getPlayer().getId());
+                    inv.setPlayerId(entity.getPlayer().getId() != null ? entity.getPlayer().getId().toString() : null);
                     inv.setMessage(entity.getMessage());
                     inv.setStatus(entity.getStatus());
                     return inv;
@@ -227,7 +228,7 @@ public class TeamServiceImpl implements TeamService {
     @Transactional(readOnly = true)
     public boolean validateTeamComposition(String teamId) {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        List<TeamPlayerEntity> players = teamPlayerRepository.findByTeamId(teamId);
+        List<TeamPlayerEntity> players = teamPlayerRepository.findByTeamId(UUID.fromString(teamId));
         int count = players.size();
         boolean valid = count >= 7 && count <= 12;
         log.info("Team composition validation. teamId={}, players={}, valid={}", teamId, count, valid);
@@ -239,7 +240,7 @@ public class TeamServiceImpl implements TeamService {
     public boolean validatePlayerUniquePerTournament(String playerId, String tournamentId) {
         if (playerId == null || playerId.isBlank()) throw new InvalidInputException("playerId is required");
         if (tournamentId == null || tournamentId.isBlank()) throw new InvalidInputException("tournamentId is required");
-        boolean exists = teamPlayerRepository.existsByPlayerIdAndTournamentId(playerId, tournamentId);
+        boolean exists = teamPlayerRepository.existsByPlayerIdAndTournamentId(UUID.fromString(playerId), UUID.fromString(tournamentId));
         log.info("Player unique validation. playerId={}, tournamentId={}, exists={}", playerId, tournamentId, exists);
         return !exists;
     }
@@ -248,7 +249,7 @@ public class TeamServiceImpl implements TeamService {
     @Transactional(readOnly = true)
     public Team getTeamById(String teamId) {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        return teamRepository.findById(teamId)
+        return teamRepository.findById(UUID.fromString(teamId))
                 .map(TeamMapper::toModel)
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
     }
@@ -265,7 +266,7 @@ public class TeamServiceImpl implements TeamService {
     @Transactional(readOnly = true)
     public boolean validateEngineeringMajority(String teamId) {
         if (teamId == null || teamId.isBlank()) throw new InvalidInputException("teamId is required");
-        List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(teamId);
+        List<TeamPlayerEntity> teamPlayers = teamPlayerRepository.findByTeamId(UUID.fromString(teamId));
         if (teamPlayers.isEmpty()) throw new InvalidInputException("Team has no players");
 
         long engineeringCount = teamPlayers.stream()
@@ -293,7 +294,7 @@ public class TeamServiceImpl implements TeamService {
 
         validateSchedule(matchId, teamId);
 
-        TeamEntity team = teamRepository.findById(teamId)
+        TeamEntity team = teamRepository.findById(UUID.fromString(teamId))
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
 
         team.setFormation(formation);
@@ -303,7 +304,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private void validateSchedule(String matchId, String teamId) {
-        MatchEntity match = matchRepository.findByIdAndTeam(matchId, teamId)
+        MatchEntity match = matchRepository.findByIdAndTeam(UUID.fromString(matchId), UUID.fromString(teamId))
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
         if (DateUtil.isInThePast(match.getDateTime())) {
@@ -325,7 +326,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Formation getEnemyFormation(String teamId) {
-        TeamEntity team = teamRepository.findById(teamId)
+        TeamEntity team = teamRepository.findById(UUID.fromString(teamId))
                 .orElseThrow(() -> new TeamNotFoundException(teamId));
         return team.getFormation();
     }
@@ -343,7 +344,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Payment uploadPayment(String teamId, PaymentDTO paymentDTO, MultipartFile voucher) {
 
-        TeamEntity team = teamRepository.findById(teamId)
+        TeamEntity team = teamRepository.findById(UUID.fromString(teamId))
                 .orElseThrow(() -> new EntityNotFoundException("Equipo no encontrado: " + teamId));
 
         TournamentEntity tournament = team.getTournament();

@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.payment;
 
+import java.util.UUID;
+
 
 import com.escuela.techcup.core.model.enums.PaymentStatus;
 import jakarta.persistence.*;
@@ -14,7 +16,7 @@ public class PaymentEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 50)

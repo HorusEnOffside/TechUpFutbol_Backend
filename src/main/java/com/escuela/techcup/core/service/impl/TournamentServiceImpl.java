@@ -9,7 +9,6 @@ import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.model.enums.CanchaTipo;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.service.TournamentService;
-import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.CanchaEntity;
 import com.escuela.techcup.persistence.entity.tournament.HorarioEntity;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
@@ -26,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TournamentServiceImpl implements TournamentService {
@@ -55,11 +55,11 @@ public class TournamentServiceImpl implements TournamentService {
                 .anyMatch(t -> startDate.isBefore(t.getEndDate()) && endDate.isAfter(t.getStartDate()));
         if (overlap) throw new TournamentOverlapException();
 
-        OrganizerEntity organizer = organizerRepository.findById(organizerId)
+        OrganizerEntity organizer = organizerRepository.findById(UUID.fromString(organizerId))
                 .orElseThrow(() -> new InvalidInputException("Organizer not found"));
 
         TournamentEntity entity = new TournamentEntity();
-        entity.setId(IdGeneratorUtil.generateId());
+        entity.setId(UUID.randomUUID());
         entity.setStartDate(startDate);
         entity.setEndDate(endDate);
         entity.setTeamsMaxAmount(teamsMaxAmount);
@@ -78,7 +78,7 @@ public class TournamentServiceImpl implements TournamentService {
     public Tournament getTournamentById(String tournamentId) {
         if (tournamentId == null || tournamentId.isBlank())
             throw new InvalidInputException("tournamentId is required");
-        return tournamentRepository.findById(tournamentId)
+        return tournamentRepository.findById(UUID.fromString(tournamentId))
                 .map(TournamentMapper::toModel)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
     }
@@ -100,7 +100,7 @@ public class TournamentServiceImpl implements TournamentService {
         if (tournamentId == null || tournamentId.isBlank())
             throw new InvalidInputException("tournamentId is required");
 
-        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+        TournamentEntity entity = tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
         // RN-06: No modificar torneos finalizados
@@ -125,7 +125,7 @@ public class TournamentServiceImpl implements TournamentService {
         if (tournamentId == null || tournamentId.isBlank())
             throw new InvalidInputException("tournamentId is required");
 
-        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+        TournamentEntity entity = tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
         if (entity.getStatus() == TournamentStatus.COMPLETED)
@@ -141,7 +141,7 @@ public class TournamentServiceImpl implements TournamentService {
     @Transactional
     public Tournament configureTournament(String tournamentId, String reglamento,
                                           LocalDateTime closingDate, String sanciones) {
-        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+        TournamentEntity entity = tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
         if (entity.getStatus() == TournamentStatus.COMPLETED)
@@ -164,14 +164,14 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     @Transactional
     public Tournament addCancha(String tournamentId, CanchaTipo tipo, String nombre) {
-        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+        TournamentEntity entity = tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
         if (entity.getStatus() == TournamentStatus.COMPLETED)
             throw new TournamentFinalizedException(tournamentId);
 
         CanchaEntity c = new CanchaEntity();
-        c.setId(IdGeneratorUtil.generateId());
+        c.setId(UUID.randomUUID());
         c.setTipo(tipo.name());
         c.setNombre(nombre != null && !nombre.isBlank() ? nombre : tipo.getDisplayName());
         c.setFotoUrl(tipo.getFotoUrl());
@@ -187,14 +187,14 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     @Transactional
     public Tournament addHorario(String tournamentId, LocalDate fecha, String descripcion) {
-        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+        TournamentEntity entity = tournamentRepository.findById(UUID.fromString(tournamentId))
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
         if (entity.getStatus() == TournamentStatus.COMPLETED)
             throw new TournamentFinalizedException(tournamentId);
 
         HorarioEntity h = new HorarioEntity();
-        h.setId(IdGeneratorUtil.generateId());
+        h.setId(UUID.randomUUID());
         h.setFecha(fecha);
         h.setDescripcion(descripcion);
         h.setTournament(entity);

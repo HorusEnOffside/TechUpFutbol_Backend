@@ -1,7 +1,6 @@
 package com.escuela.techcup.controller;
 
 import com.escuela.techcup.controller.dto.CreateSancionDTO;
-import com.escuela.techcup.core.util.IdGeneratorUtil;
 import com.escuela.techcup.persistence.entity.tournament.SancionEntity;
 import com.escuela.techcup.persistence.repository.tournament.SancionRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/sanciones")
@@ -34,9 +34,9 @@ public class SancionController {
         log.info("Request to create sancion. tipo={}, entidadId={}", dto.getTipo(), dto.getEntidadId());
 
         SancionEntity sancion = new SancionEntity();
-        sancion.setId(IdGeneratorUtil.generateId());
+        sancion.setId(UUID.randomUUID());
         sancion.setTipo(dto.getTipo());
-        sancion.setEntidadId(dto.getEntidadId());
+        sancion.setEntidadId(UUID.fromString(dto.getEntidadId()));
         sancion.setEntidadNombre(dto.getEntidadNombre());
         sancion.setMotivo(dto.getMotivo());
         sancion.setFecha(dto.getFecha());
@@ -44,6 +44,6 @@ public class SancionController {
         sancionRepository.save(sancion);
         log.info("Sancion created. id={}", sancion.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", sancion.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", sancion.getId().toString()));
     }
 }

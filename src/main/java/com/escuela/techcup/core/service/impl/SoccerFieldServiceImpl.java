@@ -1,6 +1,7 @@
 package com.escuela.techcup.core.service.impl;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
+import java.util.UUID;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class SoccerFieldServiceImpl implements SoccerFieldService {
     @Transactional(readOnly = true)
     public SoccerField getSoccerFieldById(String id) {
         log.info("Fetching soccer field with ID: {}", id);
-        SoccerFieldEntity entity = soccerFieldRepository.findById(id).orElse(null);
+        SoccerFieldEntity entity = soccerFieldRepository.findById(UUID.fromString(id)).orElse(null);
         if (entity == null) {
             log.warn("Soccer field not found with ID: {}", id);
             throw new SoccerFieldNotFoundException(id);

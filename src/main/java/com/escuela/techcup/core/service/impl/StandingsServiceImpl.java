@@ -3,7 +3,6 @@ package com.escuela.techcup.core.service.impl;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.MatchEvent;
-import com.escuela.techcup.core.model.Card;
 import com.escuela.techcup.core.service.StandingsService;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class StandingsServiceImpl implements StandingsService {
@@ -40,13 +40,14 @@ public class StandingsServiceImpl implements StandingsService {
 
     @Override
     public List<Team> getStandingsTable(String tournamentId) {
+        UUID tournamentUUID = UUID.fromString(tournamentId);
         var equipos = teamRepository.findAll().stream()
-                .filter(t -> t.getTournament() != null && t.getTournament().getId().equals(tournamentId))
+                .filter(t -> t.getTournament() != null && tournamentUUID.equals(t.getTournament().getId()))
                 .toList();
 
 
         var partidos = matchRepository.findAll().stream()
-                .filter(m -> m.getTournament() != null && m.getTournament().getId().equals(tournamentId))
+                .filter(m -> m.getTournament() != null && tournamentUUID.equals(m.getTournament().getId()))
                 .toList();
 
 
@@ -55,7 +56,7 @@ public class StandingsServiceImpl implements StandingsService {
             int getDG() { return gf - gc; }
             int getPts() { return pg * 3 + pe; }
         }
-        var statsMap = new java.util.HashMap<String, Stats>();
+        var statsMap = new java.util.HashMap<UUID, Stats>();
         for (var equipo : equipos) {
             statsMap.put(equipo.getId(), new Stats());
         }
@@ -98,8 +99,9 @@ public class StandingsServiceImpl implements StandingsService {
 
 
         result.sort((t1, t2) -> {
-            Stats s1 = statsMap.get(t1.getId());
-            Stats s2 = statsMap.get(t2.getId());
+            Stats s1 = statsMap.get(UUID.fromString(t1.getId()));
+            Stats s2 = statsMap.get(UUID.fromString(t2.getId()));
+            if (s1 == null || s2 == null) return 0;
             int cmp = Integer.compare(s2.getPts(), s1.getPts());
             if (cmp == 0) {
                 cmp = Integer.compare(s2.getDG(), s1.getDG());
@@ -111,18 +113,19 @@ public class StandingsServiceImpl implements StandingsService {
 
     @Override
     public List<Player> getTopScorers(String tournamentId) {
+        UUID tournamentUUID = UUID.fromString(tournamentId);
         var partidos = matchRepository.findAll().stream()
-                .filter(m -> m.getTournament() != null && m.getTournament().getId().equals(tournamentId))
+                .filter(m -> m.getTournament() != null && tournamentUUID.equals(m.getTournament().getId()))
                 .toList();
         var goles = new java.util.ArrayList<com.escuela.techcup.persistence.entity.tournament.GoalEntity>();
         for (var partido : partidos) {
             goles.addAll(partido.getGoals());
         }
-        var golesPorJugador = new java.util.HashMap<String, Integer>();
-        var jugadorEntidadMap = new java.util.HashMap<String, com.escuela.techcup.persistence.entity.users.PlayerEntity>();
+        var golesPorJugador = new java.util.HashMap<UUID, Integer>();
+        var jugadorEntidadMap = new java.util.HashMap<UUID, com.escuela.techcup.persistence.entity.users.PlayerEntity>();
         for (var gol : goles) {
             if (gol.getPlayer() == null) continue;
-            String playerId = gol.getPlayer().getId();
+            UUID playerId = gol.getPlayer().getId();
             golesPorJugador.put(playerId, golesPorJugador.getOrDefault(playerId, 0) + 1);
             jugadorEntidadMap.put(playerId, gol.getPlayer());
         }
@@ -132,7 +135,10 @@ public class StandingsServiceImpl implements StandingsService {
             lista.add(player);
         }
         lista.sort((p1, p2) -> {
-            int cmp = Integer.compare(golesPorJugador.get(p2.getUserId()), golesPorJugador.get(p1.getUserId()));
+            int cmp = Integer.compare(
+                golesPorJugador.get(UUID.fromString(p2.getUserId())),
+                golesPorJugador.get(UUID.fromString(p1.getUserId()))
+            );
             if (cmp == 0) {
                 cmp = p1.getName().compareToIgnoreCase(p2.getName());
             }
@@ -144,12 +150,14 @@ public class StandingsServiceImpl implements StandingsService {
     @Override
     public List<MatchEvent> getCardsHistory(String tournamentId, String playerOrTeamId) {
         List<com.escuela.techcup.persistence.entity.tournament.CardEntity> cardEntities;
+        UUID tournamentUUID = UUID.fromString(tournamentId);
         if (playerOrTeamId == null || playerOrTeamId.isEmpty()) {
-            cardEntities = cardRepository.findByPlayer_Team_Tournament_Id(tournamentId);
+            cardEntities = cardRepository.findByPlayer_Team_Tournament_Id(tournamentUUID);
         } else {
-            cardEntities = cardRepository.findByPlayer_Team_Tournament_IdAndPlayer_Id(tournamentId, playerOrTeamId);
+            UUID playerOrTeamUUID = UUID.fromString(playerOrTeamId);
+            cardEntities = cardRepository.findByPlayer_Team_Tournament_IdAndPlayer_Id(tournamentUUID, playerOrTeamUUID);
             if (cardEntities.isEmpty()) {
-                cardEntities = cardRepository.findByPlayer_Team_Tournament_IdAndPlayer_Team_Id(tournamentId, playerOrTeamId);
+                cardEntities = cardRepository.findByPlayer_Team_Tournament_IdAndPlayer_Team_Id(tournamentUUID, playerOrTeamUUID);
             }
         }
         return cardEntities.stream().map(CardMapper::toModel).map(c -> (MatchEvent) c).toList();

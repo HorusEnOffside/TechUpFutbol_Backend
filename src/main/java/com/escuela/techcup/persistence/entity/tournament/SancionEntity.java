@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.tournament;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,14 +17,14 @@ public class SancionEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     /** "equipo" o "jugador" */
     @Column(name = "tipo", nullable = false, length = 20)
     private String tipo;
 
     @Column(name = "entidad_id", nullable = false, columnDefinition = "uuid")
-    private String entidadId;
+    private UUID entidadId;
 
     @Column(name = "entidad_nombre", nullable = false, length = 200)
     private String entidadNombre;

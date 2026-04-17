@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional(readOnly = true)
     public Optional<Player> getPlayerByUserId(String userId) {
         if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
-        return playerRepository.findByUserId(userId).map(PlayerMapper::toModel);
+        return playerRepository.findByUserId(UUID.fromString(userId)).map(PlayerMapper::toModel);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         if (filters.getPlayerId() != null && !filters.getPlayerId().isBlank()) {
-            if (!player.getId().equalsIgnoreCase(filters.getPlayerId().trim())) return false;
+            if (!player.getId().toString().equalsIgnoreCase(filters.getPlayerId().trim())) return false;
         }
 
         if (filters.getSemester() != null) {
@@ -209,7 +210,7 @@ public class PlayerServiceImpl implements PlayerService {
     private PlayerSearchResultDTO toSearchResultDTO(PlayerEntity player) {
         String teamName = player.getTeam() != null ? player.getTeam().getName() : null;
         return new PlayerSearchResultDTO(
-                player.getId(),
+                player.getId() != null ? player.getId().toString() : null,
                 player.getUser().getName(),
                 player.getUser().getMail(),
                 player.getPosition(),
@@ -225,7 +226,7 @@ public class PlayerServiceImpl implements PlayerService {
     private Player savePlayerProfile(UserPlayer createdUser,
                                      com.escuela.techcup.core.model.enums.Position position,
                                      int dorsalNumber) {
-        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(createdUser.getId())
+        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(UUID.fromString(createdUser.getId()))
                 .orElseThrow(() -> new InvalidInputException("User player not found after creation"));
 
         if (playerRepository.existsByUserId(userPlayerEntity.getId()))
@@ -242,7 +243,7 @@ public class PlayerServiceImpl implements PlayerService {
     public Player updateStatus(String userId, PlayerStatus status) {
         if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
         if (status == null) throw new InvalidInputException("status is required");
-        PlayerEntity entity = playerRepository.findByUserId(userId)
+        PlayerEntity entity = playerRepository.findByUserId(UUID.fromString(userId))
                 .orElseThrow(() -> new InvalidInputException("Player not found for userId: " + userId));
         entity.setStatus(status);
         playerRepository.save(entity);
@@ -253,7 +254,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     public Player updateProfile(String userId, PlayerUpdateDTO dto) {
         if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
-        PlayerEntity entity = playerRepository.findByUserId(userId)
+        PlayerEntity entity = playerRepository.findByUserId(UUID.fromString(userId))
                 .orElseThrow(() -> new InvalidInputException("Player not found for userId: " + userId));
 
         if (dto.getPosition() != null) entity.setPosition(dto.getPosition());
@@ -264,6 +265,32 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         playerRepository.save(entity);
+        return PlayerMapper.toModel(entity);
+    }
+
+    @Override
+    @Transactional
+    public Player linkSportsProfile(com.escuela.techcup.controller.dto.LinkSportsProfileDTO dto) {
+        if (dto == null) throw new InvalidInputException(PLAYER_DTO_IS_REQUIRED);
+        if (dto.getUserId() == null || dto.getUserId().isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
+
+        UUID uid = UUID.fromString(dto.getUserId());
+
+        if (playerRepository.existsByUserId(uid))
+            throw new InvalidInputException("A sports profile already exists for that user");
+
+        UserPlayerEntity userPlayerEntity = userPlayerRepository.findById(uid)
+                .orElseThrow(() -> new InvalidInputException("User not found or not eligible for a sports profile"));
+
+        PlayerEntity entity = new PlayerEntity();
+        entity.setId(uid);
+        entity.setUser(userPlayerEntity);
+        entity.setPosition(dto.getPosition());
+        entity.setDorsalNumber(dto.getDorsalNumber());
+        entity.setStatus(com.escuela.techcup.core.model.enums.PlayerStatus.AVAILABLE);
+        playerRepository.save(entity);
+
+        log.info("Sports profile linked. userId={}", uid);
         return PlayerMapper.toModel(entity);
     }
 

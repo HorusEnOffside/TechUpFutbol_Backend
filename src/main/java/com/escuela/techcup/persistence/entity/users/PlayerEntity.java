@@ -1,5 +1,7 @@
 package com.escuela.techcup.persistence.entity.users;
 
+import java.util.UUID;
+
 import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
@@ -22,7 +24,7 @@ public class PlayerEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "uuid")
-    private String id;
+    private UUID id;
 
     // 1-1: un user_player solo puede tener 1 perfil deportivo
     @OneToOne(optional = false, fetch = FetchType.LAZY)

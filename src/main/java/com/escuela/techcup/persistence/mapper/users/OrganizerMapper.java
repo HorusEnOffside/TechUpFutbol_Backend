@@ -2,6 +2,7 @@ package com.escuela.techcup.persistence.mapper.users;
 
 import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
 import com.escuela.techcup.core.model.Organizer;
+import java.util.UUID;
 
 public class OrganizerMapper {
 
@@ -11,7 +12,7 @@ public class OrganizerMapper {
     public static Organizer toModel(OrganizerEntity entity) {
         if (entity == null) return null;
         Organizer organizer = new Organizer(
-            entity.getId(),
+            entity.getId().toString(),
             entity.getName(),
             entity.getMail(),
             entity.getDateOfBirth(),
@@ -27,7 +28,7 @@ public class OrganizerMapper {
     public static OrganizerEntity toEntity(Organizer model) {
         if (model == null) return null;
         OrganizerEntity entity = new OrganizerEntity();
-        entity.setId(model.getId());
+        entity.setId(UUID.fromString(model.getId()));
         entity.setName(model.getName());
         entity.setMail(model.getMail());
         entity.setDateOfBirth(model.getDateOfBirth());
