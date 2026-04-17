@@ -1,10 +1,12 @@
 package com.escuela.techcup.controller.mapper;
 
 import com.escuela.techcup.controller.dto.MatchResponseDTO;
+import com.escuela.techcup.controller.dto.MatchResponseDTO.CardResponseDTO;
 import com.escuela.techcup.controller.dto.MatchResponseDTO.GoalResponseDTO;
 import com.escuela.techcup.controller.dto.MatchResponseDTO.RefereeSummaryDTO;
 import com.escuela.techcup.controller.dto.MatchResponseDTO.SoccerFieldResponseDTO;
 import com.escuela.techcup.controller.dto.MatchResponseDTO.TeamSummaryDTO;
+import com.escuela.techcup.core.model.Card;
 import com.escuela.techcup.core.model.Goal;
 import com.escuela.techcup.core.model.Match;
 
@@ -44,6 +46,7 @@ public class MatchResponseMapper {
         }
 
         List<GoalResponseDTO> goals = Collections.emptyList();
+        List<CardResponseDTO> cards = Collections.emptyList();
         if (match.getEvents() != null) {
             goals = match.getEvents().stream()
                     .filter(e -> e instanceof Goal)
@@ -54,16 +57,28 @@ public class MatchResponseMapper {
                         return new GoalResponseDTO(g.getMinute(), playerName, g.getDescription());
                     })
                     .toList();
+            cards = match.getEvents().stream()
+                    .filter(e -> e instanceof Card)
+                    .map(e -> {
+                        Card c = (Card) e;
+                        String playerName = c.getPlayer() != null && c.getPlayer().getUserPlayer() != null
+                            ? c.getPlayer().getUserPlayer().getName() : null;
+                        return new CardResponseDTO(c.getMinute(), playerName, c.getType().name(), c.getDescription());
+                    })
+                    .toList();
         }
 
         return new MatchResponseDTO(
                 match.getId(),
                 match.getDateTime(),
                 match.getStatus(),
+                match.getLocalScore(),
+                match.getVisitorScore(),
                 teamA,
                 teamB,
                 referee,
                 soccerField,
-                goals);
+                goals,
+                cards);
     }
 }

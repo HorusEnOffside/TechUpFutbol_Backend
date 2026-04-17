@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.escuela.techcup.controller.dto.*;
 import com.escuela.techcup.core.model.Player;
+import com.escuela.techcup.core.model.enums.PlayerStatus;
 
 public interface PlayerService {
 
@@ -19,4 +20,6 @@ public interface PlayerService {
     Optional<Player> findByNameContaining(String name);
 
     List<PlayerSearchResultDTO> searchPlayers(PlayerSearchDTO filters);
+
+    Player updateStatus(String userId, PlayerStatus status);
 }

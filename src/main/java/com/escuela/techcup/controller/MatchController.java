@@ -10,13 +10,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import com.escuela.techcup.controller.dto.MatchResponseDTO;
+import com.escuela.techcup.controller.dto.MatchResultDTO;
 import com.escuela.techcup.controller.mapper.MatchResponseMapper;
 import com.escuela.techcup.core.service.MatchService;
+import com.escuela.techcup.persistence.entity.tournament.CardEntity;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -95,6 +98,27 @@ public class MatchController {
 			@RequestParam String description) {
 		log.info("Received request to add goal event to match. matchId={}, playerId={}, minute={}, description={}", matchId, playerId, minute, description);
 		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.addMatchEventGoal(matchId, playerId, minute, description)));
+	}
+
+	@PostMapping("/{matchId}/events/card")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('REFEREE')")
+	public ResponseEntity<MatchResponseDTO> addMatchEventCard(
+			@PathVariable String matchId,
+			@RequestParam String playerId,
+			@RequestParam int minute,
+			@RequestParam CardEntity.CardType type,
+			@RequestParam(required = false) String description) {
+		log.info("Received request to add card event to match. matchId={}, playerId={}, minute={}, type={}", matchId, playerId, minute, type);
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.addMatchEventCard(matchId, playerId, minute, type, description)));
+	}
+
+	@PostMapping("/{matchId}/result")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('REFEREE')")
+	public ResponseEntity<MatchResponseDTO> finalizeMatch(
+			@PathVariable String matchId,
+			@RequestBody MatchResultDTO result) {
+		log.info("Received request to finalize match. matchId={}, localScore={}, visitorScore={}", matchId, result.getLocalScore(), result.getVisitorScore());
+		return ResponseEntity.ok(MatchResponseMapper.toDTO(matchService.finalizeMatch(matchId, result)));
 	}
 
 }

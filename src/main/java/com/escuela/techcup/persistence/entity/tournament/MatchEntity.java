@@ -50,9 +50,20 @@ public class MatchEntity {
     @Column(name = "status", nullable = false)
     private String status = "PENDING";
 
+    @Column(name = "local_score", nullable = false)
+    private int localScore = 0;
+
+    @Column(name = "visitor_score", nullable = false)
+    private int visitorScore = 0;
+
     public void addGoal(GoalEntity goal) {
         goals.add(goal);
         goal.setMatch(this);
+    }
+
+    public void addCard(CardEntity card) {
+        cards.add(card);
+        card.setMatch(this);
     }
 
 }

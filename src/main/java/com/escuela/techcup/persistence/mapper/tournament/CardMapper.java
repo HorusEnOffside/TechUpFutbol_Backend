@@ -17,5 +17,17 @@ public class CardMapper {
                 entity.getDescription()
         );
     }
+
+    public static CardEntity toEntity(Card card) {
+        if (card == null) return null;
+        CardEntity entity = new CardEntity();
+        entity.setMinute(card.getMinute());
+        entity.setType(CardEntity.CardType.valueOf(card.getType().name()));
+        entity.setDescription(card.getDescription());
+        if (card.getPlayer() != null) {
+            entity.setPlayer(PlayerMapper.toEntity(card.getPlayer()));
+        }
+        return entity;
+    }
 }
 

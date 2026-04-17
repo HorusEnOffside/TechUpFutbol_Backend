@@ -72,8 +72,8 @@ class CaptainTest {
 
     @Test
     void testDecoratorDelegaStatus() {
-        player.setStatus(PlayerStatus.IN_TEAM);
-        assertEquals(PlayerStatus.IN_TEAM, captain.getStatus());
+        player.setStatus(PlayerStatus.NOT_AVAILABLE);
+        assertEquals(PlayerStatus.NOT_AVAILABLE, captain.getStatus());
     }
 
     @Test
