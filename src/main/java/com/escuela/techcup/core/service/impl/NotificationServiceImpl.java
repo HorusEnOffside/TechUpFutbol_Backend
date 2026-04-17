@@ -1,6 +1,5 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.core.exception.NotificationNotFoundException;
 import com.escuela.techcup.core.model.Notification;
 import com.escuela.techcup.core.service.NotificationService;
 import com.escuela.techcup.persistence.entity.tournament.NotificationEntity;
@@ -26,11 +25,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<Notification> getNotifications(Long userId) {
         List<NotificationEntity> entities = notificationRepository.findByUserIdAndReadFalse(userId);
-
-        if (entities.isEmpty()) {
-            throw new NotificationNotFoundException(userId);
-        }
-
         return notificationMapper.toModelList(entities);
     }
 

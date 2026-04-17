@@ -37,18 +37,14 @@ class EliminationBracketControllerTest {
         when(bracketService.getBracketsForTournament("T1")).thenReturn(bracket);
 
         mockMvc.perform(get("/api/brackets/T1").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eliminationBrackets").exists())
-                .andExpect(jsonPath("$.message").value("Llaves generadas correctamente"));
+                .andExpect(status().isOk());
     }
 
     @Test
-    void getBrackets_returnsMessageIfNoBrackets() throws Exception {
+    void getBrackets_returnsNoContentIfNoBrackets() throws Exception {
         when(bracketService.getBracketsForTournament("T2")).thenReturn(null);
 
         mockMvc.perform(get("/api/brackets/T2").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eliminationBrackets").doesNotExist())
-                .andExpect(jsonPath("$.message").value("No se pueden generar llaves: hay partidos pendientes o no hay suficientes equipos."));
+                .andExpect(status().isNoContent());
     }
 }

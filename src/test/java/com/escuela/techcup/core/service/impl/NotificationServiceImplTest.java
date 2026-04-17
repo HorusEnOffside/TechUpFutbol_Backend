@@ -114,39 +114,37 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void shouldThrowNotificationNotFoundExceptionWhenNoNotifications() {
+    void sinNotificaciones_devuelveLista() {
         when(notificationRepository.findByUserIdAndReadFalse(10L))
                 .thenReturn(Collections.emptyList());
+        when(notificationMapper.toModelList(any())).thenReturn(Collections.emptyList());
 
-        NotificationNotFoundException exception = assertThrows(
-                NotificationNotFoundException.class,
-                () -> notificationService.getNotifications(10L)
-        );
+        List<Notification> result = notificationService.getNotifications(10L);
 
-        assertTrue(exception.getMessage().contains("10"));
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldThrowExceptionForNonExistentUser() {
+    void usuarioSinNotificaciones_devuelveListaVacia() {
         when(notificationRepository.findByUserIdAndReadFalse(999L))
                 .thenReturn(Collections.emptyList());
+        when(notificationMapper.toModelList(any())).thenReturn(Collections.emptyList());
 
-        assertThrows(
-                NotificationNotFoundException.class,
-                () -> notificationService.getNotifications(999L)
-        );
+        List<Notification> result = notificationService.getNotifications(999L);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldNotCallMapperWhenRepositoryReturnsEmpty() {
+    void repositorioVacio_llamaMapperConListaVacia() {
         when(notificationRepository.findByUserIdAndReadFalse(10L))
                 .thenReturn(Collections.emptyList());
+        when(notificationMapper.toModelList(any())).thenReturn(Collections.emptyList());
 
-        assertThrows(NotificationNotFoundException.class,
-                () -> notificationService.getNotifications(10L));
+        notificationService.getNotifications(10L);
 
-        verify(notificationMapper, never()).toModelList(any());
+        verify(notificationMapper).toModelList(Collections.emptyList());
     }
 
 
