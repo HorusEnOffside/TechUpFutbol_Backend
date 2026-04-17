@@ -3,6 +3,7 @@ package com.escuela.techcup.core.service.impl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.escuela.techcup.core.exception.MatchNotFoundException;
+import com.escuela.techcup.core.exception.ScheduleConflictException;
 import com.escuela.techcup.core.exception.TeamNotFoundException;
 import com.escuela.techcup.core.exception.UserNotFoundException;
 import com.escuela.techcup.core.model.Goal;
@@ -82,9 +84,16 @@ public class MatchServiceImpl implements MatchService {
                 .orElseThrow(() -> new TeamNotFoundException(teamAId));
         TeamEntity teamB = teamRepository.findById(teamBId)
                 .orElseThrow(() -> new TeamNotFoundException(teamBId));
-        
-        
-        Match match = new Match(idGenerator(), date.atStartOfDay(), TeamMapper.toModel(teamA), TeamMapper.toModel(teamB));
+
+        LocalDateTime dateTime = date.atStartOfDay();
+
+        // RN: un equipo no puede jugar dos partidos a la misma hora
+        if (matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, teamAId, dateTime, teamAId)
+                || matchRepository.existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(dateTime, teamBId, dateTime, teamBId)) {
+            throw new ScheduleConflictException("One of the teams already has a match scheduled at that date and time");
+        }
+
+        Match match = new Match(idGenerator(), dateTime, TeamMapper.toModel(teamA), TeamMapper.toModel(teamB));
         MatchEntity matchEntity = MatchMapper.toEntity(match);
         matchRepository.save(matchEntity);
         return match;
@@ -110,6 +119,11 @@ public class MatchServiceImpl implements MatchService {
     public Match setSoccerField(String matchId, String soccerFieldId) {
         MatchEntity matchEntity = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
+
+        // RN: una cancha no puede tener dos partidos a la misma hora
+        if (matchRepository.existsByDateTimeAndSoccerFieldId(matchEntity.getDateTime(), soccerFieldId)) {
+            throw new ScheduleConflictException("The soccer field already has a match scheduled at that date and time");
+        }
 
         matchEntity.setSoccerField(SoccerFieldMapper.toEntity(SoccerFieldServiceImpl.getSoccerFieldById(soccerFieldId)));
         matchRepository.save(matchEntity);
