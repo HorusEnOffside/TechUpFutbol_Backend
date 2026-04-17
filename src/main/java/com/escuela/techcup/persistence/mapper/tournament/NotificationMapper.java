@@ -6,8 +6,9 @@ import com.escuela.techcup.core.model.Notification;
 import com.escuela.techcup.persistence.entity.tournament.NotificationEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
 public class NotificationMapper {
@@ -16,10 +17,25 @@ public class NotificationMapper {
         return Notification.builder()
                 .id(entity.getId())
                 .userId(entity.getUserId())
-                .sender(entity.getSender())
+                .type(entity.getType())
+                .title(entity.getTitle())
                 .description(entity.getDescription())
+                .relatedId(entity.getRelatedId())
                 .dateTime(entity.getDateTime())
                 .read(entity.isRead())
+                .build();
+    }
+
+    public Notification toModel(NotificationDTO dto) {
+        return Notification.builder()
+                .id(UUID.randomUUID())
+                .userId(dto.getUserId())
+                .type(dto.getType())
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .relatedId(dto.getRelatedId())
+                .dateTime(LocalDateTime.now())
+                .read(false)
                 .build();
     }
 
@@ -27,42 +43,32 @@ public class NotificationMapper {
         return NotificationEntity.builder()
                 .id(model.getId())
                 .userId(model.getUserId())
-                .sender(model.getSender())
+                .type(model.getType())
+                .title(model.getTitle())
                 .description(model.getDescription())
+                .relatedId(model.getRelatedId())
                 .dateTime(model.getDateTime())
                 .read(model.isRead())
-                .build();
-    }
-
-    public Notification toModel(NotificationDTO dto) {
-        return Notification.builder()
-                .userId(dto.getUserId())
-                .sender(dto.getSender())
-                .description(dto.getDescription())
-                .dateTime(dto.getDateTime())
-                .read(false)
                 .build();
     }
 
     public NotificationResponseDTO toResponseDTO(Notification model) {
         return NotificationResponseDTO.builder()
                 .id(model.getId())
-                .sender(model.getSender())
+                .type(model.getType())
+                .title(model.getTitle())
                 .description(model.getDescription())
+                .relatedId(model.getRelatedId())
                 .dateTime(model.getDateTime())
                 .read(model.isRead())
                 .build();
     }
 
-    public List<Notification> toModelList(List<NotificationEntity> entities) {
-        return entities.stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
+    public List<NotificationResponseDTO> toResponseDTOList(List<Notification> models) {
+        return models.stream().map(this::toResponseDTO).toList();
     }
 
-    public List<NotificationResponseDTO> toResponseDTOList(List<Notification> models) {
-        return models.stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+    public List<Notification> toModelList(List<NotificationEntity> entities) {
+        return entities.stream().map(this::toModel).toList();
     }
 }

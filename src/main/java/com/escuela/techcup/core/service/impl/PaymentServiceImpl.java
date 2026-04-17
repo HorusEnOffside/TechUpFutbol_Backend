@@ -4,12 +4,18 @@ import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.core.exception.InvalidImageException;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.TechcupException;
+import com.escuela.techcup.core.model.Notification;
 import com.escuela.techcup.core.model.Payment;
+import com.escuela.techcup.core.model.enums.NotificationType;
 import com.escuela.techcup.core.model.enums.PaymentStatus;
+import com.escuela.techcup.core.model.enums.UserRole;
+import com.escuela.techcup.core.service.NotificationService;
 import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.persistence.entity.payment.PaymentEntity;
+import com.escuela.techcup.persistence.entity.users.UserEntity;
 import com.escuela.techcup.persistence.mapper.payment.PaymentMapper;
 import com.escuela.techcup.persistence.repository.payment.PaymentRepository;
+import com.escuela.techcup.persistence.repository.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +37,8 @@ public class PaymentServiceImpl implements PaymentService {
     private static final String PAYMENT_NOT_FOUND = "Pago no encontrado con id: ";
 
     private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -40,6 +49,19 @@ public class PaymentServiceImpl implements PaymentService {
         }
         PaymentEntity entity = PaymentMapper.toEntity(paymentDTO, file);
         PaymentEntity savedEntity = paymentRepository.save(entity);
+
+        userRepository.findByRole(UserRole.ORGANIZER).forEach((UserEntity organizer) ->
+                notificationService.createNotification(Notification.builder()
+                        .id(UUID.randomUUID())
+                        .userId(organizer.getId())
+                        .type(NotificationType.PAYMENT_UPLOADED)
+                        .title("Nuevo comprobante de pago")
+                        .description("Se ha subido un comprobante de pago. Revisa los pagos pendientes.")
+                        .relatedId(savedEntity.getId())
+                        .dateTime(LocalDateTime.now())
+                        .read(false)
+                        .build()));
+
         return PaymentMapper.toModel(savedEntity);
     }
 

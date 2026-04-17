@@ -2,10 +2,12 @@ package com.escuela.techcup.core.service.impl;
 
 import java.awt.image.BufferedImage;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +26,12 @@ import com.escuela.techcup.controller.dto.TeacherPlayerDTO;
 import com.escuela.techcup.controller.dto.TeacherUserDTO;
 import com.escuela.techcup.controller.dto.UserPlayerDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
+import com.escuela.techcup.core.model.Notification;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.UserPlayer;
+import com.escuela.techcup.core.model.enums.NotificationType;
 import com.escuela.techcup.core.model.enums.PlayerStatus;
+import com.escuela.techcup.core.service.NotificationService;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.core.validator.PlayerValidator;
@@ -48,13 +53,16 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerRepository playerRepository;
     private final UserPlayerRepository userPlayerRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     public PlayerServiceImpl(PlayerRepository playerRepository,
                              UserPlayerRepository userPlayerRepository,
-                             UserService userService) {
+                             UserService userService,
+                             NotificationService notificationService) {
         this.playerRepository = playerRepository;
         this.userPlayerRepository = userPlayerRepository;
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     // ── Creación de perfiles deportivos ──────────────────────────────────
@@ -192,7 +200,7 @@ public class PlayerServiceImpl implements PlayerService {
         }
 
         if (filters.getSemester() != null) {
-            UserEntity user = player.getUser();
+            UserEntity user = (UserEntity) Hibernate.unproxy(player.getUser());
             if (!(user instanceof StudentEntity s)) return false;
             if (!filters.getSemester().equals(s.getSemester())) return false;
         }
@@ -235,7 +243,21 @@ public class PlayerServiceImpl implements PlayerService {
         Player player = new Player(createdUser, position, dorsalNumber);
         PlayerEntity entity = PlayerMapper.toEntity(player);
         playerRepository.save(entity);
+
+        sendWelcomeNotification(userPlayerEntity.getId());
         return player;
+    }
+
+    private void sendWelcomeNotification(UUID userId) {
+        notificationService.createNotification(Notification.builder()
+                .id(UUID.randomUUID())
+                .userId(userId)
+                .type(NotificationType.WELCOME)
+                .title("¡Bienvenido a TechUp Fútbol!")
+                .description("Tu perfil deportivo ha sido creado exitosamente. ¡Ya puedes unirte a un equipo!")
+                .dateTime(LocalDateTime.now())
+                .read(false)
+                .build());
     }
 
     @Override
@@ -289,6 +311,7 @@ public class PlayerServiceImpl implements PlayerService {
         entity.setDorsalNumber(dto.getDorsalNumber());
         entity.setStatus(com.escuela.techcup.core.model.enums.PlayerStatus.AVAILABLE);
         playerRepository.save(entity);
+        sendWelcomeNotification(uid);
 
         log.info("Sports profile linked. userId={}", uid);
         return PlayerMapper.toModel(entity);

@@ -3,14 +3,18 @@ package com.escuela.techcup.core.service.impl;
 import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.core.exception.*;
 import com.escuela.techcup.core.model.Invitation;
+import com.escuela.techcup.core.model.Notification;
 import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.Tournament;
+import org.hibernate.Hibernate;
 import com.escuela.techcup.core.model.enums.Career;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import com.escuela.techcup.core.model.enums.NotificationType;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.model.enums.UserRole;
+import com.escuela.techcup.core.service.NotificationService;
 import com.escuela.techcup.core.service.PaymentService;
 import com.escuela.techcup.core.service.TeamService;
 import com.escuela.techcup.core.util.DateUtil;
@@ -46,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -64,6 +69,7 @@ public class TeamServiceImpl implements TeamService {
     private final MatchRepository matchRepository;
     private final PaymentService paymentService;
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
 
     public TeamServiceImpl(
             TeamRepository teamRepository,
@@ -74,7 +80,8 @@ public class TeamServiceImpl implements TeamService {
             UserRepository userRepository,
             MatchRepository matchRepository,
             PaymentRepository paymentRepository,
-            PaymentService paymentService) {
+            PaymentService paymentService,
+            NotificationService notificationService) {
         this.teamRepository = teamRepository;
         this.teamPlayerRepository = teamPlayerRepository;
         this.playerRepository = playerRepository;
@@ -84,6 +91,7 @@ public class TeamServiceImpl implements TeamService {
         this.matchRepository = matchRepository;
         this.paymentService = paymentService;
         this.paymentRepository = paymentRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -165,6 +173,20 @@ public class TeamServiceImpl implements TeamService {
         invitation.setStatus(InvitationStatus.PENDING);
 
         invitationRepository.save(invitation);
+
+        notificationService.createNotification(Notification.builder()
+                .id(java.util.UUID.randomUUID())
+                .userId(player.getUser().getId())
+                .type(NotificationType.INVITATION)
+                .title("Invitación al equipo " + team.getName())
+                .description(message != null && !message.isBlank()
+                        ? message
+                        : "Has sido invitado a unirte al equipo " + team.getName() + ".")
+                .relatedId(team.getId())
+                .dateTime(LocalDateTime.now())
+                .read(false)
+                .build());
+
         log.info("Invitation sent. teamId={}, playerId={}", teamId, playerId);
     }
 
@@ -271,7 +293,7 @@ public class TeamServiceImpl implements TeamService {
 
         long engineeringCount = teamPlayers.stream()
                 .map(TeamPlayerEntity::getPlayer)
-                .map(PlayerEntity::getUser)
+                .map(p -> (com.escuela.techcup.persistence.entity.users.UserEntity) Hibernate.unproxy(p.getUser()))
                 .filter(user -> {
                     if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
                     else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
@@ -369,7 +391,7 @@ public class TeamServiceImpl implements TeamService {
     private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {
         long engineeringCount = teamPlayers.stream()
                 .map(TeamPlayerEntity::getPlayer)
-                .map(PlayerEntity::getUser)
+                .map(p -> (com.escuela.techcup.persistence.entity.users.UserEntity) Hibernate.unproxy(p.getUser()))
                 .filter(user -> {
                     if (user instanceof StudentEntity s) return isEngineeringCareer(s.getCareer());
                     else if (user instanceof TeacherEntity t) return isEngineeringCareer(t.getCareer());
