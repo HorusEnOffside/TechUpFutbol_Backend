@@ -15,11 +15,14 @@ public class MatchResponseDTO {
     private String id;
     private LocalDateTime dateTime;
     private String status;
+    private int localScore;
+    private int visitorScore;
     private TeamSummaryDTO teamA;
     private TeamSummaryDTO teamB;
     private RefereeSummaryDTO referee;
     private SoccerFieldResponseDTO soccerField;
     private List<GoalResponseDTO> goals;
+    private List<CardResponseDTO> cards;
 
     @Data
     @NoArgsConstructor
@@ -55,6 +58,16 @@ public class MatchResponseDTO {
     public static class GoalResponseDTO {
         private int minute;
         private String playerName;
+        private String description;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CardResponseDTO {
+        private int minute;
+        private String playerName;
+        private String type;
         private String description;
     }
 }

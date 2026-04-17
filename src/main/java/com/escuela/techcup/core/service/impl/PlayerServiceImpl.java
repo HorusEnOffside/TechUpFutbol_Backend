@@ -236,6 +236,18 @@ public class PlayerServiceImpl implements PlayerService {
         return player;
     }
 
+    @Override
+    @Transactional
+    public Player updateStatus(String userId, PlayerStatus status) {
+        if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
+        if (status == null) throw new InvalidInputException("status is required");
+        PlayerEntity entity = playerRepository.findByUserId(userId)
+                .orElseThrow(() -> new InvalidInputException("Player not found for userId: " + userId));
+        entity.setStatus(status);
+        playerRepository.save(entity);
+        return PlayerMapper.toModel(entity);
+    }
+
     private void validatePlayerMailUnique(String mail) {
         if (mail == null || mail.isBlank()) throw new InvalidInputException("mail is required");
         if (userPlayerRepository.existsByMailIgnoreCase(mail))

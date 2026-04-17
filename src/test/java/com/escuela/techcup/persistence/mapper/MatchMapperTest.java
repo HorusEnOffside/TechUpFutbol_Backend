@@ -201,13 +201,14 @@ class MatchMapperTest {
         }
 
         @Test
-        void whenEntityHasNullGoals_thenModelEventsIsNull() {
+        void whenEntityHasNullGoals_thenModelEventsIsEmpty() {
             MatchEntity entity = buildMinimalMatchEntity();
             entity.setGoals(null);
 
             Match result = MatchMapper.toModel(entity);
 
-            assertNull(result.getEvents());
+            assertNotNull(result.getEvents());
+            assertTrue(result.getEvents().isEmpty());
         }
 
         @Test

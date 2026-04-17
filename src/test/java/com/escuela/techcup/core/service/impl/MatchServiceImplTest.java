@@ -1,5 +1,7 @@
 package com.escuela.techcup.core.service.impl;
 
+import com.escuela.techcup.controller.dto.MatchResultDTO;
+import com.escuela.techcup.controller.dto.PlayerMatchStatsDTO;
 import com.escuela.techcup.core.exception.MatchNotFoundException;
 import com.escuela.techcup.core.exception.TeamNotFoundException;
 import com.escuela.techcup.core.exception.UserNotFoundException;
@@ -12,11 +14,14 @@ import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.service.SoccerFieldService;
+import com.escuela.techcup.persistence.entity.tournament.CardEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
+import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.RefereeEntity;
 import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
+import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.RefereeRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +59,9 @@ class MatchServiceImplTest {
 
     @Mock
     private PlayerService playerService;
+
+    @Mock
+    private PlayerRepository playerRepository;
 
     @InjectMocks
     private MatchServiceImpl matchService;
@@ -282,11 +290,102 @@ class MatchServiceImplTest {
 
 
 
+    @Nested
+    class AddMatchEventCard {
+
+        @Test
+        void cuandoPartidoYJugadorExisten_agregaTarjeta() {
+            PlayerEntity playerEntity = buildPlayerEntity("player-1");
+
+            when(matchRepository.findById("match-1")).thenReturn(Optional.of(matchEntity));
+            when(playerRepository.findByUserId("player-1")).thenReturn(Optional.of(playerEntity));
+            when(matchRepository.save(any())).thenReturn(matchEntity);
+
+            Match result = matchService.addMatchEventCard("match-1", "player-1", 55, CardEntity.CardType.YELLOW, "Falta grave");
+
+            assertNotNull(result);
+            assertEquals(1, matchEntity.getCards().size());
+            assertEquals(CardEntity.CardType.YELLOW, matchEntity.getCards().get(0).getType());
+            verify(matchRepository).save(matchEntity);
+        }
+
+        @Test
+        void cuandoPartidoNoExiste_lanzaExcepcion() {
+            when(matchRepository.findById("nope")).thenReturn(Optional.empty());
+
+            assertThrows(MatchNotFoundException.class,
+                    () -> matchService.addMatchEventCard("nope", "p1", 10, CardEntity.CardType.RED, "desc"));
+        }
+
+        @Test
+        void cuandoJugadorNoExiste_lanzaExcepcion() {
+            when(matchRepository.findById("match-1")).thenReturn(Optional.of(matchEntity));
+            when(playerRepository.findByUserId("ghost")).thenReturn(Optional.empty());
+
+            assertThrows(UserNotFoundException.class,
+                    () -> matchService.addMatchEventCard("match-1", "ghost", 10, CardEntity.CardType.YELLOW, "desc"));
+
+            verify(matchRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    class FinalizeMatch {
+
+        @Test
+        void conResultadoCorrecto_guardaMarcadorYFinaliza() {
+            PlayerEntity playerEntity = buildPlayerEntity("p1");
+            when(matchRepository.findById("match-1")).thenReturn(Optional.of(matchEntity));
+            when(playerRepository.findByUserId("p1")).thenReturn(Optional.of(playerEntity));
+            when(matchRepository.save(any())).thenReturn(matchEntity);
+
+            PlayerMatchStatsDTO stats = new PlayerMatchStatsDTO("p1", 2, 1, 0);
+            MatchResultDTO result = new MatchResultDTO(3, 1, List.of(stats));
+
+            Match match = matchService.finalizeMatch("match-1", result);
+
+            assertEquals("FINISHED", matchEntity.getStatus());
+            assertEquals(3, matchEntity.getLocalScore());
+            assertEquals(1, matchEntity.getVisitorScore());
+            assertNotNull(match);
+        }
+
+        @Test
+        void sinStats_soloActualizaMarcador() {
+            when(matchRepository.findById("match-1")).thenReturn(Optional.of(matchEntity));
+            when(matchRepository.save(any())).thenReturn(matchEntity);
+
+            MatchResultDTO result = new MatchResultDTO(0, 0, List.of());
+
+            matchService.finalizeMatch("match-1", result);
+
+            assertEquals("FINISHED", matchEntity.getStatus());
+            assertTrue(matchEntity.getGoals().isEmpty());
+        }
+
+        @Test
+        void cuandoPartidoNoExiste_lanzaExcepcion() {
+            when(matchRepository.findById("nope")).thenReturn(Optional.empty());
+
+            assertThrows(MatchNotFoundException.class,
+                    () -> matchService.finalizeMatch("nope", new MatchResultDTO(1, 0, List.of())));
+        }
+    }
+
     private TeamEntity buildTeamEntity(String id, String name) {
         TeamEntity entity = new TeamEntity();
         entity.setId(id);
         entity.setName(name);
         entity.setFormation(Formation.FORMATION_4_4_2);
+        return entity;
+    }
+
+    private PlayerEntity buildPlayerEntity(String userId) {
+        PlayerEntity entity = new PlayerEntity();
+        entity.setId(userId);
+        entity.setPosition(Position.FORWARD);
+        entity.setDorsalNumber(9);
+        entity.setStatus(PlayerStatus.AVAILABLE);
         return entity;
     }
 

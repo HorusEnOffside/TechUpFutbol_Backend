@@ -400,6 +400,58 @@ class PlayerServiceImplTest {
         }
     }
 
+    // ── UpdateStatus ─────────────────────────────────────────────────────
+
+    @Nested
+    class UpdateStatus {
+
+        @Test
+        void cuandoJugadorExiste_actualizaEstado() {
+            PlayerEntity entity = buildPlayerEntity("user-1", Position.FORWARD, 9);
+            when(playerRepository.findByUserId("user-1")).thenReturn(Optional.of(entity));
+            when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            Player result = playerService.updateStatus("user-1", PlayerStatus.INJURED);
+
+            assertNotNull(result);
+            assertEquals(PlayerStatus.INJURED, entity.getStatus());
+            verify(playerRepository).save(entity);
+        }
+
+        @Test
+        void puedeCambiarANoDisponible() {
+            PlayerEntity entity = buildPlayerEntity("user-2", Position.MIDFIELDER, 8);
+            when(playerRepository.findByUserId("user-2")).thenReturn(Optional.of(entity));
+            when(playerRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            playerService.updateStatus("user-2", PlayerStatus.NOT_AVAILABLE);
+
+            assertEquals(PlayerStatus.NOT_AVAILABLE, entity.getStatus());
+        }
+
+        @Test
+        void cuandoJugadorNoExiste_lanzaExcepcion() {
+            when(playerRepository.findByUserId("nobody")).thenReturn(Optional.empty());
+
+            assertThrows(com.escuela.techcup.core.exception.InvalidInputException.class,
+                    () -> playerService.updateStatus("nobody", PlayerStatus.AVAILABLE));
+
+            verify(playerRepository, never()).save(any());
+        }
+
+        @Test
+        void cuandoUserIdEsNulo_lanzaExcepcion() {
+            assertThrows(com.escuela.techcup.core.exception.InvalidInputException.class,
+                    () -> playerService.updateStatus(null, PlayerStatus.AVAILABLE));
+        }
+
+        @Test
+        void cuandoStatusEsNulo_lanzaExcepcion() {
+            assertThrows(com.escuela.techcup.core.exception.InvalidInputException.class,
+                    () -> playerService.updateStatus("user-1", null));
+        }
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────
 
     private PlayerEntity buildPlayerEntity(String userId, Position position, int dorsal) {
