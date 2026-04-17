@@ -17,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
+import com.escuela.techcup.controller.dto.PlayerUpdateDTO;
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerResponseDTO;
@@ -174,10 +177,11 @@ public class PlayerController {
 	@GetMapping("/{userId}")
 	public ResponseEntity<PlayerResponseDTO> getPlayerByUserId(@PathVariable String userId) {
 		log.info("Request received to get player by userId={}", userId);
-		PlayerResponseDTO player = playerService.getPlayerByUserId(userId)
-				.map(PlayerMapper::toResponseDTO)
-				.orElseThrow(() -> new TechcupException("Player not found", HttpStatus.NOT_FOUND));
-		return ResponseEntity.ok(player);
+		return ResponseEntity.ok(
+				playerService.getPlayerByUserId(userId)
+						.map(PlayerMapper::toResponseDTO)
+						.orElse(null)
+		);
 	}
 
 	// ── RF-15: Búsqueda de jugadores ─────────────────────────────────────
@@ -208,6 +212,17 @@ public class PlayerController {
 		filters.setPlayerId(playerId);
 
 		return ResponseEntity.ok(playerService.searchPlayers(filters));
+	}
+
+	// ── Actualizar perfil deportivo ──────────────────────────────────────
+
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/{userId}")
+	public ResponseEntity<PlayerResponseDTO> updateProfile(
+			@PathVariable String userId,
+			@RequestBody PlayerUpdateDTO dto) {
+		log.info("Request to update player profile. userId={}", userId);
+		return ResponseEntity.ok(PlayerMapper.toResponseDTO(playerService.updateProfile(userId, dto)));
 	}
 
 	// ── RF-04: Actualizar estado del jugador ─────────────────────────────

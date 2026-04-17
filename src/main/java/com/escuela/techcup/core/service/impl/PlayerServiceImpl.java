@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
+import com.escuela.techcup.controller.dto.PlayerUpdateDTO;
 import com.escuela.techcup.controller.dto.GraduateUserDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerSearchDTO;
@@ -244,6 +245,24 @@ public class PlayerServiceImpl implements PlayerService {
         PlayerEntity entity = playerRepository.findByUserId(userId)
                 .orElseThrow(() -> new InvalidInputException("Player not found for userId: " + userId));
         entity.setStatus(status);
+        playerRepository.save(entity);
+        return PlayerMapper.toModel(entity);
+    }
+
+    @Override
+    @Transactional
+    public Player updateProfile(String userId, PlayerUpdateDTO dto) {
+        if (userId == null || userId.isBlank()) throw new InvalidInputException(USER_ID_IS_REQUIRED);
+        PlayerEntity entity = playerRepository.findByUserId(userId)
+                .orElseThrow(() -> new InvalidInputException("Player not found for userId: " + userId));
+
+        if (dto.getPosition() != null) entity.setPosition(dto.getPosition());
+        if (dto.getDorsalNumber() != null) entity.setDorsalNumber(dto.getDorsalNumber());
+
+        if (dto.getSemester() != null && entity.getUser() instanceof StudentEntity student) {
+            student.setSemester(dto.getSemester());
+        }
+
         playerRepository.save(entity);
         return PlayerMapper.toModel(entity);
     }

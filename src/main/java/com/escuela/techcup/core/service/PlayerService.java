@@ -22,4 +22,6 @@ public interface PlayerService {
     List<PlayerSearchResultDTO> searchPlayers(PlayerSearchDTO filters);
 
     Player updateStatus(String userId, PlayerStatus status);
+
+    Player updateProfile(String userId, PlayerUpdateDTO dto);
 }

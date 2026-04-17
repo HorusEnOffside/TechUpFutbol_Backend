@@ -51,12 +51,12 @@ public class TeamController {
     }
 
     @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE})
     public ResponseEntity<Team> createTeam(
             @RequestParam String name,
             @RequestParam String uniformColors,
             @RequestParam String captainUserId,
-            @RequestPart(value = "logo", required = false) MultipartFile logo
+            @RequestParam(value = "logo", required = false) MultipartFile logo
     ) throws IOException {
         log.info("Request to create team. name={}, captainUserId={}", name, captainUserId);
         BufferedImage logoImage = null;

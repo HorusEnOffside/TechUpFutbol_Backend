@@ -100,7 +100,7 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(TournamentNotActiveException::new);
 
         PlayerEntity captainPlayer = playerRepository.findByUserId(captainUserId)
-                .orElseThrow(() -> new InvalidInputException("Captain player profile not found for userId: " + captainUserId));
+                .orElseThrow(() -> new InvalidInputException("El usuario no tiene perfil deportivo registrado. Completa tu perfil deportivo antes de crear un equipo."));
 
         UserEntity captainUser = captainPlayer.getUser();
         captainUser.addRole(UserRole.CAPTAIN);
