@@ -538,7 +538,7 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTrueWhenMajorityAreStudents() {
-            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.INGENIERIA_DE_SISTEMAS);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(s), buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
             ));
@@ -547,7 +547,7 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTrueWhenMajorityAreTeachers() {
-            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.INTELIGENCIA_ARTIFICIAL);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(t), buildTeamPlayer(t), buildTeamPlayer(new FamiliarEntity())
             ));
@@ -556,7 +556,7 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTrueWhenMajorityAreGraduates() {
-            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.CIBERSEGURIDAD);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(g), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
             ));
@@ -565,9 +565,9 @@ class TeamServiceImplTest {
 
         @Test
         void returnsTrueWithMixedEngineeringTypes() {
-            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
-            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.DATA_SCIENCE);
-            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.ENGINEERING);
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.INGENIERIA_DE_SISTEMAS);
+            TeacherEntity t = new TeacherEntity(); t.setCareer(Career.ESTADISTICA);
+            GraduateEntity g = new GraduateEntity(); g.setCareer(Career.CIBERSEGURIDAD);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(s), buildTeamPlayer(t), buildTeamPlayer(g), buildTeamPlayer(new FamiliarEntity())
             ));
@@ -576,7 +576,7 @@ class TeamServiceImplTest {
 
         @Test
         void returnsFalseWhenMajorityAreFamiliars() {
-            StudentEntity s = new StudentEntity(); s.setCareer(Career.OTHER);
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.INGENIERIA_DE_SISTEMAS);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity()), buildTeamPlayer(new FamiliarEntity())
             ));
@@ -585,7 +585,7 @@ class TeamServiceImplTest {
 
         @Test
         void returnsFalseWhenExactlyHalfAreEngineering() {
-            StudentEntity s = new StudentEntity(); s.setCareer(Career.ENGINEERING);
+            StudentEntity s = new StudentEntity(); s.setCareer(Career.INGENIERIA_DE_SISTEMAS);
             when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of(
                     buildTeamPlayer(s), buildTeamPlayer(new FamiliarEntity())
             ));

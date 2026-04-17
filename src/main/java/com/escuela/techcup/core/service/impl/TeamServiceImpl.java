@@ -359,7 +359,10 @@ public class TeamServiceImpl implements TeamService {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private boolean isEngineeringCareer(Career career) {
-        return career == Career.ENGINEERING || career == Career.DATA_SCIENCE;
+        return career == Career.INGENIERIA_DE_SISTEMAS
+                || career == Career.INTELIGENCIA_ARTIFICIAL
+                || career == Career.CIBERSEGURIDAD
+                || career == Career.ESTADISTICA;
     }
 
     private boolean isMajorityEngineering(List<TeamPlayerEntity> teamPlayers) {

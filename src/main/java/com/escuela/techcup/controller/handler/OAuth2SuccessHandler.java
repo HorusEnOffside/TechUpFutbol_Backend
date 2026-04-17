@@ -21,7 +21,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtService jwtService;
     private final UserService userService;
 
-    @Value("${FRONTEND_URL:http://localhost:3000}")
+    @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
     public OAuth2SuccessHandler(JwtService jwtService, UserService userService) {
@@ -50,11 +50,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 roles
         );
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(
-                "{\"token\": \"" + token + "\", \"email\": \"" + email + "\"}"
-        );
+        String redirectUrl = frontendUrl + "/oauth2/callback?token=" + token;
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

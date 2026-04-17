@@ -54,13 +54,13 @@ class UserServiceImplTest {
                 LocalDate.of(2000, 1, 1), Gender.MALE, "Password1");
 
         studentUserDTO = new StudentUserDTO("Juan", "juan@escuela.edu.co",
-                LocalDate.of(2000, 1, 1), Gender.MALE, "Password1", 3, Career.ENGINEERING);
+                LocalDate.of(2000, 1, 1), Gender.MALE, "Password1", 3, Career.INGENIERIA_DE_SISTEMAS);
 
         teacherUserDTO = new TeacherUserDTO("Luis", "luis@escuela.edu.co",
-                LocalDate.of(1985, 3, 10), Gender.MALE, "Password1", Career.DATA_SCIENCE);
+                LocalDate.of(1985, 3, 10), Gender.MALE, "Password1", Career.INTELIGENCIA_ARTIFICIAL);
 
         graduateUserDTO = new GraduateUserDTO("Ana", "ana@escuela.edu.co",
-                LocalDate.of(1998, 6, 5), Gender.FEMALE, "Password1", Career.ENGINEERING);
+                LocalDate.of(1998, 6, 5), Gender.FEMALE, "Password1", Career.INGENIERIA_DE_SISTEMAS);
     }
 
     // --- createAdminUser ---

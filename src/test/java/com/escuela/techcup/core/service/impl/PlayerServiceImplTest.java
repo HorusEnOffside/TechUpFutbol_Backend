@@ -68,7 +68,7 @@ class PlayerServiceImplTest {
             dto.setGender(Gender.MALE);
             dto.setPassword("Password1");
             dto.setSemester(3);
-            dto.setCareer(Career.ENGINEERING);
+            dto.setCareer(Career.INGENIERIA_DE_SISTEMAS);
             dto.setDorsalNumber(10);
             dto.setPosition(Position.FORWARD);
             return dto;
@@ -164,7 +164,7 @@ class PlayerServiceImplTest {
             dto.setDateOfBirth(LocalDate.of(1990, 5, 15));
             dto.setGender(Gender.FEMALE);
             dto.setPassword("Password1");
-            dto.setCareer(Career.ENGINEERING);
+            dto.setCareer(Career.INGENIERIA_DE_SISTEMAS);
             dto.setDorsalNumber(7);
             dto.setPosition(Position.MIDFIELDER);
             return dto;
@@ -291,7 +291,7 @@ class PlayerServiceImplTest {
             dto.setDateOfBirth(LocalDate.of(1995, 7, 10));
             dto.setGender(Gender.FEMALE);
             dto.setPassword("Password1");
-            dto.setCareer(Career.DATA_SCIENCE);
+            dto.setCareer(Career.ESTADISTICA);
             dto.setDorsalNumber(3);
             dto.setPosition(Position.GOALKEEPER);
             return dto;
