@@ -9,6 +9,8 @@ import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.service.TournamentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +23,8 @@ import java.util.List;
 @Tag(name = "Gestion de torneos", description = "Operaciones de torneos")
 public class TournamentController {
 
+	private static final Logger log = LoggerFactory.getLogger(TournamentController.class);
+
 	private final TournamentService tournamentService;
 
 	public TournamentController(TournamentService tournamentService) {
@@ -31,6 +35,7 @@ public class TournamentController {
 	@PreAuthorize("hasRole('ORGANIZER')")
 	@PostMapping
 	public ResponseEntity<Tournament> createTournament(@Valid @RequestBody CreateTournamentDTO dto) {
+		log.info("Request to create tournament. organizerId={}", dto.getOrganizerId());
 		Tournament tournament = tournamentService.createTournament(
 				dto.getStartDate(), dto.getEndDate(), dto.getTeamsMaxAmount(),
 				dto.getTeamCost(), dto.getStatus(), dto.getOrganizerId());
@@ -41,6 +46,7 @@ public class TournamentController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
 	public ResponseEntity<List<Tournament>> getAllTournaments() {
+		log.info("Request to get all tournaments");
 		return ResponseEntity.ok(tournamentService.getAllTournaments());
 	}
 
@@ -48,6 +54,7 @@ public class TournamentController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{tournamentId}")
 	public ResponseEntity<Tournament> getTournamentById(@PathVariable String tournamentId) {
+		log.info("Request to get tournament by id={}", tournamentId);
 		return ResponseEntity.ok(tournamentService.getTournamentById(tournamentId));
 	}
 
@@ -56,7 +63,8 @@ public class TournamentController {
 	@PutMapping("/{tournamentId}")
 	public ResponseEntity<Tournament> updateTournament(
 			@PathVariable String tournamentId,
-			@RequestBody UpdateTournamentDTO dto) {
+			@Valid @RequestBody UpdateTournamentDTO dto) {
+		log.info("Request to update tournament id={}", tournamentId);
 		return ResponseEntity.ok(tournamentService.updateTournament(
 				tournamentId, dto.getStartDate(), dto.getEndDate(),
 				dto.getTeamsMaxAmount() != null ? dto.getTeamsMaxAmount() : 0,
@@ -67,6 +75,7 @@ public class TournamentController {
 	@PreAuthorize("hasRole('ORGANIZER')")
 	@PutMapping("/{tournamentId}/finalize")
 	public ResponseEntity<Void> finalizeTournament(@PathVariable String tournamentId) {
+		log.info("Request to finalize tournament id={}", tournamentId);
 		tournamentService.finalizeTournament(tournamentId);
 		return ResponseEntity.ok().build();
 	}
@@ -77,6 +86,7 @@ public class TournamentController {
 	public ResponseEntity<Tournament> configureTournament(
 			@PathVariable String tournamentId,
 			@Valid @RequestBody ConfigureTournamentDTO dto) {
+		log.info("Request to configure tournament id={}", tournamentId);
 		return ResponseEntity.ok(tournamentService.configureTournament(
 				tournamentId, dto.getReglamento(), dto.getClosingDate(), dto.getSanciones()));
 	}
@@ -87,6 +97,7 @@ public class TournamentController {
 	public ResponseEntity<Tournament> addCancha(
 			@PathVariable String tournamentId,
 			@Valid @RequestBody AddCanchaDTO dto) {
+		log.info("Request to add cancha to tournament id={}", tournamentId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				tournamentService.addCancha(tournamentId, dto.getTipo(), dto.getNombre()));
 	}
@@ -97,6 +108,7 @@ public class TournamentController {
 	public ResponseEntity<Tournament> addHorario(
 			@PathVariable String tournamentId,
 			@Valid @RequestBody HorarioDTO dto) {
+		log.info("Request to add horario to tournament id={}", tournamentId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				tournamentService.addHorario(tournamentId, dto.getFecha(), dto.getDescripcion()));
 	}
@@ -105,6 +117,7 @@ public class TournamentController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/active")
 	public ResponseEntity<Tournament> getActiveTournament() {
+		log.info("Request to get active tournament");
 		return ResponseEntity.ok(tournamentService.getActiveTournament());
 	}
 

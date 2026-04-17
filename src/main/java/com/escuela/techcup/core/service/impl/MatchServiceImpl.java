@@ -16,10 +16,11 @@ import com.escuela.techcup.core.exception.MatchNotFoundException;
 import com.escuela.techcup.core.exception.ScheduleConflictException;
 import com.escuela.techcup.core.exception.TeamNotFoundException;
 import com.escuela.techcup.core.exception.UserNotFoundException;
-import com.escuela.techcup.core.model.Card;
+import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.model.Goal;
 import com.escuela.techcup.core.model.Match;
 import com.escuela.techcup.core.model.Player;
+import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.service.MatchService;
 import com.escuela.techcup.core.service.PlayerService;
 import com.escuela.techcup.core.service.SoccerFieldService;
@@ -30,11 +31,11 @@ import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.TeamEntity;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
 import com.escuela.techcup.persistence.entity.users.RefereeEntity;
-import com.escuela.techcup.persistence.mapper.tournament.CardMapper;
 import com.escuela.techcup.persistence.mapper.tournament.GoalMapper;
 import com.escuela.techcup.persistence.mapper.tournament.MatchMapper;
 import com.escuela.techcup.persistence.mapper.tournament.SoccerFieldMapper;
 import com.escuela.techcup.persistence.mapper.tournament.TeamMapper;
+import com.escuela.techcup.persistence.mapper.users.PlayerMapper;
 import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.TeamRepository;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
@@ -89,7 +90,11 @@ public class MatchServiceImpl implements MatchService {
     @Transactional
     public Match createMatch(LocalDate date, String teamAId, String teamBId) {
         log.info("Creating match for date: {}, teamAId: {}, teamBId: {}", date, teamAId, teamBId);
-        
+
+        if (teamAId.equals(teamBId)) {
+            throw new InvalidInputException("Un equipo no puede jugar contra sí mismo");
+        }
+
         TeamEntity teamA = teamRepository.findById(teamAId)
                 .orElseThrow(() -> new TeamNotFoundException(teamAId));
         TeamEntity teamB = teamRepository.findById(teamBId)
@@ -144,16 +149,18 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public Match addMatchEventGoal(String matchId, String playerId, int minute, String description) {
+        log.info("Adding goal to match {}. playerId={}, minute={}", matchId, playerId, minute);
         MatchEntity matchEntity = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
-        Player player = playerService.getPlayerByUserId(playerId)
+        PlayerEntity playerEntity = playerRepository.findByUserId(playerId)
                 .orElseThrow(() -> new UserNotFoundException(playerId));
-        
+
+        validatePlayerBelongsToMatch(playerEntity, matchEntity);
+
+        Player player = PlayerMapper.toModel(playerEntity);
         Goal goal = new Goal(idGenerator(), minute, player, description);
-
         matchEntity.addGoal(GoalMapper.toEntity(goal));
-
         matchRepository.save(matchEntity);
         return MatchMapper.toModel(matchEntity);
     }
@@ -161,11 +168,14 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public Match addMatchEventCard(String matchId, String playerId, int minute, CardEntity.CardType type, String description) {
+        log.info("Adding card to match {}. playerId={}, minute={}, type={}", matchId, playerId, minute, type);
         MatchEntity matchEntity = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
         PlayerEntity playerEntity = playerRepository.findByUserId(playerId)
                 .orElseThrow(() -> new UserNotFoundException(playerId));
+
+        validatePlayerBelongsToMatch(playerEntity, matchEntity);
 
         CardEntity card = new CardEntity();
         card.setMinute(minute);
@@ -174,6 +184,12 @@ public class MatchServiceImpl implements MatchService {
         card.setPlayer(playerEntity);
         matchEntity.addCard(card);
 
+        if (type == CardEntity.CardType.RED) {
+            log.info("Red card issued to playerId={}. Setting status to NOT_AVAILABLE.", playerId);
+            playerEntity.setStatus(PlayerStatus.NOT_AVAILABLE);
+            playerRepository.save(playerEntity);
+        }
+
         matchRepository.save(matchEntity);
         return MatchMapper.toModel(matchEntity);
     }
@@ -181,6 +197,7 @@ public class MatchServiceImpl implements MatchService {
     @Override
     @Transactional
     public Match finalizeMatch(String matchId, MatchResultDTO result) {
+        log.info("Finalizing match {}. localScore={}, visitorScore={}", matchId, result.getLocalScore(), result.getVisitorScore());
         MatchEntity matchEntity = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException(matchId));
 
@@ -218,6 +235,9 @@ public class MatchServiceImpl implements MatchService {
                     card.setDescription("Tarjeta roja registrada al finalizar partido");
                     card.setPlayer(playerEntity);
                     matchEntity.addCard(card);
+                    log.info("Red card from match result for playerId={}. Setting status to NOT_AVAILABLE.", stats.getPlayerId());
+                    playerEntity.setStatus(PlayerStatus.NOT_AVAILABLE);
+                    playerRepository.save(playerEntity);
                 }
             }
         }
@@ -225,6 +245,18 @@ public class MatchServiceImpl implements MatchService {
         matchEntity.setStatus("FINISHED");
         matchRepository.save(matchEntity);
         return MatchMapper.toModel(matchEntity);
+    }
+
+    private void validatePlayerBelongsToMatch(PlayerEntity player, MatchEntity match) {
+        if (player.getTeam() == null) {
+            throw new InvalidInputException("El jugador no pertenece a ningún equipo");
+        }
+        String playerTeamId = player.getTeam().getId();
+        boolean inTeamA = match.getTeamA() != null && match.getTeamA().getId().equals(playerTeamId);
+        boolean inTeamB = match.getTeamB() != null && match.getTeamB().getId().equals(playerTeamId);
+        if (!inTeamA && !inTeamB) {
+            throw new InvalidInputException("El jugador no pertenece a ninguno de los equipos del partido");
+        }
     }
 
     private String idGenerator() {
