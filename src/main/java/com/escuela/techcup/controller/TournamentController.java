@@ -1,7 +1,9 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.dto.AddCanchaDTO;
 import com.escuela.techcup.controller.dto.ConfigureTournamentDTO;
 import com.escuela.techcup.controller.dto.CreateTournamentDTO;
+import com.escuela.techcup.controller.dto.HorarioDTO;
 import com.escuela.techcup.controller.dto.UpdateTournamentDTO;
 import com.escuela.techcup.core.model.Tournament;
 import com.escuela.techcup.core.service.TournamentService;
@@ -69,15 +71,34 @@ public class TournamentController {
 		return ResponseEntity.ok().build();
 	}
 
-	// RF-07: Configurar torneo
+	// RF-07a: Configurar reglamento, fecha de cierre y sanciones
 	@PreAuthorize("hasRole('ORGANIZER')")
 	@PutMapping("/{tournamentId}/configure")
 	public ResponseEntity<Tournament> configureTournament(
 			@PathVariable String tournamentId,
 			@Valid @RequestBody ConfigureTournamentDTO dto) {
 		return ResponseEntity.ok(tournamentService.configureTournament(
-				tournamentId, dto.getReglamento(), dto.getClosingDate(),
-				dto.getCanchas(), dto.getHorarios(), dto.getSanciones()));
+				tournamentId, dto.getReglamento(), dto.getClosingDate(), dto.getSanciones()));
+	}
+
+	// RF-07b: Añadir cancha (imagen asignada automáticamente por tipo)
+	@PreAuthorize("hasRole('ORGANIZER')")
+	@PostMapping("/{tournamentId}/canchas")
+	public ResponseEntity<Tournament> addCancha(
+			@PathVariable String tournamentId,
+			@Valid @RequestBody AddCanchaDTO dto) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				tournamentService.addCancha(tournamentId, dto.getTipo(), dto.getNombre()));
+	}
+
+	// RF-07c: Añadir horario/jornada
+	@PreAuthorize("hasRole('ORGANIZER')")
+	@PostMapping("/{tournamentId}/horarios")
+	public ResponseEntity<Tournament> addHorario(
+			@PathVariable String tournamentId,
+			@Valid @RequestBody HorarioDTO dto) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				tournamentService.addHorario(tournamentId, dto.getFecha(), dto.getDescripcion()));
 	}
 
 	// Consultar torneo activo

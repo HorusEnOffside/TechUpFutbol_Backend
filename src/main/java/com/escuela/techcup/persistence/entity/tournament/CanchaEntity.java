@@ -14,13 +14,15 @@ public class CanchaEntity {
     @Column(name = "id", columnDefinition = "uuid")
     private String id;
 
+    @Column(name = "tipo", nullable = false, length = 50)
+    private String tipo;
+
     @Column(name = "nombre", nullable = false, length = 200)
     private String nombre;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "foto")
-    private byte[] foto;
+    /** URL de la imagen estática en el servidor, asignada automáticamente según el tipo. */
+    @Column(name = "foto_url", length = 500)
+    private String fotoUrl;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id", nullable = false,

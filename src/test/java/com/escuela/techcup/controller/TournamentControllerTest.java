@@ -143,22 +143,13 @@ class TournamentControllerTest {
 
     @Test
     void configureTournament_returns200WhenValid() throws Exception {
-        when(tournamentService.configureTournament(any(), any(), any(), any(), any(), any()))
+        when(tournamentService.configureTournament(any(), any(), any(), any()))
                 .thenReturn(tournament);
-
-        CanchaDTO canchaDTO = new CanchaDTO();
-        canchaDTO.setNombre("Cancha A");
-
-        HorarioDTO horarioDTO = new HorarioDTO();
-        horarioDTO.setFecha(LocalDate.of(2026, 6, 1));
-        horarioDTO.setDescripcion("Jornada 1");
 
         com.escuela.techcup.controller.dto.ConfigureTournamentDTO dto =
                 new com.escuela.techcup.controller.dto.ConfigureTournamentDTO();
         dto.setReglamento("Reglamento de prueba");
         dto.setClosingDate(LocalDateTime.of(2026, 5, 1, 0, 0));
-        dto.setCanchas(List.of(canchaDTO));
-        dto.setHorarios(List.of(horarioDTO));
 
         String body = objectMapper.writeValueAsString(dto);
 

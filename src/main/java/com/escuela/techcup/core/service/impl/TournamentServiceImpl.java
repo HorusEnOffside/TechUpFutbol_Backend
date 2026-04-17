@@ -1,13 +1,12 @@
 package com.escuela.techcup.core.service.impl;
 
-import com.escuela.techcup.controller.dto.CanchaDTO;
-import com.escuela.techcup.controller.dto.HorarioDTO;
 import com.escuela.techcup.core.exception.InvalidInputException;
 import com.escuela.techcup.core.exception.TournamentFinalizedException;
 import com.escuela.techcup.core.exception.TournamentNotActiveException;
 import com.escuela.techcup.core.exception.TournamentNotFoundException;
 import com.escuela.techcup.core.exception.TournamentOverlapException;
 import com.escuela.techcup.core.model.Tournament;
+import com.escuela.techcup.core.model.enums.CanchaTipo;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.core.service.TournamentService;
 import com.escuela.techcup.core.util.IdGeneratorUtil;
@@ -24,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -137,12 +136,11 @@ public class TournamentServiceImpl implements TournamentService {
         log.info("Tournament finalized. id={}", tournamentId);
     }
 
-    // RF-07: Configurar torneo
+    // RF-07a: Configurar reglamento, fecha de cierre y sanciones
     @Override
     @Transactional
     public Tournament configureTournament(String tournamentId, String reglamento,
-                                          LocalDateTime closingDate, List<CanchaDTO> canchas,
-                                          List<HorarioDTO> horarios, String sanciones) {
+                                          LocalDateTime closingDate, String sanciones) {
         TournamentEntity entity = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
 
@@ -157,31 +155,53 @@ public class TournamentServiceImpl implements TournamentService {
         entity.setClosingDate(closingDate);
         entity.setSanciones(sanciones);
 
-        // Reemplazar canchas: orphanRemoval elimina las anteriores
-        entity.getCanchas().clear();
-        canchas.forEach(dto -> {
-            CanchaEntity c = new CanchaEntity();
-            c.setId(IdGeneratorUtil.generateId());
-            c.setNombre(dto.getNombre());
-            if (dto.getFoto() != null && !dto.getFoto().isBlank())
-                c.setFoto(Base64.getDecoder().decode(dto.getFoto()));
-            c.setTournament(entity);
-            entity.getCanchas().add(c);
-        });
+        tournamentRepository.save(entity);
+        log.info("Tournament configured. id={}", tournamentId);
+        return TournamentMapper.toModel(entity);
+    }
 
-        // Reemplazar horarios: orphanRemoval elimina los anteriores
-        entity.getHorarios().clear();
-        horarios.forEach(dto -> {
-            HorarioEntity h = new HorarioEntity();
-            h.setId(IdGeneratorUtil.generateId());
-            h.setFecha(dto.getFecha());
-            h.setDescripcion(dto.getDescripcion());
-            h.setTournament(entity);
-            entity.getHorarios().add(h);
-        });
+    // RF-07b: Añadir cancha una por una
+    @Override
+    @Transactional
+    public Tournament addCancha(String tournamentId, CanchaTipo tipo, String nombre) {
+        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
+
+        if (entity.getStatus() == TournamentStatus.COMPLETED)
+            throw new TournamentFinalizedException(tournamentId);
+
+        CanchaEntity c = new CanchaEntity();
+        c.setId(IdGeneratorUtil.generateId());
+        c.setTipo(tipo.name());
+        c.setNombre(nombre != null && !nombre.isBlank() ? nombre : tipo.getDisplayName());
+        c.setFotoUrl(tipo.getFotoUrl());
+        c.setTournament(entity);
+        entity.getCanchas().add(c);
 
         tournamentRepository.save(entity);
-        log.info("Tournament configured. id={}, canchas={}, horarios={}", tournamentId, canchas.size(), horarios.size());
+        log.info("Cancha added to tournament. id={}, tipo={}", tournamentId, tipo);
+        return TournamentMapper.toModel(entity);
+    }
+
+    // RF-07c: Añadir horario/jornada uno por uno
+    @Override
+    @Transactional
+    public Tournament addHorario(String tournamentId, LocalDate fecha, String descripcion) {
+        TournamentEntity entity = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentNotFoundException(tournamentId));
+
+        if (entity.getStatus() == TournamentStatus.COMPLETED)
+            throw new TournamentFinalizedException(tournamentId);
+
+        HorarioEntity h = new HorarioEntity();
+        h.setId(IdGeneratorUtil.generateId());
+        h.setFecha(fecha);
+        h.setDescripcion(descripcion);
+        h.setTournament(entity);
+        entity.getHorarios().add(h);
+
+        tournamentRepository.save(entity);
+        log.info("Horario added to tournament. id={}, fecha={}", tournamentId, fecha);
         return TournamentMapper.toModel(entity);
     }
 

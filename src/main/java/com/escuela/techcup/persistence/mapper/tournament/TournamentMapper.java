@@ -27,8 +27,9 @@ public class TournamentMapper {
         List<Cancha> canchas = entity.getCanchas().stream().map(c -> {
             Cancha cancha = new Cancha();
             cancha.setId(c.getId());
+            cancha.setTipo(c.getTipo());
             cancha.setNombre(c.getNombre());
-            cancha.setFoto(c.getFoto());
+            cancha.setFotoUrl(c.getFotoUrl());
             return cancha;
         }).toList();
         tournament.setCanchas(canchas);

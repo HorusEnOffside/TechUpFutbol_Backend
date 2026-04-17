@@ -226,7 +226,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
 
         Tournament result = tournamentService.configureTournament(
-                "tour-1", "Reglamento X", closing, canchas(), horarios(), null);
+                "tour-1", "Reglamento X", closing, null);
 
         assertNotNull(result);
         verify(tournamentRepository).save(any());
@@ -239,7 +239,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), canchas(), horarios(), null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), null));
     }
 
     @Test
@@ -248,7 +248,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(TournamentFinalizedException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), canchas(), horarios(), null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), null));
     }
 
     // --- getActiveTournament ---
