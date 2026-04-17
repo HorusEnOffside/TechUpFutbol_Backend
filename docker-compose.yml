@@ -37,6 +37,7 @@ services:
         condition: service_healthy
     environment:
       DB_URL: jdbc:postgresql://db:5432/techcup?stringtype=unspecified
+      CORS_ALLOWED_ORIGINS: "https://localhost:3000,http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173"
     ports:
       - "8443:8443"
     volumes:
