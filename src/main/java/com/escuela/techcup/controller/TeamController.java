@@ -1,5 +1,6 @@
 package com.escuela.techcup.controller;
 
+import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
 import com.escuela.techcup.controller.dto.InvitationResponseDTO;
 import com.escuela.techcup.controller.dto.PaymentDTO;
 import com.escuela.techcup.controller.dto.PaymentRespondDTO;
@@ -38,6 +39,15 @@ public class TeamController {
     public TeamController(TeamService teamService, TeamFullInfoService teamFullInfoService,  PaymentService paymentService) {
         this.teamService = teamService;
         this.teamFullInfoService = teamFullInfoService;
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/search")
+    public ResponseEntity<EntitySearchResultDTO> searchTeamByName(@RequestParam String name) {
+        log.info("Request to search team by name={}", name);
+        return teamService.findByNameContaining(name)
+                .map(team -> ResponseEntity.ok(new EntitySearchResultDTO(team.getId(), team.getName())))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyRole('CAPTAIN', 'ADMIN', 'PLAYER', 'BASEUSER')")
@@ -146,12 +156,13 @@ public class TeamController {
     @PostMapping(value = "/{teamId}/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PaymentRespondDTO> uploadPayment(
             @PathVariable String teamId,
-            @RequestPart("payment") PaymentDTO paymentDTO
-    ) {
+            @RequestPart("payment") PaymentDTO paymentDTO,
+            @RequestPart("voucher") MultipartFile voucher) {
+
         log.info("Request to upload payment. teamId={}", teamId);
 
-        Payment payment = teamService.uploadPayment(teamId, paymentDTO);
-        PaymentRespondDTO response = PaymentMapper.toRespondDTO(payment);
+        Payment payment = teamService.uploadPayment(teamId, paymentDTO, voucher);
+        PaymentRespondDTO response =PaymentMapper.toRespondDTO(payment);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

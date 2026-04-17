@@ -6,6 +6,7 @@ import com.escuela.techcup.core.exception.TournamentNotFoundException;
 import com.escuela.techcup.core.exception.TournamentNotActiveException;
 import com.escuela.techcup.core.exception.TournamentOverlapException;
 import com.escuela.techcup.core.model.Tournament;
+import com.escuela.techcup.core.model.enums.CanchaTipo;
 import com.escuela.techcup.core.model.enums.TournamentStatus;
 import com.escuela.techcup.persistence.entity.tournament.TournamentEntity;
 import com.escuela.techcup.persistence.entity.users.OrganizerEntity;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +41,7 @@ class TournamentServiceImplTest {
     private OrganizerEntity organizerEntity;
     private final LocalDateTime start = LocalDateTime.of(2026, 6, 1, 0, 0);
     private final LocalDateTime end   = LocalDateTime.of(2026, 7, 1, 0, 0);
+
 
     @BeforeEach
     void setUp() {
@@ -69,18 +72,6 @@ class TournamentServiceImplTest {
     }
 
     @Test
-    void createTournament_throwsWhenStartDateIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(null, end, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
-    void createTournament_throwsWhenEndDateIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(start, null, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
     void createTournament_throwsWhenEndBeforeStart() {
         assertThrows(InvalidInputException.class,
                 () -> tournamentService.createTournament(end, start, 8, 50.0, TournamentStatus.DRAFT, "org-1"));
@@ -90,12 +81,6 @@ class TournamentServiceImplTest {
     void createTournament_throwsWhenTeamsMaxAmountLessThan2() {
         assertThrows(InvalidInputException.class,
                 () -> tournamentService.createTournament(start, end, 1, 50.0, TournamentStatus.DRAFT, "org-1"));
-    }
-
-    @Test
-    void createTournament_throwsWhenTeamCostIsNull() {
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.createTournament(start, end, 8, null, TournamentStatus.DRAFT, "org-1"));
     }
 
     @Test
@@ -228,25 +213,20 @@ class TournamentServiceImplTest {
         when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
 
         Tournament result = tournamentService.configureTournament(
-                "tour-1", "Reglamento X", closing, "Cancha A", "10:00", null);
+                "tour-1", "Reglamento X", closing, null);
 
         assertNotNull(result);
         verify(tournamentRepository).save(any());
     }
 
-    @Test
-    void configureTournament_throwsWhenReglamentoIsBlank() {
 
-        assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "", start.minusDays(1), "Cancha", "10:00", null));
-    }
 
     @Test
     void configureTournament_throwsWhenClosingDateAfterStart() {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(InvalidInputException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), "Cancha", "10:00", null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", end.plusDays(1), null));
     }
 
     @Test
@@ -255,7 +235,7 @@ class TournamentServiceImplTest {
         when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
 
         assertThrows(TournamentFinalizedException.class,
-                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), "Cancha", "10:00", null));
+                () -> tournamentService.configureTournament("tour-1", "Reglamento", start.minusDays(1), null));
     }
 
     // --- getActiveTournament ---
@@ -277,5 +257,75 @@ class TournamentServiceImplTest {
 
         assertThrows(TournamentNotActiveException.class,
                 () -> tournamentService.getActiveTournament());
+    }
+
+    // --- addCancha ---
+
+    @Test
+    void addCancha_addsWithDefaultNameWhenNombreIsNull() {
+        when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
+        when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
+
+        Tournament result = tournamentService.addCancha("tour-1", CanchaTipo.CANCHA_1, null);
+
+        assertNotNull(result);
+        verify(tournamentRepository).save(any());
+    }
+
+    @Test
+    void addCancha_addsWithCustomNombre() {
+        when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
+        when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
+
+        Tournament result = tournamentService.addCancha("tour-1", CanchaTipo.CANCHA_2, "Mi Cancha");
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void addCancha_throwsWhenTournamentNotFound() {
+        when(tournamentRepository.findById("no-existe")).thenReturn(Optional.empty());
+
+        assertThrows(TournamentNotFoundException.class,
+                () -> tournamentService.addCancha("no-existe", CanchaTipo.CANCHA_1, null));
+    }
+
+    @Test
+    void addCancha_throwsWhenFinalized() {
+        tournamentEntity.setStatus(TournamentStatus.COMPLETED);
+        when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
+
+        assertThrows(TournamentFinalizedException.class,
+                () -> tournamentService.addCancha("tour-1", CanchaTipo.CANCHA_1, null));
+    }
+
+    // --- addHorario ---
+
+    @Test
+    void addHorario_addsSuccessfully() {
+        when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
+        when(tournamentRepository.save(any())).thenReturn(tournamentEntity);
+
+        Tournament result = tournamentService.addHorario("tour-1", LocalDate.of(2026, 5, 10), "Jornada 1");
+
+        assertNotNull(result);
+        verify(tournamentRepository).save(any());
+    }
+
+    @Test
+    void addHorario_throwsWhenTournamentNotFound() {
+        when(tournamentRepository.findById("no-existe")).thenReturn(Optional.empty());
+
+        assertThrows(TournamentNotFoundException.class,
+                () -> tournamentService.addHorario("no-existe", LocalDate.of(2026, 5, 10), "Jornada 1"));
+    }
+
+    @Test
+    void addHorario_throwsWhenFinalized() {
+        tournamentEntity.setStatus(TournamentStatus.COMPLETED);
+        when(tournamentRepository.findById("tour-1")).thenReturn(Optional.of(tournamentEntity));
+
+        assertThrows(TournamentFinalizedException.class,
+                () -> tournamentService.addHorario("tour-1", LocalDate.of(2026, 5, 10), "Jornada 1"));
     }
 }

@@ -19,11 +19,5 @@ public class ConfigureTournamentDTO {
     @NotNull(message = "closingDate is required")
     private LocalDateTime closingDate;
 
-    @NotBlank(message = "canchas is required")
-    private String canchas;
-
-    @NotBlank(message = "horarios is required")
-    private String horarios;
-
     private String sanciones;
 }

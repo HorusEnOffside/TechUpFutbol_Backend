@@ -6,6 +6,7 @@ import com.escuela.techcup.core.model.Payment;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.enums.Formation;
 import com.escuela.techcup.core.model.enums.InvitationStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.awt.image.BufferedImage;
@@ -24,6 +25,7 @@ public interface TeamService {
 
     Team getTeamById(String teamId);
     List<Team> getAllTeams();
+    java.util.Optional<Team> findByNameContaining(String name);
 
     boolean validateEngineeringMajority(String teamId);
 
@@ -34,5 +36,5 @@ public interface TeamService {
     List<Formation> getAllFormations();
     Formation getEnemyFormation(String teamId);
 
-    Payment uploadPayment(String teamId, PaymentDTO paymentDTO);
+    Payment uploadPayment(String teamId, PaymentDTO paymentDTO, MultipartFile voucher);
 }

@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -16,6 +17,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import com.escuela.techcup.core.model.Match;
 import com.escuela.techcup.core.service.MatchService;
+
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,6 +101,34 @@ class MatchControllerTest {
                 .param("description", "desc"))
             .andExpect(status().isOk());
         verify(matchService).addMatchEventGoal("1", "p1", 10, "desc");
+    }
+
+    @Test
+    void getMyMatches_returnsMatchesForReferee() throws Exception {
+        Match match = mock(Match.class);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("referee-uuid");
+        when(matchService.getMatchesByRefereeId("referee-uuid")).thenReturn(List.of(match));
+
+        mockMvc.perform(get("/api/matches/my-matches")
+                .principal(auth))
+            .andExpect(status().isOk());
+
+        verify(matchService).getMatchesByRefereeId("referee-uuid");
+    }
+
+    @Test
+    void getMyMatches_returnsEmptyWhenNoMatches() throws Exception {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("referee-no-matches");
+        when(matchService.getMatchesByRefereeId("referee-no-matches")).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/matches/my-matches")
+                .principal(auth))
+            .andExpect(status().isOk())
+            .andExpect(content().json("[]"));
+
+        verify(matchService).getMatchesByRefereeId("referee-no-matches");
     }
 
 }

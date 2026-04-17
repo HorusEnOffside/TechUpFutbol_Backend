@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -139,19 +140,67 @@ class TournamentControllerTest {
 
     @Test
     void configureTournament_returns200WhenValid() throws Exception {
-        when(tournamentService.configureTournament(any(), any(), any(), any(), any(), any()))
+        when(tournamentService.configureTournament(any(), any(), any(), any()))
                 .thenReturn(tournament);
 
-        String body = objectMapper.writeValueAsString(new com.escuela.techcup.controller.dto.ConfigureTournamentDTO() {{
-            setReglamento("Reglamento de prueba");
-            setClosingDate(LocalDateTime.of(2026, 5, 1, 0, 0));
-            setCanchas("Cancha A");
-            setHorarios("10:00");
-        }});
+        com.escuela.techcup.controller.dto.ConfigureTournamentDTO dto =
+                new com.escuela.techcup.controller.dto.ConfigureTournamentDTO();
+        dto.setReglamento("Reglamento de prueba");
+        dto.setClosingDate(LocalDateTime.of(2026, 5, 1, 0, 0));
+
+        String body = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put("/api/tournaments/tour-1/configure")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk());
+    }
+
+    // --- POST /api/tournaments/{id}/canchas ---
+
+    @Test
+    void addCancha_returns201WhenValid() throws Exception {
+        when(tournamentService.addCancha(any(), any(), any())).thenReturn(tournament);
+
+        String body = "{\"tipo\":\"CANCHA_1\"}";
+
+        mockMvc.perform(post("/api/tournaments/tour-1/canchas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(tournamentService).addCancha(eq("tour-1"), any(), any());
+    }
+
+    @Test
+    void addCancha_returns400WhenTipoMissing() throws Exception {
+        mockMvc.perform(post("/api/tournaments/tour-1/canchas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    // --- POST /api/tournaments/{id}/horarios ---
+
+    @Test
+    void addHorario_returns201WhenValid() throws Exception {
+        when(tournamentService.addHorario(any(), any(), any())).thenReturn(tournament);
+
+        String body = "{\"fecha\":\"2026-06-10\",\"descripcion\":\"Jornada 1\"}";
+
+        mockMvc.perform(post("/api/tournaments/tour-1/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        verify(tournamentService).addHorario(eq("tour-1"), any(), any());
+    }
+
+    @Test
+    void addHorario_returns400WhenFechaMissing() throws Exception {
+        mockMvc.perform(post("/api/tournaments/tour-1/horarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"descripcion\":\"Jornada 1\"}"))
+                .andExpect(status().isBadRequest());
     }
 }

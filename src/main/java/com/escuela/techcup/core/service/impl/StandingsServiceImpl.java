@@ -10,19 +10,21 @@ import com.escuela.techcup.persistence.repository.tournament.MatchRepository;
 import com.escuela.techcup.persistence.repository.tournament.GoalRepository;
 import com.escuela.techcup.persistence.repository.tournament.CardRepository;
 import com.escuela.techcup.persistence.mapper.tournament.CardMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class StandingsServiceImpl implements StandingsService {
 
+    private static final Logger log = LoggerFactory.getLogger(StandingsServiceImpl.class);
+
     private final TeamRepository teamRepository;
     private final MatchRepository matchRepository;
     private final GoalRepository goalRepository;
     private final CardRepository cardRepository;
 
-    @Autowired
     public StandingsServiceImpl(TeamRepository teamRepository, MatchRepository matchRepository, GoalRepository goalRepository, CardRepository cardRepository) {
         this.teamRepository = teamRepository;
         this.matchRepository = matchRepository;

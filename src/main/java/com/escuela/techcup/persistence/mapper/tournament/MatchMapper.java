@@ -1,7 +1,9 @@
 package com.escuela.techcup.persistence.mapper.tournament;
 
+import com.escuela.techcup.persistence.entity.tournament.CardEntity;
 import com.escuela.techcup.persistence.entity.tournament.MatchEntity;
 import com.escuela.techcup.persistence.entity.tournament.GoalEntity;
+import com.escuela.techcup.core.model.Card;
 import com.escuela.techcup.core.model.Match;
 import com.escuela.techcup.core.model.Team;
 import com.escuela.techcup.core.model.Referee;
@@ -64,17 +66,19 @@ public class MatchMapper {
         SoccerField soccerField = matchEntity.getSoccerField() != null ? SoccerFieldMapper.toModel(matchEntity.getSoccerField()) : null;
         String status = matchEntity.getStatus();
 
-
-        List<GoalEntity> goals = matchEntity.getGoals();
-        List<MatchEvent> events = null;
-        if (goals != null) {
-            events = goals.stream()
+        List<MatchEvent> events = new ArrayList<>();
+        if (matchEntity.getGoals() != null) {
+            matchEntity.getGoals().stream()
                     .map(GoalMapper::toModel)
-                    .collect(Collectors.toList());
+                    .forEach(events::add);
+        }
+        if (matchEntity.getCards() != null) {
+            matchEntity.getCards().stream()
+                    .map(c -> (MatchEvent) CardMapper.toModel(c))
+                    .forEach(events::add);
         }
 
-
-        return new Match(
+        Match match = new Match(
                 matchEntity.getId(),
                 matchEntity.getDateTime(),
                 teamA,
@@ -82,7 +86,10 @@ public class MatchMapper {
                 referee,
                 soccerField,
                 events,
-                status
+                status,
+                matchEntity.getLocalScore(),
+                matchEntity.getVisitorScore()
         );
+        return match;
     }
 }

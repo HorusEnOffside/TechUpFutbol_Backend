@@ -44,14 +44,14 @@ public class TournamentEntity {
     @Column(name = "reglamento", length = 2000)
     private String reglamento;
 
-    @Column(name = "canchas", length = 500)
-    private String canchas;
-
-    @Column(name = "horarios", length = 500)
-    private String horarios;
-
     @Column(name = "sanciones", length = 500)
     private String sanciones;
+
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CanchaEntity> canchas = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<HorarioEntity> horarios = new java.util.ArrayList<>();
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(

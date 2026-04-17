@@ -19,6 +19,12 @@ public interface MatchRepository extends JpaRepository<MatchEntity, String> {
 
     List<MatchEntity> findByTeamAIdOrTeamBId(String teamAId, String teamBId);
 
+    boolean existsByDateTimeAndTeamAIdOrDateTimeAndTeamBId(
+            LocalDateTime dt1, String teamAId,
+            LocalDateTime dt2, String teamBId);
+
+    boolean existsByDateTimeAndSoccerFieldId(LocalDateTime dateTime, String soccerFieldId);
+
     @Query("SELECT m FROM MatchEntity m WHERE m.id = :matchId " +
            "AND (m.teamA.id = :teamId OR m.teamB.id = :teamId)")
     Optional<MatchEntity> findByIdAndTeam(@Param("matchId") String matchId,

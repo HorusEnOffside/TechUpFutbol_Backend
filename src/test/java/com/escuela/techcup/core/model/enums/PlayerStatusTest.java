@@ -6,24 +6,26 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlayerStatusTest {
 
     @Test
-    void testCantidadDeValores() {
-        assertEquals(2, PlayerStatus.values().length);
+    void tresEstadosDefinidos() {
+        assertEquals(3, PlayerStatus.values().length);
     }
 
     @Test
-    void testValoresExisten() {
+    void losEstadosExisten() {
         assertNotNull(PlayerStatus.valueOf("AVAILABLE"));
-        assertNotNull(PlayerStatus.valueOf("IN_TEAM"));
+        assertNotNull(PlayerStatus.valueOf("INJURED"));
+        assertNotNull(PlayerStatus.valueOf("NOT_AVAILABLE"));
     }
 
     @Test
-    void testNombreDeValores() {
-        assertEquals("AVAILABLE", PlayerStatus.AVAILABLE.name());
-        assertEquals("IN_TEAM",   PlayerStatus.IN_TEAM.name());
+    void nombresDeEstados() {
+        assertEquals("AVAILABLE",     PlayerStatus.AVAILABLE.name());
+        assertEquals("INJURED",       PlayerStatus.INJURED.name());
+        assertEquals("NOT_AVAILABLE", PlayerStatus.NOT_AVAILABLE.name());
     }
 
     @Test
-    void testValueOfInvalidoLanzaExcepcion() {
-        assertThrows(IllegalArgumentException.class, () -> PlayerStatus.valueOf("INVALIDO"));
+    void estadoInvalidoLanzaExcepcion() {
+        assertThrows(IllegalArgumentException.class, () -> PlayerStatus.valueOf("EN_EQUIPO"));
     }
 }

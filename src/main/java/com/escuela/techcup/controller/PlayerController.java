@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import com.escuela.techcup.controller.dto.EntitySearchResultDTO;
 import com.escuela.techcup.controller.dto.GraduatePlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerDTO;
 import com.escuela.techcup.controller.dto.PlayerResponseDTO;
@@ -40,6 +42,7 @@ import com.escuela.techcup.core.exception.InvalidImageException;
 import com.escuela.techcup.core.exception.TechcupException;
 import com.escuela.techcup.core.model.Player;
 import com.escuela.techcup.core.model.enums.Gender;
+import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.service.PlayerService;
 
@@ -148,6 +151,15 @@ public class PlayerController {
 
 	// ── Consultas ────────────────────────────────────────────────────────
 
+	@PreAuthorize("permitAll()")
+	@GetMapping("/find")
+	public ResponseEntity<EntitySearchResultDTO> findPlayerByName(@RequestParam String name) {
+		log.info("Request to find player by name={}", name);
+		return playerService.findByNameContaining(name)
+				.map(p -> ResponseEntity.ok(new EntitySearchResultDTO(p.getUserId(), p.getName())))
+				.orElse(ResponseEntity.notFound().build());
+	}
+
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping
 	public ResponseEntity<List<PlayerResponseDTO>> getAllPlayers() {
@@ -196,6 +208,17 @@ public class PlayerController {
 		filters.setPlayerId(playerId);
 
 		return ResponseEntity.ok(playerService.searchPlayers(filters));
+	}
+
+	// ── RF-04: Actualizar estado del jugador ─────────────────────────────
+
+	@PreAuthorize("isAuthenticated()")
+	@PatchMapping("/{userId}/status")
+	public ResponseEntity<PlayerResponseDTO> updateStatus(
+			@PathVariable String userId,
+			@RequestParam PlayerStatus status) {
+		log.info("Request to update player status. userId={}, status={}", userId, status);
+		return ResponseEntity.ok(PlayerMapper.toResponseDTO(playerService.updateStatus(userId, status)));
 	}
 
 	// ── Helper ───────────────────────────────────────────────────────────

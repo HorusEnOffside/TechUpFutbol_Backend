@@ -35,11 +35,6 @@ public class TeamMapper {
         } else {
             teamEntity.setCaptainPlayer(null);
         }
-        if (team.getPayment() != null) {
-            teamEntity.setPayment(PaymentMapper.toEntity(team.getPayment()));
-        } else {
-            teamEntity.setPayment(null);
-        }
         if (team.getTournament() != null) {
             teamEntity.setTournament(TournamentMapper.toEntity(team.getTournament()));
         } else {

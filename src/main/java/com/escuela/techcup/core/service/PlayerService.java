@@ -17,6 +17,7 @@ public interface PlayerService {
 
     List<Player> getAllPlayers();
     Optional<Player> getPlayerByUserId(String userId);
+    Optional<Player> findByNameContaining(String name);
 
     List<PlayerSearchResultDTO> searchPlayers(PlayerSearchDTO filters);
 

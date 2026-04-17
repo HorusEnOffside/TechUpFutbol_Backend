@@ -52,7 +52,7 @@ También evidencia la integración con procesos externos como el pago y la carga
 ### Requerimientos no funcionales
 
 #### Documento de definición de requerimientos del sistema, donde se consolidan los requerimientos funcionales y no funcionales que delimitan el alcance del proyecto:
-#### https://drive.google.com/file/d/1AOBtzUp4Ludo7ZzYN-Zx059rskGi4_KU/view?usp=sharing
+#### [https://drive.google.com/file/d/1AOBtzUp4Ludo7ZzYN-Zx059rskGi4_KU/view?usp=sharing](https://1drv.ms/w/c/7d34c3acd28e130c/IQAim0BIwi04RbLb8oTCCe4JAaGJAvjYEXK_jyXGgs0F7eQ?e=s9ioUt)
 
 ## Análisis de requerimientos
 

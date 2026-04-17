@@ -50,10 +50,10 @@ class PlayerTest {
     }
 
     @Test
-    void testConstructorWithTeam_statusIsInTeam() {
+    void testConstructorWithTeam_statusIsNotAvailable() {
         Player p = new Player(userPlayer, Position.GOALKEEPER, 1);
-        p.setStatus(PlayerStatus.IN_TEAM);
-        assertEquals(PlayerStatus.IN_TEAM, p.getStatus());
+        p.setStatus(PlayerStatus.NOT_AVAILABLE);
+        assertEquals(PlayerStatus.NOT_AVAILABLE, p.getStatus());
     }
 
 
@@ -115,8 +115,8 @@ class PlayerTest {
 
     @Test
     void testSetStatus() {
-        player.setStatus(PlayerStatus.IN_TEAM);
-        assertEquals(PlayerStatus.IN_TEAM, player.getStatus());
+        player.setStatus(PlayerStatus.INJURED);
+        assertEquals(PlayerStatus.INJURED, player.getStatus());
     }
 
     @Test
