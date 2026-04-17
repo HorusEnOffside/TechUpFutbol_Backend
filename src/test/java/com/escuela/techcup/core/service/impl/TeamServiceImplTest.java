@@ -264,6 +264,18 @@ class TeamServiceImplTest {
                     .isInstanceOf(InvalidInputException.class)
                     .hasMessageContaining("maximum of 12");
         }
+
+        @Test
+        void throwsWhenPlayerAlreadyInTournament() {
+            when(teamRepository.findById("team-1")).thenReturn(Optional.of(teamEntity));
+            when(playerRepository.findById("player-1")).thenReturn(Optional.of(playerEntity));
+            when(invitationRepository.existsByTeamIdAndPlayerId("team-1", "player-1")).thenReturn(false);
+            when(teamPlayerRepository.findByTeamId("team-1")).thenReturn(List.of());
+            when(teamPlayerRepository.existsByPlayerIdAndTournamentId("player-1", "tour-1")).thenReturn(true);
+
+            assertThatThrownBy(() -> teamService.invitePlayer("team-1", "player-1", "msg"))
+                    .isInstanceOf(InvalidInputException.class);
+        }
     }
 
     // ── respondInvitation ────────────────────────────────────────────────

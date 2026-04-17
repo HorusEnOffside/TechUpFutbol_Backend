@@ -10,6 +10,7 @@ import com.escuela.techcup.core.model.enums.PlayerStatus;
 import com.escuela.techcup.core.model.enums.Position;
 import com.escuela.techcup.core.service.UserService;
 import com.escuela.techcup.persistence.entity.users.PlayerEntity;
+import com.escuela.techcup.persistence.entity.users.StudentEntity;
 import com.escuela.techcup.persistence.entity.users.UserPlayerEntity;
 import com.escuela.techcup.persistence.repository.users.PlayerRepository;
 import com.escuela.techcup.persistence.repository.users.UserPlayerRepository;
@@ -397,6 +398,212 @@ class PlayerServiceImplTest {
             assertThrows(InvalidInputException.class,
                     () -> playerService.getPlayerByUserId("   "));
             verifyNoInteractions(playerRepository);
+        }
+    }
+
+    // ── SearchPlayers ────────────────────────────────────────────────────
+
+    @Nested
+    class SearchPlayers {
+
+        private PlayerEntity buildAvailablePlayer(String id, Position position, Gender gender, String name) {
+            UserPlayerEntity user = new UserPlayerEntity();
+            user.setId(id);
+            user.setName(name);
+            user.setMail(id + "@test.com");
+            user.setGender(gender);
+            user.setDateOfBirth(LocalDate.of(2000, 1, 1));
+            user.setPasswordHash("hash");
+
+            PlayerEntity entity = new PlayerEntity();
+            entity.setId(id);
+            entity.setUser(user);
+            entity.setPosition(position);
+            entity.setDorsalNumber(10);
+            entity.setStatus(PlayerStatus.AVAILABLE);
+            return entity;
+        }
+
+        @Test
+        void returnsAllAvailablePlayers_whenFiltersNull() {
+            PlayerEntity p = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            var result = playerService.searchPlayers(null);
+
+            assertEquals(1, result.size());
+        }
+
+        @Test
+        void returnsEmpty_whenNoAvailablePlayers() {
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of());
+
+            var filters = new PlayerSearchDTO();
+            assertTrue(playerService.searchPlayers(filters).isEmpty());
+        }
+
+        @Test
+        void filtersByPosition() {
+            PlayerEntity forward = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            PlayerEntity defender = buildAvailablePlayer("p2", Position.DEFENDER, Gender.MALE, "Ana");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(forward, defender));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setPosition(Position.FORWARD);
+
+            var result = playerService.searchPlayers(filters);
+            assertEquals(1, result.size());
+            assertEquals(Position.FORWARD, result.get(0).getPosition());
+        }
+
+        @Test
+        void filtersByGender() {
+            PlayerEntity male = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            PlayerEntity female = buildAvailablePlayer("p2", Position.FORWARD, Gender.FEMALE, "Ana");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(male, female));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setGender(Gender.FEMALE);
+
+            var result = playerService.searchPlayers(filters);
+            assertEquals(1, result.size());
+        }
+
+        @Test
+        void filtersByName_caseInsensitive() {
+            PlayerEntity p1 = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan Perez");
+            PlayerEntity p2 = buildAvailablePlayer("p2", Position.FORWARD, Gender.MALE, "Pedro Lopez");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p1, p2));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setName("juan");
+
+            var result = playerService.searchPlayers(filters);
+            assertEquals(1, result.size());
+        }
+
+        @Test
+        void blankNameFilter_ignored() {
+            PlayerEntity p = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setName("   ");
+
+            assertEquals(1, playerService.searchPlayers(filters).size());
+        }
+
+        @Test
+        void filtersByPlayerId() {
+            PlayerEntity p1 = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            PlayerEntity p2 = buildAvailablePlayer("p2", Position.FORWARD, Gender.MALE, "Ana");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p1, p2));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setPlayerId("p1");
+
+            var result = playerService.searchPlayers(filters);
+            assertEquals(1, result.size());
+            assertEquals("p1", result.get(0).getPlayerId());
+        }
+
+        @Test
+        void blankPlayerIdFilter_ignored() {
+            PlayerEntity p = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setPlayerId("   ");
+
+            assertEquals(1, playerService.searchPlayers(filters).size());
+        }
+
+        @Test
+        void filtersBySemester_matchesStudent() {
+            StudentEntity student = new StudentEntity();
+            student.setId("s1");
+            student.setName("Juan");
+            student.setMail("s1@test.com");
+            student.setGender(Gender.MALE);
+            student.setDateOfBirth(LocalDate.of(2000, 1, 1));
+            student.setPasswordHash("hash");
+            student.setSemester(3);
+
+            PlayerEntity p = new PlayerEntity();
+            p.setId("p1");
+            p.setUser(student);
+            p.setPosition(Position.FORWARD);
+            p.setDorsalNumber(10);
+            p.setStatus(PlayerStatus.AVAILABLE);
+
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setSemester(3);
+
+            assertEquals(1, playerService.searchPlayers(filters).size());
+        }
+
+        @Test
+        void filtersBySemester_excludesNonStudent() {
+            PlayerEntity p = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setSemester(3);
+
+            assertTrue(playerService.searchPlayers(filters).isEmpty());
+        }
+
+        @Test
+        void filtersByAge_matches() {
+            int expectedAge = LocalDate.now().getYear() - 2000;
+            PlayerEntity p = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setAge(expectedAge);
+
+            assertEquals(1, playerService.searchPlayers(filters).size());
+        }
+
+        @Test
+        void filtersByAge_excludesWhenDobNull() {
+            UserPlayerEntity user = new UserPlayerEntity();
+            user.setId("p1");
+            user.setName("Juan");
+            user.setMail("p1@test.com");
+            user.setGender(Gender.MALE);
+            user.setDateOfBirth(null);
+            user.setPasswordHash("hash");
+
+            PlayerEntity p = new PlayerEntity();
+            p.setId("p1");
+            p.setUser(user);
+            p.setPosition(Position.FORWARD);
+            p.setDorsalNumber(10);
+            p.setStatus(PlayerStatus.AVAILABLE);
+
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(p));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setAge(25);
+
+            assertTrue(playerService.searchPlayers(filters).isEmpty());
+        }
+
+        @Test
+        void multipleFilters_allMustMatch() {
+            PlayerEntity match = buildAvailablePlayer("p1", Position.FORWARD, Gender.MALE, "Juan");
+            PlayerEntity noMatch = buildAvailablePlayer("p2", Position.DEFENDER, Gender.FEMALE, "Ana");
+            when(playerRepository.findByStatus(PlayerStatus.AVAILABLE)).thenReturn(List.of(match, noMatch));
+
+            PlayerSearchDTO filters = new PlayerSearchDTO();
+            filters.setPosition(Position.FORWARD);
+            filters.setGender(Gender.MALE);
+
+            var result = playerService.searchPlayers(filters);
+            assertEquals(1, result.size());
         }
     }
 
