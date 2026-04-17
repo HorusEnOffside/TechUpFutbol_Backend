@@ -4,12 +4,14 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import com.escuela.techcup.core.model.enums.Formation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
 public class Team {
     private String id;
     private String name;
+    @JsonIgnore
     private BufferedImage logo;
     private String uniformColor;
     private Formation formation;

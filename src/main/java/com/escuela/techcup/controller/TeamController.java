@@ -62,8 +62,7 @@ public class TeamController {
         BufferedImage logoImage = null;
         if (logo != null && !logo.isEmpty()) logoImage = ImageIO.read(logo.getInputStream());
         Team team = teamService.createTeam(name, uniformColors, logoImage, captainUserId);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new Team(team.getId(), team.getName(), team.getUniformColor(), null, team.getFormation()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(team);
     }
 
     @PreAuthorize("isAuthenticated()")
